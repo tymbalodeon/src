@@ -10,20 +10,20 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
-    /// Cd
+    /// Change directory
     Cd,
 
     /// Clone
     Clone,
 
-    /// Ls
+    /// List
     Ls,
 
     /// New
     New,
 
     /// Remove
-    Remove,
+    Rm,
 
     /// Sync
     Sync,
@@ -47,7 +47,7 @@ fn main() {
             println!("Implement me!");
         }
 
-        Some(Command::Remove {}) => {
+        Some(Command::Rm {}) => {
             println!("Implement me!");
         }
 
@@ -55,6 +55,6 @@ fn main() {
             println!("Implement me!");
         }
 
-        None => (),
+        None => {}
     }
 }
