@@ -47,7 +47,6 @@
           fzf
           gh
           just
-          libiconv
           lychee
           markdown-oxide
           marksman
