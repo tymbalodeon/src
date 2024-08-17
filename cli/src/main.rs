@@ -16,6 +16,9 @@ enum Command {
     /// Clone
     Clone,
 
+    /// Config
+    Config,
+
     /// List
     Ls,
 
@@ -36,6 +39,10 @@ fn main() {
         }
 
         Some(Command::Clone {}) => {
+            println!("Implement me!");
+        }
+
+        Some(Command::Config {}) => {
             println!("Implement me!");
         }
 
