@@ -1,87 +1,97 @@
-@_help:
-    ./scripts/help.nu
-
-# Add dependencies
-@add *dependencies:
-    ./scripts/add.nu {{ dependencies }}
-
-# Build the application
-@build *release:
-    ./scripts/build.nu {{ release }}
+# View help text
+@help *recipe:
+    ./scripts/help.nu {{ recipe }}
 
 # Check flake and run pre-commit hooks
 @check *args:
     ./scripts/check.nu {{ args }}
 
-# Remove generated files
-@clean *help:
-    ./scripts/clean.nu {{ help }}
+# List dependencies (alias: `deps`)
+@dependencies *args:
+    ./scripts/dependencies.nu {{ args }}
 
-# Run clippy
-@clippy *help:
-    ./scripts/clippy.nu {{ help }}
+alias deps := dependencies
 
-# Show application dependencies
-@deps *help:
-    ./scripts/deps.nu {{ help }}
+# Manage environments
+@environment *args:
+    ./scripts/environment.nu {{ args }}
 
-# Open a pre-configured development environment
-@dev *help:
-    ./scripts/dev.nu {{ help }}
-
-# View the diff between environments
-@diff-env *args:
-    ./scripts/diff-env.nu {{ args }}
+alias env := environment
 
 # Search available `just` recipes
+[no-cd]
 [no-exit-message]
 @find-recipe *search_term:
     ./scripts/find-recipe.nu {{ search_term }}
 
-# Search project history
-@history *search_term:
-    ./scripts/history.nu {{ search_term }}
+alias find := find-recipe
 
-# Initialize direnv environment
-@init *help:
-    ./scripts/init.nu {{ help }}
-
-# Install the application
-@install *help:
-    ./scripts/install.nu {{ help }}
+# View project history
+[no-cd]
+@history *args:
+    ./scripts/history.nu {{ args }}
 
 # View issues
 @issue *args:
     ./scripts/issue.nu {{ args }}
 
 # Create a new release
-@release *args:
-    ./scripts/release.nu  {{ args }}
+@release *preview:
+    ./scripts/release.nu  {{ preview }}
 
 # View remote repository
 @remote *web:
     ./scripts/remote.nu  {{ web }}
 
-# Remove dependencies
-@remove *dependencies:
-    ./scripts/remove.nu {{ dependencies }}
-
-# Run the application, with any provided <args>.
-@run *args:
-    ./scripts/run.nu {{ args }}
-
 # View repository analytics
 @stats *help:
     ./scripts/stats.nu {{ help }}
 
-# Run the tests
-@test *package:
-    ./scripts/test.nu {{ package }}
-
-# Update dependencies
-@update-deps *help:
-    ./scripts/update-deps.nu {{ help }}
+# Run tests
+@test *args:
+    ./scripts/test.nu {{ args }}
 
 # View the source code for a recipe
+[no-cd]
 @view-source *recipe:
     ./scripts/view-source.nu {{ recipe }}
+
+alias src := view-source
+
+mod rust "just/rust.just"
+
+# alias for `rust add`
+@add *args:
+    just rust add {{ args }}
+
+# alias for `rust build`
+@build *args:
+    just rust build {{ args }}
+
+# alias for `rust clean`
+@clean *args:
+    just rust clean {{ args }}
+
+# alias for `rust clippy`
+@clippy *args:
+    just rust clippy {{ args }}
+
+# alias for `rust dev`
+@dev *args:
+    just rust dev {{ args }}
+
+# alias for `rust install`
+@install *args:
+    just rust install {{ args }}
+
+# alias for `rust remove`
+@remove *args:
+    just rust remove {{ args }}
+
+# alias for `rust run`
+@run *args:
+    just rust run {{ args }}
+
+# alias for `rust update`
+@update *args:
+    just rust update {{ args }}

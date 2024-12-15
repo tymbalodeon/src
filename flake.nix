@@ -1,84 +1,90 @@
 {
-  inputs = {
-    crane = {
-      inputs = {nixpkgs = {follows = "nixpkgs";};};
-      url = "github:ipetkov/crane";
-    };
-    nixpkgs = {url = "github:NixOS/nixpkgs/nixos-unstable";};
-    nushell-syntax = {
-      flake = false;
-      owner = "stevenxxiu";
-      repo = "sublime_text_nushell";
-      type = "github";
-    };
-    rust-overlay = {
-      inputs = {nixpkgs = {follows = "nixpkgs";};};
-      url = "github:oxalica/rust-overlay";
-    };
-  };
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-  outputs = {
-    nixpkgs,
-    nushell-syntax,
-    ...
-  }: let
+  outputs = {nixpkgs, ...}: let
+    forEachSupportedSystem = f:
+      nixpkgs.lib.genAttrs supportedSystems
+      (system:
+        f rec {
+          mergeModuleAttrs = {
+            attr,
+            nullValue,
+          }:
+            pkgs.lib.lists.flatten
+            (map (module: module.${attr} or nullValue) modules);
+
+          modules =
+            map (module: (import ./nix/${module} {inherit pkgs;}))
+            (builtins.attrNames (builtins.readDir ./nix));
+
+          pkgs = import nixpkgs {inherit system;};
+        });
+
     supportedSystems = [
       "x86_64-darwin"
       "x86_64-linux"
     ];
-
-    forEachSupportedSystem = f:
-      nixpkgs.lib.genAttrs supportedSystems
-      (system:
-        f {
-          pkgs = import nixpkgs {inherit system;};
-        });
   in {
-    devShells = forEachSupportedSystem ({pkgs}: {
-      default = pkgs.mkShell {
-        packages = with pkgs; [
-          alejandra
-          ansible-language-server
-          bat
-          cocogitto
-          deadnix
-          eza
-          flake-checker
-          fzf
-          gh
-          just
-          lychee
-          markdown-oxide
-          marksman
-          nil
-          nodePackages.prettier
-          nushell
-          pre-commit
-          python312Packages.pre-commit-hooks
-          ripgrep
-          statix
-          stylelint
-          taplo
-          tokei
-          vscode-langservers-extracted
-          yaml-language-server
-          yamlfmt
-        ];
+    devShells = forEachSupportedSystem ({
+      mergeModuleAttrs,
+      modules,
+      pkgs,
+    }: {
+      default = pkgs.mkShell ({
+          packages = with pkgs;
+            [
+              alejandra
+              ansible-language-server
+              bat
+              cocogitto
+              deadnix
+              delta
+              eza
+              fd
+              flake-checker
+              fzf
+              gh
+              git
+              glab
+              just
+              lychee
+              markdown-oxide
+              marksman
+              nb
+              nil
+              nodePackages.prettier
+              nushell
+              pre-commit
+              python312Packages.pre-commit-hooks
+              ripgrep
+              statix
+              stylelint
+              taplo
+              tokei
+              vscode-langservers-extracted
+              yaml-language-server
+              yamlfmt
+            ]
+            ++ mergeModuleAttrs {
+              attr = "packages";
+              nullValue = [];
+            };
 
-        shellHook = ''
-          nushell_syntax="${nushell-syntax}/nushell.sublime-syntax"
-          bat_config_dir=".config/bat"
-          bat_syntax_dir="''${bat_config_dir}/syntaxes"
-          bat_nushell_syntax="''${bat_syntax_dir}/nushell.sublime-syntax"
-
-          mkdir -p "''${bat_syntax_dir}"
-          cp "''${nushell_syntax}" "''${bat_nushell_syntax}"
-          bat cache --build --source "''${bat_config_dir}"
-
-          pre-commit install --hook-type commit-msg
-
-        '';
-      };
+          shellHook = with pkgs;
+            lib.concatLines (
+              ["pre-commit install --hook-type commit-msg"]
+              ++ mergeModuleAttrs {
+                attr = "shellHook";
+                nullValue = "";
+              }
+            );
+        }
+        // builtins.foldl'
+        (a: b: a // b)
+        {}
+        (map
+          (module: builtins.removeAttrs module ["packages" "shellHook"])
+          modules));
     });
   };
 }

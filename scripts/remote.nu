@@ -1,6 +1,6 @@
 #!/usr/bin/env nu
 
-use ./domain.nu
+use domain.nu
 
 # View remote repository
 def main [
@@ -8,17 +8,21 @@ def main [
 ] {
     let domain = (domain)
 
-    if $domain == "github" {
-        if $web {
-            gh repo view --web
-        } else {
-            gh repo view
+    match (domain) {
+        "github" => {
+            if $web {
+                gh repo view --web
+            } else {
+                gh repo view
+            }
         }
-    } else if $domain == "gitlab" {
-        if $web {
-            glab repo view --web
-        } else {
-            glab repo view
+
+        "gitlab" => {
+            if $web {
+                glab repo view --web
+            } else {
+                glab repo view
+            }
         }
     }
 }

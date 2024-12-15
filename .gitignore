@@ -1,7 +1,9 @@
 .config
 .direnv
+.env
 .envrc
-
+.pdm-python
+.venv
 
 # Added by cargo
 

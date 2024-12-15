@@ -1,45 +1,48 @@
 #!/usr/bin/env nu
 
+export def get-pre-commit-hook-names [config: record<repos: list<any>>] {
+  $config
+  | get repos.hooks
+  | each {get id}
+  | flatten
+  | sort
+  | to text
+}
+
+# Run `nix flake check`
+def "main flake" [] {
+  nix flake check
+}
+
+# List hook ids
+def "main list" [] {
+  get-pre-commit-hook-names (open .pre-commit-config.yaml)
+}
+
+# Update all pre-commit hooks
+def "main update" [] {
+  pre-commit run pre-commit-update --all-files
+}
+
 # Check flake and run pre-commit hooks
 def main [
-    ...hooks: string # The hooks to run
-    --all # Run `nix flake check` and all pre-commit hooks
-    --flake # Run `nix flake check`
-    --list # List hook ids
-    --update # Update all pre-commit hooks
+  ...hooks: string # The hooks to run
+  --all # Run all checks
+  --update # Update all pre-commit hooks
 ] {
-    if $list {
-        print (
-            rg '\- id:' .pre-commit-config.yaml
-            | str replace --all "- id:" ""
-            | lines
-            | str trim
-            | sort
-            | to text
-        )
+  if $all {
+    main flake
+  }
 
-        return
+  if $update {
+    main update
+  }
+
+  if $all or ($hooks | is-empty) {
+    pre-commit run --all-files
+  } else {
+    for hook in $hooks {
+      pre-commit run $hook --all-files
     }
-
-    if $all or $flake {
-        nix flake check
-
-        if $flake {
-            return
-        }
-    }
-
-    if $update {
-        pre-commit autoupdate
-
-        return
-    }
-
-    if $all or ($hooks | is-empty) {
-        pre-commit run --all-files
-    } else {
-        for hook in $hooks {
-          pre-commit run $hook --all-files
-        }
-    }
+  }
 }
