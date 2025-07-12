@@ -1,0 +1,7 @@
+[[language]]
+name = "just"
+auto-format = true
+
+[language.formatter]
+command = "just"
+args = ["--justfile", "/dev/stdin", "--dump"]

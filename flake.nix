@@ -1,90 +1,115 @@
 {
-  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+  inputs = {
+    environments = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:tymbalodeon/environments?dir=src";
+    };
 
-  outputs = {nixpkgs, ...}: let
-    forEachSupportedSystem = f:
-      nixpkgs.lib.genAttrs supportedSystems
-      (system:
-        f rec {
-          mergeModuleAttrs = {
-            attr,
-            nullValue,
-          }:
-            pkgs.lib.lists.flatten
-            (map (module: module.${attr} or nullValue) modules);
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
 
-          modules =
-            map (module: (import ./nix/${module} {inherit pkgs;}))
-            (builtins.attrNames (builtins.readDir ./nix));
+    nutest = {
+      flake = false;
+      url = "github:vyadh/nutest";
+    };
+  };
 
-          pkgs = import nixpkgs {inherit system;};
-        });
+  outputs = {
+    environments,
+    nixpkgs,
+    nutest,
+    systems,
+    ...
+  }: {
+    devShells = nixpkgs.lib.genAttrs (import systems) (
+      system: let
+        mergeModuleAttrs = {
+          attr,
+          nullValue,
+        }:
+          pkgs.lib.lists.flatten
+          (map (module: module.${attr} or nullValue) modules);
 
-    supportedSystems = [
-      "x86_64-darwin"
-      "x86_64-linux"
-    ];
-  in {
-    devShells = forEachSupportedSystem ({
-      mergeModuleAttrs,
-      modules,
-      pkgs,
-    }: {
-      default = pkgs.mkShell ({
-          packages = with pkgs;
-            [
-              alejandra
-              ansible-language-server
-              bat
-              cocogitto
-              deadnix
-              delta
-              eza
-              fd
-              flake-checker
-              fzf
-              gh
-              git
-              glab
-              just
-              lychee
-              markdown-oxide
-              marksman
-              nb
-              nil
-              nodePackages.prettier
-              nushell
-              pre-commit
-              python312Packages.pre-commit-hooks
-              ripgrep
-              statix
-              stylelint
-              taplo
-              tokei
-              vscode-langservers-extracted
-              yaml-language-server
-              yamlfmt
-            ]
-            ++ mergeModuleAttrs {
+        modules =
+          map
+          (module: (import module {inherit pkgs;}))
+          (builtins.filter
+            (path: builtins.pathExists path)
+            (map
+              (item: ./.environments/${item.name}/shell.nix)
+              (builtins.filter
+                (item: item.value == "directory")
+                (
+                  if (builtins.pathExists ./.environments)
+                  then
+                    nixpkgs.lib.attrsets.attrsToList
+                    (builtins.readDir ./.environments)
+                  else []
+                ))));
+
+        pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
+        };
+      in {
+        default = pkgs.mkShellNoCC ({
+            inputsFrom =
+              builtins.map
+              (environment: environments.devShells.${system}.${environment})
+              ((
+                  if builtins.pathExists ./.environments/environments.toml
+                  then let
+                    environments =
+                      builtins.fromTOML
+                      (builtins.readFile ./.environments/environments.toml);
+                  in
+                    if builtins.hasAttr "environments" environments
+                    then
+                      builtins.map (environment: environment.name)
+                      environments.environments
+                    else []
+                  else []
+                )
+                ++ [
+                  "default"
+                  "git"
+                  "markdown"
+                  "nix"
+                  "toml"
+                  "yaml"
+                ]);
+
+            packages = mergeModuleAttrs {
               attr = "packages";
               nullValue = [];
             };
 
-          shellHook = with pkgs;
-            lib.concatLines (
-              ["pre-commit install --hook-type commit-msg"]
-              ++ mergeModuleAttrs {
-                attr = "shellHook";
-                nullValue = "";
-              }
-            );
-        }
-        // builtins.foldl'
-        (a: b: a // b)
-        {}
-        (map
-          (module: builtins.removeAttrs module ["packages" "shellHook"])
-          modules));
-    });
+            shellHook = with pkgs;
+              lib.concatLines (
+                [
+                  ''
+                    export NUTEST=${nutest}
+                    export ENVIRONMENTS=${environments}
+                    ${nushell}/bin/nu ${environments}/shell-hook.nu
+
+                    ${pre-commit}/bin/pre-commit install \
+                      --hook-type commit-msg \
+                      --overwrite \
+                      >/dev/null
+                  ''
+                ]
+                ++ mergeModuleAttrs {
+                  attr = "shellHook";
+                  nullValue = "";
+                }
+              );
+          }
+          // builtins.foldl'
+          (a: b: a // b)
+          {}
+          (map
+            (module: builtins.removeAttrs module ["packages" "shellHook"])
+            modules));
+      }
+    );
   };
 }

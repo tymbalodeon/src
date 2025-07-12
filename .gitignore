@@ -2,9 +2,8 @@
 .direnv
 .env
 .envrc
+.helix/config.toml
 .pdm-python
 .venv
-
-# Added by cargo
-
 /target
+target
