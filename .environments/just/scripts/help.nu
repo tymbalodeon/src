@@ -16,7 +16,7 @@ def "main aliases" [
       $sort_by_environment
       $sort_by_recipe
       --color $color
-      --justfile .environments/nix/Justfile
+      --justfile .environments/just/Justfile
   )
 }
 
@@ -28,7 +28,7 @@ def main [
 ] {
   (
     display-just-help
-      nix
+      just
       $recipe
       $subcommands
       --color $color

@@ -1,12 +1,11 @@
 [private]
-@default:
-    just help
+@_: help
 
 # View full help text, or for a specific recipe
 @help *args:
     .environments/default/scripts/help.nu {{ args }}
 
-# Check flake and run pre-commit hooks
+# Run checks
 @check *args:
     .environments/default/scripts/check.nu {{ args }}
 
@@ -16,12 +15,11 @@
 
 alias env := environment
 
-# Search available `just` recipes
-[no-exit-message]
-@find-recipe *args:
-    .environments/default/scripts/find-recipe.nu {{ args }}
+# Format files
+@format *args:
+    .environments/default/scripts/format.nu {{ args }}
 
-alias find := find-recipe
+alias fmt := format
 
 # View project history
 @history *args:
@@ -30,6 +28,18 @@ alias find := find-recipe
 # View issues
 @issue *args:
     .environments/default/scripts/issue.nu {{ args }}
+
+# Lint files
+@lint *args:
+    .environments/default/scripts/lint.nu {{ args }}
+
+# View README file
+@readme *args:
+    .environments/default/scripts/readme.nu  {{ args }}
+
+# View or open recipes
+@recipe *args:
+    .environments/default/scripts/recipe.nu  {{ args }}
 
 # View remote repository
 @remote *args:
@@ -53,28 +63,36 @@ alias todos := todo
 @theme *args:
     .environments/default/scripts/theme.nu {{ args }}
 
-# View the source code for a recipe
-@view-source *args:
-    .environments/default/scripts/view-source.nu {{ args }}
-
-alias src := view-source
+[private]
+@md *args:
+    just markdown {{ args }}
 
 [private]
 @rs *args:
     just rust {{ args }}
 
+[private]
+@yml *args:
+    just yaml {{ args }}
+
+mod git ".environments/git/Justfile"
+mod just ".environments/just/Justfile"
+mod markdown ".environments/markdown/Justfile"
 mod nix ".environments/nix/Justfile"
 mod rust ".environments/rust/Justfile"
+mod yaml ".environments/yaml/Justfile"
 
 alias add := rust::add
 alias build := rust::build
 alias clean := rust::clean
-alias clippy := rust::clippy
 alias deps := rust::deps
-alias dev := rust::dev
+alias dev := rust::develop
+alias develop := rust::develop
 alias install := rust::install
+alias leaks := git::leaks
 alias remove := rust::remove
 alias run := rust::run
+alias sh := nix::shell
 alias shell := nix::shell
 alias test := rust::test
 alias update := rust::update

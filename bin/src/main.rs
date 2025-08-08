@@ -34,32 +34,32 @@ enum Command {
 
 fn main() {
     match &Cli::parse().command {
-        Some(Command::Cd {}) => {
-            println!("Implement me!");
+        Some(Command::Cd) => {
+            todo!()
         }
 
-        Some(Command::Clone {}) => {
-            println!("Implement me!");
+        Some(Command::Clone) => {
+            todo!()
         }
 
-        Some(Command::Config {}) => {
-            println!("Implement me!");
+        Some(Command::Config) => {
+            todo!()
         }
 
-        Some(Command::Ls {}) => {
-            println!("Implement me!");
+        Some(Command::Ls) => {
+            todo!()
         }
 
-        Some(Command::New {}) => {
-            println!("Implement me!");
+        Some(Command::New) => {
+            todo!()
         }
 
-        Some(Command::Rm {}) => {
-            println!("Implement me!");
+        Some(Command::Rm) => {
+            todo!()
         }
 
-        Some(Command::Sync {}) => {
-            println!("Implement me!");
+        Some(Command::Sync) => {
+            todo!()
         }
 
         None => {}
