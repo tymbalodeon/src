@@ -1,9 +1,0 @@
-[package]
-name = "src"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-assert_cmd = "2.0.16"
-clap = { version = "4.5.15", features = ["derive"] }
-lib = { path = "../lib" }

@@ -1,0 +1,19 @@
+set working-directory := "../.."
+
+# View help text
+@help *args:
+    .environments/documentation/scripts/help.nu {{ args }}
+
+# Open a pre-configured development environment
+@develop *args: open
+    .environments/documentation/scripts/develop.nu {{ args }}
+
+alias dev := develop
+
+# Serve documentation files and recompile on changes
+@serve *args: open
+    .environments/documentation/scripts/serve.nu {{ args }}
+
+[private]
+@open:
+    open http://localhost:3000/
