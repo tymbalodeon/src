@@ -9,6 +9,12 @@
 @check *args:
     .environments/default/scripts/check.nu {{ args }}
 
+# Create and switch to bookmarks/branches
+@develop *args:
+    .environments/default/scripts/develop.nu {{ args }}
+
+alias dev := develop
+
 # Manage environments
 @environment *args:
     .environments/default/scripts/environment.nu {{ args }}
@@ -93,10 +99,10 @@ mod yaml ".environments/yaml/Justfile"
 
 alias add := rust::add
 alias build := rust::build
-alias clean := rust::clean
 alias deps := rust::deps
 alias install := rust::install
 alias leaks := git::leaks
+alias open := documentation::open
 alias remove := rust::remove
 alias run := rust::run
 alias serve := documentation::serve

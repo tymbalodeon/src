@@ -7,4 +7,5 @@
 .venv
 /target
 book
+result
 target

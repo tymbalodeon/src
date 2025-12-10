@@ -5,15 +5,15 @@ set working-directory := "../.."
     .environments/documentation/scripts/help.nu {{ args }}
 
 # Open a pre-configured development environment
-@develop *args: open
+@develop *args:
     .environments/documentation/scripts/develop.nu {{ args }}
 
 alias dev := develop
 
 # Serve documentation files and recompile on changes
-@serve *args: open
+@serve *args:
     .environments/documentation/scripts/serve.nu {{ args }}
 
-[private]
-@open:
-    open http://localhost:3000/
+# Open the documentation page
+@open *args:
+    .environments/documentation/scripts/open-documentation.nu {{ args }}
