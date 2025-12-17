@@ -1,5 +1,7 @@
 use clap::{Parser, Subcommand};
 
+mod add;
+
 /// Manage repositories in an organized way
 #[derive(Parser)]
 #[command(arg_required_else_help(true))]
@@ -11,7 +13,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Command {
     /// Add local or clone remote repositories
-    Add { repo: String },
+    Add { repos: Vec<String> },
 
     /// Change directory to a repository
     Cd { repo: Option<String> },
@@ -34,9 +36,7 @@ enum Command {
 
 fn main() {
     match &Cli::parse().command {
-        Some(Command::Add { repo: _ }) => {
-            todo!()
-        }
+        Some(Command::Add { repos }) => add::add(repos),
 
         Some(Command::Cd { repo: _ }) => {
             todo!()
