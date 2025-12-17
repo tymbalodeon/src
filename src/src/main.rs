@@ -10,25 +10,34 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
-    /// Add local and remote repositories to the `src`-managed directory
-    Add,
+    /// Add local or clone remote repositories
+    Add { repo: String },
 
     /// Change directory to a managed repository
     Cd { repo: Option<String> },
 
-    /// Clone a remote repositoryto the `src`-managed directory
+    /// Clone a remote repository
     Clone { url: String },
+
+    /// Initialize a new repository in the current directory
+    Init,
 
     /// List managed repositories
     List,
 
     /// Create a new repository
-    New,
+    New { path: String },
+
+    /// Remove a repository
+    Remove { repo: String },
+
+    /// Sync a repository
+    Sync { repo: Option<String> },
 }
 
 fn main() {
     match &Cli::parse().command {
-        Some(Command::Add) => {
+        Some(Command::Add { repo: _ }) => {
             todo!()
         }
 
@@ -39,12 +48,23 @@ fn main() {
         Some(Command::Clone { url: _ }) => {
             todo!()
         }
+        Some(Command::Init) => {
+            todo!()
+        }
 
         Some(Command::List) => {
             todo!()
         }
 
-        Some(Command::New) => {
+        Some(Command::New { path: _ }) => {
+            todo!()
+        }
+
+        Some(Command::Remove { repo: _ }) => {
+            todo!()
+        }
+
+        Some(Command::Sync { repo: _ }) => {
             todo!()
         }
 
