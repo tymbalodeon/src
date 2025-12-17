@@ -1,5 +1,5 @@
 [workspace]
-members = ["src"]
+members = ["environment","repo","src"]
 resolver = "3"
 
 # [package]
