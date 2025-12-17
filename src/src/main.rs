@@ -1,6 +1,7 @@
-use clap::{Parser, Subcommand};
+mod commands;
 
-mod add;
+use clap::{Parser, Subcommand};
+use commands::add::add;
 
 /// Manage repositories in an organized way
 #[derive(Parser)]
@@ -36,7 +37,7 @@ enum Command {
 
 fn main() {
     match &Cli::parse().command {
-        Some(Command::Add { repos }) => add::add(repos),
+        Some(Command::Add { repos }) => add(repos),
 
         Some(Command::Cd { repo: _ }) => {
             todo!()
