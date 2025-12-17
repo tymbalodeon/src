@@ -6,6 +6,6 @@
 .pdm-python
 .venv
 /target
-book
+documentation/book
 result
 target
