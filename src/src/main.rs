@@ -19,6 +19,9 @@ enum Command {
     /// Clone a remote repository
     Clone { url: String },
 
+    /// View config file
+    Config,
+
     /// Initialize a new repository in the current directory
     Init,
 
@@ -48,6 +51,11 @@ fn main() {
         Some(Command::Clone { url: _ }) => {
             todo!()
         }
+
+        Some(Command::Config) => {
+            todo!()
+        }
+
         Some(Command::Init) => {
             todo!()
         }
