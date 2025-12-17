@@ -13,29 +13,23 @@ enum Command {
     /// Add local or clone remote repositories
     Add { repo: String },
 
-    /// Change directory to a managed repository
+    /// Change directory to a repository
     Cd { repo: Option<String> },
-
-    /// Clone a remote repository
-    Clone { url: String },
 
     /// View config file
     Config,
 
-    /// Initialize a new repository in the current directory
-    Init,
-
-    /// List managed repositories
+    /// List repositories
     List,
 
-    /// Create a new repository
-    New { path: String },
+    /// Create or initialize a new repository
+    New { path: Option<String> },
 
-    /// Remove a repository
-    Remove { repo: String },
+    /// Remove repositories
+    Remove { repo: Vec<String> },
 
-    /// Sync a repository
-    Sync { repo: Option<String> },
+    /// Sync repositories
+    Sync { repo: Vec<String> },
 }
 
 fn main() {
@@ -48,15 +42,7 @@ fn main() {
             todo!()
         }
 
-        Some(Command::Clone { url: _ }) => {
-            todo!()
-        }
-
         Some(Command::Config) => {
-            todo!()
-        }
-
-        Some(Command::Init) => {
             todo!()
         }
 
