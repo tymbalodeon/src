@@ -682,6 +682,7 @@ dependencies = [
  "assert_cmd",
  "clap",
  "repo",
+ "serde",
 ]
 
 [[package]]
