@@ -20,14 +20,16 @@ pub struct Repo {
     pub host: String,
     pub name: String,
     pub owner: String,
+    pub url: String,
 }
 
 impl Repo {
-    fn from(host: &str, name: &str, owner: &str) -> Self {
+    fn from(host: &str, name: &str, owner: &str, url: &str) -> Self {
         Repo {
             host: host.to_string(),
             name: name.to_string(),
             owner: owner.to_string(),
+            url: url.to_string(),
         }
     }
 }
@@ -41,13 +43,14 @@ impl PartialEq for Repo {
 }
 
 fn parse_url(url: &str) -> Result<Repo, GitUrlParseError> {
-    let url = GitUrl::parse(url).unwrap();
-    let repo_provider = url.provider_info::<GenericProvider>().unwrap();
+    let git_url = GitUrl::parse(url).unwrap();
+    let repo_provider = git_url.provider_info::<GenericProvider>().unwrap();
 
     Ok(Repo::from(
-        url.host().unwrap(),
+        git_url.host().unwrap(),
         repo_provider.repo(),
         repo_provider.owner(),
+        url,
     ))
 }
 
@@ -74,24 +77,26 @@ mod tests {
     const NAME: &str = "src";
     const OWNER: &str = "tymbalodeon";
 
-    fn validate_repo(repo: &Repo) {
+    fn validate_repo(repo: &Repo, url: &str) {
         assert_eq!(repo.host, HOST);
         assert_eq!(repo.name, NAME);
         assert_eq!(repo.owner, OWNER);
+        assert_eq!(repo.url, url);
     }
 
     #[test]
     fn it_parses_https_url() {
-        let repo =
-            parse_url("https://github.com/tymbalodeon/src.git").unwrap();
+        let url = "https://github.com/tymbalodeon/src.git";
+        let repo = parse_url(url).unwrap();
 
-        validate_repo(&repo);
+        validate_repo(&repo, url);
     }
 
     #[test]
     fn it_parses_ssh_url() {
-        let repo = parse_url("git@github.com:tymbalodeon/src.git").unwrap();
+        let url = "git@github.com:tymbalodeon/src.git";
+        let repo = parse_url(url).unwrap();
 
-        validate_repo(&repo);
+        validate_repo(&repo, url);
     }
 }
