@@ -6,7 +6,7 @@ use git_url_parse::types::provider::GenericProvider;
 use git_url_parse::{GitUrl, GitUrlParseError};
 use shellexpand::tilde;
 
-#[derive(Debug, Derivative)]
+#[derive(Clone, Debug, Derivative)]
 #[derivative(Eq, PartialEq, Hash)]
 pub struct Repo {
     pub host: String,
