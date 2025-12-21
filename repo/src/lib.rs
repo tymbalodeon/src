@@ -73,7 +73,7 @@ fn get_git_url_from_dir(dir: &Path) -> String {
 
 fn get_url(repo: &str, local_repo_path: &Option<PathBuf>) -> String {
     match local_repo_path {
-        Some(path) => get_git_url_from_dir(&path),
+        Some(path) => get_git_url_from_dir(path),
         None => repo.to_string(),
     }
 }

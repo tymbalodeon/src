@@ -39,13 +39,13 @@ enum Command {
 
 fn main() {
     match &Cli::parse().command {
-        Some(Command::Add { repos }) => add(repos),
+        Some(Command::Add { repos }) => add(repos).unwrap(),
 
         Some(Command::Cd { repo: _ }) => {
             todo!()
         }
 
-        Some(Command::Config) => config(),
+        Some(Command::Config) => config().unwrap(),
 
         Some(Command::List) => {
             todo!()
