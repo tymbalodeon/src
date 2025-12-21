@@ -5,10 +5,7 @@ use repo::Repo;
 use crate::config::get_config;
 
 fn parse_repos(repos: &[String]) -> Vec<Repo> {
-    repos
-        .iter()
-        .filter_map(|repo| parse_repo(repo).ok())
-        .collect()
+    repos.iter().map(|repo| parse_repo(repo)).collect()
 }
 
 fn filter_unique_repos(repos: Vec<Repo>) -> Vec<Repo> {

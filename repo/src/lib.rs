@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use derivative::Derivative;
 use git2::Repository;
 use git_url_parse::types::provider::GenericProvider;
-use git_url_parse::{GitUrl, GitUrlParseError};
+use git_url_parse::GitUrl;
 use shellexpand::tilde;
 
 #[derive(Clone, Debug, Derivative)]
@@ -39,7 +39,7 @@ impl Repo {
     }
 
     #[must_use]
-    pub fn path(&self, base_directory: &PathBuf) -> String {
+    pub fn path(&self, base_directory: &Path) -> String {
         base_directory
             .join(&self.host)
             .join(&self.owner)
@@ -71,38 +71,40 @@ fn get_git_url_from_dir(dir: &Path) -> String {
         .to_owned()
 }
 
-fn get_url(repo: &str, local_repo_path: &Option<PathBuf>) -> String {
-    match local_repo_path {
-        Some(path) => get_git_url_from_dir(path),
-        None => repo.to_string(),
-    }
+fn get_url(repo: &str, local_repo_path: Option<&PathBuf>) -> String {
+    local_repo_path
+        .as_ref()
+        .map_or_else(|| repo.to_string(), |path| get_git_url_from_dir(path))
 }
 
-fn parse_url(
-    url: &str,
-    local_repo_path: &Option<PathBuf>,
-) -> Result<Repo, GitUrlParseError> {
+fn parse_url(url: &str, local_repo_path: Option<&PathBuf>) -> Repo {
     let git_url = GitUrl::parse(url).unwrap();
     let repo_provider = git_url.provider_info::<GenericProvider>().unwrap();
 
-    let url = match local_repo_path {
-        Some(path) => path.to_str().unwrap().to_string(),
-        None => url.to_owned(),
-    };
+    let url = local_repo_path.as_ref().map_or_else(
+        || url.to_owned(),
+        |path| path.to_str().unwrap().to_string(),
+    );
 
-    Ok(Repo::from(
+    let local_repo_path = local_repo_path.map(std::borrow::ToOwned::to_owned);
+
+    Repo::from(
         git_url.host().unwrap(),
         repo_provider.repo(),
         repo_provider.owner(),
-        local_repo_path.to_owned(),
+        local_repo_path,
         &url,
-    ))
+    )
 }
 
-pub fn parse_repo(repo: &str) -> Result<Repo, GitUrlParseError> {
+#[must_use]
+pub fn parse_repo(repo: &str) -> Repo {
     let local_repo_path = get_local_repo_path(repo);
 
-    parse_url(&get_url(repo, &local_repo_path), &local_repo_path)
+    parse_url(
+        &get_url(repo, local_repo_path.as_ref()),
+        local_repo_path.as_ref(),
+    )
 }
 
 #[cfg(test)]
@@ -123,7 +125,7 @@ mod tests {
     #[test]
     fn it_parses_https_url() {
         let url = "https://github.com/tymbalodeon/src.git";
-        let repo = parse_url(url, &None).unwrap();
+        let repo = parse_url(url, None);
 
         validate_repo(&repo, url);
     }
@@ -131,7 +133,7 @@ mod tests {
     #[test]
     fn it_parses_ssh_url() {
         let url = "git@github.com:tymbalodeon/src.git";
-        let repo = parse_url(url, &None).unwrap();
+        let repo = parse_url(url, None);
 
         validate_repo(&repo, url);
     }
