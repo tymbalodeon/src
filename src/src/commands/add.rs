@@ -52,4 +52,54 @@ pub fn add(repos: &[String]) -> Result<()> {
     Ok(())
 }
 
-// TODO: test filter_unique_repos
+#[cfg(test)]
+mod tests {
+    use std::path::PathBuf;
+
+    use super::*;
+
+    #[test]
+    fn it_prefers_local_paths_to_remote_urls() {
+        let local_repo = Repo::from(
+            "github.com",
+            "src",
+            "tymbalodeon",
+            Some(PathBuf::from(
+                "/home/benrosen/src/github.com/tymbalodeon/src",
+            )),
+            "git@github.com:tymbalodeon/src.git",
+        );
+
+        let repos_with_local_first = vec![
+            local_repo.clone(),
+            Repo::from(
+                "github.com",
+                "src",
+                "tymbalodeon",
+                None,
+                "git@github.com:tymbalodeon/src.git",
+            ),
+        ];
+
+        let repos_with_local_second = vec![
+            Repo::from(
+                "github.com",
+                "src",
+                "tymbalodeon",
+                None,
+                "git@github.com:tymbalodeon/src.git",
+            ),
+            local_repo.clone(),
+        ];
+
+        assert_eq!(
+            filter_unique_repos(repos_with_local_first),
+            vec![local_repo.clone()]
+        );
+
+        assert_eq!(
+            filter_unique_repos(repos_with_local_second),
+            vec![local_repo]
+        );
+    }
+}
