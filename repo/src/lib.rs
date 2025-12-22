@@ -5,6 +5,22 @@ use git2::Repository;
 use git_url_parse::types::provider::GenericProvider;
 use git_url_parse::GitUrl;
 use shellexpand::tilde;
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum RepoError {
+    #[error("failed to read git directory")]
+    Git(#[from] git2::Error),
+
+    #[error("failed to get remote \"origin\"")]
+    GitUrl,
+
+    #[error("failed to parse git url")]
+    GitUrlParseError(#[from] git_url_parse::GitUrlParseError),
+
+    #[error("invalid characters in repo path")]
+    RepoPath,
+}
 
 #[derive(Clone, Debug, Derivative)]
 #[derivative(Eq, PartialEq, Hash)]
@@ -39,14 +55,14 @@ impl Repo {
     }
 
     #[must_use]
-    pub fn path(&self, base_directory: &Path) -> String {
-        base_directory
+    pub fn path(&self, base_directory: &Path) -> Result<String, RepoError> {
+        Ok(base_directory
             .join(&self.host)
             .join(&self.owner)
             .join(&self.name)
             .to_str()
-            .unwrap()
-            .to_owned()
+            .ok_or(RepoError::RepoPath)?
+            .to_owned())
     }
 }
 
@@ -61,50 +77,55 @@ fn get_local_repo_path(repo: &str) -> Option<PathBuf> {
     }
 }
 
-fn get_git_url_from_dir(dir: &Path) -> String {
-    Repository::open(dir)
-        .unwrap()
-        .find_remote("origin")
-        .unwrap()
+fn get_git_url_from_dir(dir: &Path) -> Result<String, RepoError> {
+    Ok(Repository::open(dir)?
+        .find_remote("origin")?
         .url()
-        .unwrap()
-        .to_owned()
+        .ok_or(RepoError::GitUrl)?
+        .to_owned())
 }
 
-fn get_url(repo: &str, local_repo_path: Option<&PathBuf>) -> String {
-    local_repo_path
-        .as_ref()
-        .map_or_else(|| repo.to_string(), |path| get_git_url_from_dir(path))
+fn get_url(
+    repo: &str,
+    local_repo_path: Option<&PathBuf>,
+) -> Result<String, RepoError> {
+    local_repo_path.as_ref().map_or_else(
+        || Ok(repo.to_string()),
+        |path| get_git_url_from_dir(path),
+    )
 }
 
-fn parse_url(url: &str, local_repo_path: Option<&PathBuf>) -> Repo {
-    let git_url = GitUrl::parse(url).unwrap();
-    let repo_provider = git_url.provider_info::<GenericProvider>().unwrap();
+fn parse_url(
+    url: &str,
+    local_repo_path: Option<&PathBuf>,
+) -> Result<Repo, RepoError> {
+    let git_url = GitUrl::parse(url)?;
+    let repo_provider = git_url.provider_info::<GenericProvider>()?;
 
     let url = local_repo_path.as_ref().map_or_else(
-        || url.to_owned(),
-        |path| path.to_str().unwrap().to_string(),
-    );
+        || Ok::<String, RepoError>(url.to_owned()),
+        |path| Ok(path.to_str().ok_or(RepoError::GitUrl)?.to_string()),
+    )?;
 
     let local_repo_path = local_repo_path.map(std::borrow::ToOwned::to_owned);
 
-    Repo::from(
+    Ok(Repo::from(
         git_url.host().unwrap(),
         repo_provider.repo(),
         repo_provider.owner(),
         local_repo_path,
         &url,
-    )
+    ))
 }
 
 #[must_use]
-pub fn parse_repo(repo: &str) -> Repo {
+pub fn parse_repo(repo: &str) -> Result<Repo, RepoError> {
     let local_repo_path = get_local_repo_path(repo);
 
-    parse_url(
-        &get_url(repo, local_repo_path.as_ref()),
+    Ok(parse_url(
+        &get_url(repo, local_repo_path.as_ref())?,
         local_repo_path.as_ref(),
-    )
+    )?)
 }
 
 #[cfg(test)]
@@ -127,7 +148,7 @@ mod tests {
         let url = "https://github.com/tymbalodeon/src.git";
         let repo = parse_url(url, None);
 
-        validate_repo(&repo, url);
+        validate_repo(&repo.unwrap(), url);
     }
 
     #[test]
@@ -135,6 +156,6 @@ mod tests {
         let url = "git@github.com:tymbalodeon/src.git";
         let repo = parse_url(url, None);
 
-        validate_repo(&repo, url);
+        validate_repo(&repo.unwrap(), url);
     }
 }

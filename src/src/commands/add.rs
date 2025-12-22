@@ -5,7 +5,19 @@ use repo::Repo;
 use crate::config::get_config;
 
 fn parse_repos(repos: &[String]) -> Vec<Repo> {
-    repos.iter().map(|repo| parse_repo(repo)).collect()
+    repos
+        .iter()
+        .filter_map(|repo| {
+            if let Ok(repo) = parse_repo(repo) {
+                Some(repo)
+            } else {
+                // TODO: add better error message
+                eprintln!("invalid path: {repo:?}");
+
+                None
+            }
+        })
+        .collect()
 }
 
 fn filter_unique_repos(repos: Vec<Repo>) -> Vec<Repo> {
@@ -40,7 +52,9 @@ fn filter_unique_repos(repos: Vec<Repo>) -> Vec<Repo> {
 pub fn add(repos: &[String]) -> Result<()> {
     if let Some(root_directory) = get_config()?.root_directory {
         for repo in filter_unique_repos(parse_repos(repos)) {
-            println!("Adding {} to {}", repo.url, repo.path(&root_directory));
+            if let Ok(path) = repo.path(&root_directory) {
+                println!("Adding {} to {}", repo.url, path);
+            }
         }
     } else {
         todo!("print error message");

@@ -4,6 +4,7 @@ mod config;
 use clap::{Parser, Subcommand};
 use commands::add::add;
 use commands::config::config;
+use commands::list::list;
 
 /// Manage repositories in an organized way
 #[derive(Parser)]
@@ -47,9 +48,7 @@ fn main() {
 
         Some(Command::Config) => config().unwrap(),
 
-        Some(Command::List) => {
-            todo!()
-        }
+        Some(Command::List) => list(),
 
         Some(Command::New { path: _ }) => {
             todo!()
