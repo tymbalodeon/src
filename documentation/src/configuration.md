@@ -4,7 +4,7 @@ To override the default values, configuration can be passed in as optional argum
 
 To see which optional parameters are available, run `src [COMMAND] --help`.
 
-To pass configuration options as environment variables, prefix the name of the option with `SRC`. For example, to override the location of the `root_directory`, set the value of `SRC_ROOT_DIRECTORY`.
+To pass configuration options as environment variables, prefix the name of the option with `SRC_`. For example, to override the location of the `root_directory`, set the value of `SRC_ROOT_DIRECTORY`.
 
 The default location for the configuration file is `$XDG_CONFIG_HOME/src/config.toml`. To use a configuration file at a different location, pass a path to `--config-file` as an option.
 
