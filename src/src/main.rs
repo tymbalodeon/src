@@ -39,29 +39,44 @@ enum Command {
 }
 
 fn main() {
-    match &Cli::parse().command {
-        Some(Command::Add { repos }) => add(repos).unwrap(),
+    let result = match &Cli::parse().command {
+        Some(Command::Add { repos }) => add(repos),
 
         Some(Command::Cd { repo: _ }) => {
-            todo!()
+            eprintln!("Implement cd!");
+
+            Ok(())
         }
 
-        Some(Command::Config) => config().unwrap(),
-
-        Some(Command::List) => list(),
+        Some(Command::Config) => config(),
+        Some(Command::List) => {
+            list();
+            Ok(())
+        },
 
         Some(Command::New { path: _ }) => {
-            todo!()
+            eprintln!("Implement new!");
+
+            Ok(())
         }
 
         Some(Command::Remove { repo: _ }) => {
-            todo!()
+            eprintln!("Implement remove!");
+
+            Ok(())
         }
 
         Some(Command::Sync { repo: _ }) => {
-            todo!()
+            eprintln!("Implement sync!");
+
+            Ok(())
         }
 
-        None => {}
+        None => Ok(()),
+    };
+
+    match result {
+        Ok(()) => (),
+        Err(error) => eprintln!("{error}"),
     }
 }

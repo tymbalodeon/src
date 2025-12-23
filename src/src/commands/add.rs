@@ -8,14 +8,15 @@ fn parse_repos(repos: &[String]) -> Vec<Repo> {
     repos
         .iter()
         .filter_map(|repo| {
-            if let Ok(repo) = parse_repo(repo) {
-                Some(repo)
-            } else {
-                // TODO: add better error message
-                eprintln!("invalid path: {repo:?}");
+            parse_repo(repo).map_or_else(
+                |_| {
+                    // TODO: add better error message
+                    eprintln!("invalid path: {repo:?}");
 
-                None
-            }
+                    None
+                },
+                Some,
+            )
         })
         .collect()
 }
@@ -56,8 +57,6 @@ pub fn add(repos: &[String]) -> Result<()> {
                 println!("Adding {} to {}", repo.url, path);
             }
         }
-    } else {
-        todo!("print error message");
     }
 
     Ok(())

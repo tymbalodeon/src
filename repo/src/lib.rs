@@ -54,7 +54,9 @@ impl Repo {
         }
     }
 
-    #[must_use]
+    /// # Errors
+    ///
+    /// Will return `RepoError` if `Repo` data contains invalid unicode.
     pub fn path(&self, base_directory: &Path) -> Result<String, RepoError> {
         Ok(base_directory
             .join(&self.host)
@@ -110,7 +112,7 @@ fn parse_url(
     let local_repo_path = local_repo_path.map(std::borrow::ToOwned::to_owned);
 
     Ok(Repo::from(
-        git_url.host().unwrap(),
+        git_url.host().ok_or(RepoError::GitUrl)?,
         repo_provider.repo(),
         repo_provider.owner(),
         local_repo_path,
@@ -118,14 +120,16 @@ fn parse_url(
     ))
 }
 
-#[must_use]
+/// # Errors
+///
+/// Will return `RepoError` if it cannot determine a git url from `repo`
 pub fn parse_repo(repo: &str) -> Result<Repo, RepoError> {
     let local_repo_path = get_local_repo_path(repo);
 
-    Ok(parse_url(
+    parse_url(
         &get_url(repo, local_repo_path.as_ref())?,
         local_repo_path.as_ref(),
-    )?)
+    )
 }
 
 #[cfg(test)]
