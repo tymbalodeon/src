@@ -1,17 +1,16 @@
 use anyhow::Result;
-use repo::parse_repo;
 use repo::repo::Repo;
 
 use crate::config::get_config;
+use crate::log::{log, LogLevel};
 
 fn parse_repos(repos: &[String]) -> Vec<Repo> {
     repos
         .iter()
         .filter_map(|repo| {
-            parse_repo(repo).map_or_else(
+            Repo::from(repo).map_or_else(
                 |_| {
-                    // TODO: add better error message
-                    eprintln!("invalid path: {repo:?}");
+                    log(LogLevel::Error, "invalid path: {repo:?}");
 
                     None
                 },
@@ -70,7 +69,7 @@ mod tests {
 
     #[test]
     fn it_prefers_local_paths_to_remote_urls() {
-        let local_repo = Repo::from(
+        let local_repo = Repo::new(
             "github.com",
             "src",
             "tymbalodeon",
@@ -82,7 +81,7 @@ mod tests {
 
         let repos_with_local_first = vec![
             local_repo.clone(),
-            Repo::from(
+            Repo::new(
                 "github.com",
                 "src",
                 "tymbalodeon",
@@ -92,7 +91,7 @@ mod tests {
         ];
 
         let repos_with_local_second = vec![
-            Repo::from(
+            Repo::new(
                 "github.com",
                 "src",
                 "tymbalodeon",

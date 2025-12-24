@@ -1,3 +1,4 @@
+use std::fmt;
 use std::path::{Path, PathBuf};
 
 use derivative::Derivative;
@@ -37,8 +38,17 @@ pub struct Repo {
 }
 
 impl Repo {
+    pub fn from(repo: &str) -> Result<Repo, RepoError> {
+        let local_repo_path = get_local_repo_path(repo);
+
+        parse_url(
+            &get_url(repo, local_repo_path.as_ref())?,
+            local_repo_path.as_ref(),
+        )
+    }
+
     #[must_use]
-    pub fn from(
+    pub fn new(
         host: &str,
         name: &str,
         owner: &str,
@@ -65,6 +75,12 @@ impl Repo {
             .to_str()
             .ok_or(RepoError::RepoPath)?
             .to_owned())
+    }
+}
+
+impl fmt::Display for Repo {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}:{}/{}", self.host, self.owner, self.name)
     }
 }
 
@@ -120,7 +136,7 @@ pub fn parse_url(
 
     let local_repo_path = local_repo_path.map(std::borrow::ToOwned::to_owned);
 
-    Ok(Repo::from(
+    Ok(Repo::new(
         git_url.host().ok_or(RepoError::GitUrl)?,
         repo_provider.repo(),
         repo_provider.owner(),

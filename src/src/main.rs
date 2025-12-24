@@ -1,5 +1,6 @@
 mod commands;
 mod config;
+mod log;
 
 use clap::{Parser, Subcommand};
 use commands::add::add;
@@ -26,7 +27,10 @@ enum Command {
     Config,
 
     /// List repositories
-    List,
+    List {
+        #[arg(long)]
+        as_path: bool,
+    },
 
     /// Create or initialize a new repository
     New { path: Option<String> },
@@ -49,10 +53,11 @@ fn main() {
         }
 
         Some(Command::Config) => config(),
-        Some(Command::List) => {
-            list();
+        Some(Command::List { as_path }) => {
+            list(*as_path);
+
             Ok(())
-        },
+        }
 
         Some(Command::New { path: _ }) => {
             eprintln!("Implement new!");
