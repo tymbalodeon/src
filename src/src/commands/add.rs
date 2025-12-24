@@ -1,6 +1,6 @@
 use anyhow::Result;
 use repo::parse_repo;
-use repo::Repo;
+use repo::repo::Repo;
 
 use crate::config::get_config;
 
