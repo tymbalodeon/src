@@ -29,7 +29,7 @@ enum Command {
     /// List repositories
     List {
         #[arg(long)]
-        as_path: bool,
+        path: bool,
     },
 
     /// Create or initialize a new repository
@@ -53,8 +53,8 @@ fn main() {
         }
 
         Some(Command::Config) => config(),
-        Some(Command::List { as_path }) => {
-            list(*as_path);
+        Some(Command::List { path }) => {
+            list(*path);
 
             Ok(())
         }
