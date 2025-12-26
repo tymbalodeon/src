@@ -29,6 +29,12 @@ enum Command {
     /// List repositories
     List {
         #[arg(long)]
+        no_host: bool,
+
+        #[arg(long)]
+        no_owner: bool,
+
+        #[arg(long)]
         path: bool,
     },
 
@@ -53,7 +59,12 @@ fn main() {
         }
 
         Some(Command::Config) => config(),
-        Some(Command::List { path }) => list(*path),
+
+        Some(Command::List {
+            no_host,
+            no_owner,
+            path,
+        }) => list(*no_host, *no_owner, *path),
 
         Some(Command::New { path: _ }) => {
             eprintln!("Implement new!");

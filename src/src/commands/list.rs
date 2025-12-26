@@ -1,8 +1,8 @@
 use anyhow::Result;
-use repo::list::list as list_repos;
+use repo::list::list_repos;
 
-pub fn list(as_path: bool) -> Result<()> {
-    println!("{}", list_repos(as_path)?.join("\n"));
+pub fn list(no_host: bool, no_owner: bool, path: bool) -> Result<()> {
+    println!("{}", list_repos(no_host, no_owner, path)?.join("\n"));
 
     Ok(())
 }

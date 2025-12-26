@@ -38,6 +38,19 @@ pub struct Repo {
 }
 
 impl Repo {
+    #[must_use] 
+    pub fn display(&self, no_host: bool, no_owner: bool) -> String {
+        if no_host && no_owner {
+            self.name.clone()
+        } else if no_host {
+            format!("{}/{}", self.owner, self.name)
+        } else if no_owner {
+            format!("{}:{}", self.host, self.name)
+        } else {
+            format!("{self}")
+        }
+    }
+
     /// # Errors
     ///
     /// Will return `RepoError` if it cannot parse `repo`.
