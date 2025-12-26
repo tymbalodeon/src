@@ -53,11 +53,7 @@ fn main() {
         }
 
         Some(Command::Config) => config(),
-        Some(Command::List { path }) => {
-            list(*path);
-
-            Ok(())
-        }
+        Some(Command::List { path }) => list(*path),
 
         Some(Command::New { path: _ }) => {
             eprintln!("Implement new!");

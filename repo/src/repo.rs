@@ -38,7 +38,10 @@ pub struct Repo {
 }
 
 impl Repo {
-    pub fn from(repo: &str) -> Result<Repo, RepoError> {
+    /// # Errors
+    ///
+    /// Will return `RepoError` if it cannot parse `repo`.
+    pub fn from(repo: &str) -> Result<Self, RepoError> {
         let local_repo_path = get_local_repo_path(repo);
 
         parse_url(

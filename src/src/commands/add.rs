@@ -10,7 +10,7 @@ fn parse_repos(repos: &[String]) -> Vec<Repo> {
         .filter_map(|repo| {
             Repo::from(repo).map_or_else(
                 |_| {
-                    log(LogLevel::Error, "invalid path: {repo:?}");
+                    log(&LogLevel::Error, &format!("invalid path: {repo:?}"));
 
                     None
                 },

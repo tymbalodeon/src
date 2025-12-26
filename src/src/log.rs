@@ -4,7 +4,7 @@ pub enum LogLevel {
     Warning,
 }
 
-pub fn log(level: LogLevel, message: &str) {
+pub fn log(level: &LogLevel, message: &str) {
     let message = match level {
         LogLevel::Error => format!("error: {message}"),
         LogLevel::Warning => format!("warning: {message}"),
