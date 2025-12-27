@@ -1,3 +1,5 @@
+use std::path::{Component, Path};
+
 use dirs::home_dir;
 use walkdir::WalkDir;
 
@@ -31,17 +33,82 @@ fn format_repo_list(
 ///
 /// Will return `RepoError` if it cannot determine $HOME
 pub fn list_repos(
+    root_directory: &str,
+    host: Option<&String>,
+    owner: Option<&String>,
+    name: Option<&String>,
     no_host: bool,
     no_owner: bool,
-    as_path: bool,
+    path: bool,
 ) -> Result<Vec<String>, RepoError> {
     let repos =
         WalkDir::new(home_dir().ok_or(RepoError::RepoPath)?.join("src"))
             .into_iter()
-            .filter_map(|path| {
-                path.as_ref().map_or(None, |path| {
-                    if path.file_type().is_dir() && path.depth() == 3 {
-                        path.path().to_str().map(std::string::ToString::to_string)
+            .filter_map(|dir_entry| {
+                dir_entry.as_ref().map_or(None, |dir_entry| {
+                    // TODO: Check if is git repository as well
+                    if dir_entry.file_type().is_dir() && dir_entry.depth() == 3
+                    {
+                        dir_entry.path().strip_prefix(root_directory).map_or(
+                            None,
+                            |dir_entry| {
+                                let components: Vec<Component> =
+                                    dir_entry.components().collect();
+
+                                let mut repo =
+                                    host.map_or(Some(dir_entry), |host| {
+                                        if &(components[0]
+                                            .as_os_str()
+                                            .to_string_lossy()
+                                            .to_string())
+                                            == host
+                                        {
+                                            Some(dir_entry)
+                                        } else {
+                                            None
+                                        }
+                                    });
+
+                                repo = if repo.is_some() {
+                                    owner.map_or(Some(dir_entry), |owner| {
+                                        if &(components[1]
+                                            .as_os_str()
+                                            .to_string_lossy()
+                                            .to_string())
+                                            == owner
+                                        {
+                                            Some(dir_entry)
+                                        } else {
+                                            None
+                                        }
+                                    })
+                                } else {
+                                    None
+                                };
+
+                                repo = if repo.is_some() {
+                                    name.map_or(Some(dir_entry), |name| {
+                                        if &(components[2]
+                                            .as_os_str()
+                                            .to_string_lossy()
+                                            .to_string())
+                                            == name
+                                        {
+                                            Some(dir_entry)
+                                        } else {
+                                            None
+                                        }
+                                    })
+                                } else {
+                                    None
+                                };
+
+                                repo.map(|path| Path::new(root_directory)
+                                            .join(path)
+                                            .to_string_lossy()
+                                            .to_string())
+                            },
+                        )
                     } else {
                         None
                     }
@@ -49,5 +116,5 @@ pub fn list_repos(
             })
             .collect::<Vec<String>>();
 
-    Ok(format_repo_list(&repos, no_host, no_owner, as_path))
+    Ok(format_repo_list(&repos, no_host, no_owner, path))
 }

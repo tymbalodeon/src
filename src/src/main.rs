@@ -29,6 +29,15 @@ enum Command {
     /// List repositories
     List {
         #[arg(long)]
+        host: Option<String>,
+
+        #[arg(long)]
+        owner: Option<String>,
+
+        #[arg(long)]
+        name: Option<String>,
+
+        #[arg(long)]
         no_host: bool,
 
         #[arg(long)]
@@ -61,10 +70,20 @@ fn main() {
         Some(Command::Config) => config(),
 
         Some(Command::List {
+            host,
+            owner,
+            name,
             no_host,
             no_owner,
             path,
-        }) => list(*no_host, *no_owner, *path),
+        }) => list(
+            host.as_ref(),
+            owner.as_ref(),
+            name.as_ref(),
+            *no_host,
+            *no_owner,
+            *path,
+        ),
 
         Some(Command::New { path: _ }) => {
             eprintln!("Implement new!");
