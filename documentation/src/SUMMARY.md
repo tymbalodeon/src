@@ -5,3 +5,4 @@
 - [Configuration](./configuration.md)
 - [Commands](./commands/README.md)
   - [Add](./commands/add.md)
+  - [List](./commands/list.md)
