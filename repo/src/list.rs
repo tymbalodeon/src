@@ -1,7 +1,8 @@
 use std::path::{Component, Path, PathBuf};
+use std::process::Command;
 
 use dirs::home_dir;
-use walkdir::WalkDir;
+use walkdir::{DirEntry, WalkDir};
 
 use crate::repo::{Repo, RepoError};
 
@@ -54,6 +55,28 @@ fn filter_path(
         .cloned()
 }
 
+// TODO: use this in the src binary, so that it can print a warning about not
+// having git installed on error
+pub fn filter_git_repos(
+    paths: &[DirEntry],
+) -> Result<Vec<DirEntry>, RepoError> {
+    Ok(paths
+        .iter()
+        .filter_map(|dir_entry| {
+            if Command::new("git")
+                .args(["-C", &dir_entry.path().to_string_lossy(), "rev-parse"])
+                .status()
+                .ok()?
+                .success()
+            {
+                Some(dir_entry.clone())
+            } else {
+                None
+            }
+        })
+        .collect())
+}
+
 /// # Errors
 ///
 /// Will return `RepoError` if it cannot determine $HOME
@@ -71,7 +94,6 @@ pub fn list_repos(
             .into_iter()
             .filter_map(|dir_entry| {
                 dir_entry.as_ref().map_or(None, |dir_entry| {
-                    // TODO: Check if is git repository as well
                     if dir_entry.file_type().is_dir() && dir_entry.depth() == 3
                     {
                         dir_entry.path().strip_prefix(root_directory).map_or(
