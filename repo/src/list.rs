@@ -4,7 +4,8 @@ use std::process::Command;
 use dirs::home_dir;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::repo::{Repo, RepoError};
+use crate::error::SrcRepoError;
+use crate::repo::Repo;
 
 fn format_repo_list(
     repos: &[String],
@@ -63,7 +64,7 @@ fn filter_path(
 /// Will return `RepoError` if it git is not installed
 pub fn filter_git_repos(
     paths: &[DirEntry],
-) -> Result<Vec<DirEntry>, RepoError> {
+) -> Result<Vec<DirEntry>, SrcRepoError> {
     Ok(paths
         .iter()
         .filter_map(|dir_entry| {
@@ -83,7 +84,7 @@ pub fn filter_git_repos(
 
 /// # Errors
 ///
-/// Will return `RepoError` if it cannot determine $HOME
+/// Will return `RepoError` if it cannot determine $HOME directory
 pub fn list_repos(
     root_directory: &str,
     host: Option<&String>,
@@ -92,9 +93,9 @@ pub fn list_repos(
     no_host: bool,
     no_owner: bool,
     path: bool,
-) -> Result<Vec<String>, RepoError> {
+) -> Result<Vec<String>, SrcRepoError> {
     let repos =
-        WalkDir::new(home_dir().ok_or(RepoError::RepoPath)?.join("src"))
+        WalkDir::new(home_dir().ok_or(SrcRepoError::HomeDir)?.join("src"))
             .into_iter()
             .filter_map(|dir_entry| {
                 dir_entry.as_ref().map_or(None, |dir_entry| {

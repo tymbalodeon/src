@@ -6,22 +6,8 @@ use git2::Repository;
 use git_url_parse::types::provider::GenericProvider;
 use git_url_parse::GitUrl;
 use shellexpand::tilde;
-use thiserror::Error;
 
-#[derive(Error, Debug)]
-pub enum RepoError {
-    #[error("failed to read git directory")]
-    Git(#[from] git2::Error),
-
-    #[error("failed to get remote \"origin\"")]
-    GitUrl,
-
-    #[error("failed to parse git url")]
-    GitUrlParseError(#[from] git_url_parse::GitUrlParseError),
-
-    #[error("invalid characters in repo path")]
-    RepoPath,
-}
+use crate::error::SrcRepoError;
 
 #[derive(Clone, Debug, Derivative)]
 #[derivative(Eq, PartialEq, Hash)]
@@ -38,7 +24,7 @@ pub struct Repo {
 }
 
 impl Repo {
-    #[must_use] 
+    #[must_use]
     pub fn display(&self, no_host: bool, no_owner: bool) -> String {
         if no_host && no_owner {
             self.name.clone()
@@ -53,8 +39,9 @@ impl Repo {
 
     /// # Errors
     ///
-    /// Will return `RepoError` if it cannot parse `repo`.
-    pub fn from(repo: &str) -> Result<Self, RepoError> {
+    /// Will return `SrcRepoError` if `repo` is a path but the path doesn't
+    /// exist or it cannot determine a remote git url at that path.
+    pub fn from(repo: &str) -> Result<Self, SrcRepoError> {
         let local_repo_path = get_local_repo_path(repo);
 
         parse_url(
@@ -82,14 +69,14 @@ impl Repo {
 
     /// # Errors
     ///
-    /// Will return `RepoError` if `Repo` data contains invalid unicode.
-    pub fn path(&self, base_directory: &Path) -> Result<String, RepoError> {
+    /// Will return `SrcRepoError` if `self` data contains invalid unicode.
+    pub fn path(&self, base_directory: &Path) -> Result<String, SrcRepoError> {
         Ok(base_directory
             .join(&self.host)
             .join(&self.owner)
             .join(&self.name)
             .to_str()
-            .ok_or(RepoError::RepoPath)?
+            .ok_or(SrcRepoError::RepoPath)?
             .to_owned())
     }
 }
@@ -112,22 +99,22 @@ pub fn get_local_repo_path(repo: &str) -> Option<PathBuf> {
     }
 }
 
-fn get_git_url_from_dir(dir: &Path) -> Result<String, RepoError> {
+fn get_git_url_from_dir(dir: &Path) -> Result<String, SrcRepoError> {
     Ok(Repository::open(dir)?
         .find_remote("origin")?
         .url()
-        .ok_or(RepoError::GitUrl)?
+        .ok_or(SrcRepoError::GitUrl)?
         .to_owned())
 }
 
 /// # Errors
 ///
-/// Will return `RepoError` if `local_repo_path` is `Some` but the path doesn't
-/// exist or it cannot determine a remote url at that path.
+/// Will return `SrcRepoError` if `local_repo_path` is `Some` but the path
+/// doesn't exist or it cannot determine a remote git url at that path.
 pub fn get_url(
     repo: &str,
     local_repo_path: Option<&PathBuf>,
-) -> Result<String, RepoError> {
+) -> Result<String, SrcRepoError> {
     local_repo_path.as_ref().map_or_else(
         || Ok(repo.to_string()),
         |path| get_git_url_from_dir(path),
@@ -136,24 +123,24 @@ pub fn get_url(
 
 /// # Errors
 ///
-/// Will return `RepoError` if it cannot parse `url` or `local_repo_path` is
+/// Will return `SrcRepoError` if it cannot parse `url` or `local_repo_path` is
 /// invalid.
 pub fn parse_url(
     url: &str,
     local_repo_path: Option<&PathBuf>,
-) -> Result<Repo, RepoError> {
+) -> Result<Repo, SrcRepoError> {
     let git_url = GitUrl::parse(url)?;
     let repo_provider = git_url.provider_info::<GenericProvider>()?;
 
     let url = local_repo_path.as_ref().map_or_else(
-        || Ok::<String, RepoError>(url.to_owned()),
-        |path| Ok(path.to_str().ok_or(RepoError::GitUrl)?.to_string()),
+        || Ok::<String, SrcRepoError>(url.to_owned()),
+        |path| Ok(path.to_str().ok_or(SrcRepoError::GitUrl)?.to_string()),
     )?;
 
     let local_repo_path = local_repo_path.map(std::borrow::ToOwned::to_owned);
 
     Ok(Repo::new(
-        git_url.host().ok_or(RepoError::GitUrl)?,
+        git_url.host().ok_or(SrcRepoError::GitUrl)?,
         repo_provider.repo(),
         repo_provider.owner(),
         local_repo_path,
