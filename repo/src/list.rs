@@ -57,6 +57,10 @@ fn filter_path(
 
 // TODO: use this in the src binary, so that it can print a warning about not
 // having git installed on error
+//
+/// # Errors
+///
+/// Will return `RepoError` if it git is not installed
 pub fn filter_git_repos(
     paths: &[DirEntry],
 ) -> Result<Vec<DirEntry>, RepoError> {

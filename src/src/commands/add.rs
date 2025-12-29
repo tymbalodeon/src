@@ -53,11 +53,17 @@ pub fn add(repos: &[String]) -> Result<()> {
     if let Some(root_directory) = get_config()?.root_directory {
         for repo in filter_unique_repos(parse_repos(repos)) {
             if let Ok(path) = repo.path(&root_directory) {
-                let repo = repo.path.map_or(repo.url, |path| {
-                    path.canonicalize().unwrap().to_string_lossy().to_string()
+                let repo = repo.path.map_or(Some(repo.url), |path| {
+                    if let Ok(path) = path.canonicalize() {
+                        Some(path.to_string_lossy().to_string())
+                    } else {
+                        None
+                    }
                 });
 
-                println!("Adding {} to {}", repo, path);
+                if let Some(repo) = repo {
+                    println!("Adding {repo} to {path}");
+                }
             }
         }
     }
