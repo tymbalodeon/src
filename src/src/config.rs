@@ -34,3 +34,11 @@ pub fn get_config() -> Result<Config> {
         .extract()
         .context("failed to generate configuration")
 }
+
+pub fn get_root_directory() -> Result<String> {
+    Ok(get_config()?
+        .root_directory
+        .context("failed to determine root directory")?
+        .to_string_lossy()
+        .to_string())
+}

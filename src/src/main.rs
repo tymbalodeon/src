@@ -7,12 +7,26 @@ use commands::add::add;
 use commands::config::config;
 use commands::list::list;
 
+use crate::commands::list::{hosts, names, owners};
+
 /// Manage repositories in an organized way
 #[derive(Parser)]
 #[command(arg_required_else_help(true))]
 struct Cli {
     #[command(subcommand)]
     command: Option<Command>,
+}
+
+#[derive(Subcommand)]
+enum List {
+    /// Show all hosts
+    Hosts,
+
+    /// Show all repository names
+    Names,
+
+    /// Show all owners
+    Owners,
 }
 
 #[derive(Subcommand)]
@@ -28,6 +42,9 @@ enum Command {
 
     /// List repositories
     List {
+        #[command(subcommand)]
+        command: Option<List>,
+
         #[arg(long)]
         host: Option<String>,
 
@@ -70,20 +87,27 @@ fn main() {
         Some(Command::Config) => config(),
 
         Some(Command::List {
+            command,
             host,
             owner,
             name,
             no_host,
             no_owner,
             path,
-        }) => list(
-            host.as_ref(),
-            owner.as_ref(),
-            name.as_ref(),
-            *no_host,
-            *no_owner,
-            *path,
-        ),
+        }) => match command {
+            None => list(
+                host.as_ref(),
+                owner.as_ref(),
+                name.as_ref(),
+                *no_host,
+                *no_owner,
+                *path,
+            ),
+
+            Some(List::Hosts) => hosts(),
+            Some(List::Names) => names(),
+            Some(List::Owners) => owners(),
+        },
 
         Some(Command::New { path: _ }) => {
             eprintln!("Implement new!");

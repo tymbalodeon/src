@@ -1,7 +1,57 @@
-use anyhow::{Context, Result};
-use repo::list::list_repos;
+use std::collections::HashSet;
 
-use crate::config::get_config;
+use anyhow::Result;
+use repo::list::{get_repos, list_repos};
+
+use crate::config::get_root_directory;
+
+pub fn hosts() -> Result<()> {
+    let mut hosts: Vec<String> =
+        get_repos(&get_root_directory()?, None, None, None)?
+            .iter()
+            .map(|repo| repo.host.clone())
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();
+
+    hosts.sort();
+
+    println!("{}", hosts.join("\n"));
+
+    Ok(())
+}
+
+pub fn names() -> Result<()> {
+    let mut hosts: Vec<String> =
+        get_repos(&get_root_directory()?, None, None, None)?
+            .iter()
+            .map(|repo| repo.name.clone())
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();
+
+    hosts.sort();
+
+    println!("{}", hosts.join("\n"));
+
+    Ok(())
+}
+
+pub fn owners() -> Result<()> {
+    let mut hosts: Vec<String> =
+        get_repos(&get_root_directory()?, None, None, None)?
+            .iter()
+            .map(|repo| repo.owner.clone())
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();
+
+    hosts.sort();
+
+    println!("{}", hosts.join("\n"));
+
+    Ok(())
+}
 
 pub fn list(
     host: Option<&String>,
@@ -11,14 +61,10 @@ pub fn list(
     no_owner: bool,
     path: bool,
 ) -> Result<()> {
-    let root_directory = get_config()?
-        .root_directory
-        .context("failed to determine root directory")?;
-
     print!(
         "{}",
         list_repos(
-            root_directory.to_string_lossy().as_ref(),
+            &get_root_directory()?,
             host,
             owner,
             name,
