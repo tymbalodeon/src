@@ -54,11 +54,10 @@ pub fn add(repos: &[String]) -> Result<()> {
         for repo in filter_unique_repos(parse_repos(repos)) {
             if let Ok(path) = repo.path(&root_directory) {
                 let repo = repo.path.map_or(Some(repo.url), |path| {
-                    if let Ok(path) = path.canonicalize() {
+                    // TODO: print error if this fails
+                    path.canonicalize().map_or(None, |path| {
                         Some(path.to_string_lossy().to_string())
-                    } else {
-                        None
-                    }
+                    })
                 });
 
                 if let Some(repo) = repo {
