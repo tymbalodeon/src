@@ -15,7 +15,7 @@ pub fn list(
         .root_directory
         .context("failed to determine root directory")?;
 
-    println!(
+    print!(
         "{}",
         list_repos(
             root_directory.to_string_lossy().as_ref(),
