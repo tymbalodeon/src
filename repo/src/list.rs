@@ -1,4 +1,4 @@
-use std::path::{Component, Path};
+use std::path::{Component, Path, PathBuf};
 
 use dirs::home_dir;
 use walkdir::WalkDir;
@@ -29,6 +29,31 @@ fn format_repo_list(
     repos
 }
 
+fn filter_path(
+    path: Option<&PathBuf>,
+    components: &[Component],
+    filter: Option<&String>,
+    index: usize,
+) -> Option<PathBuf> {
+    filter
+        .map_or_else(
+            || path,
+            |filter| {
+                if &(components[index]
+                    .as_os_str()
+                    .to_string_lossy()
+                    .to_string())
+                    == filter
+                {
+                    path
+                } else {
+                    None
+                }
+            },
+        )
+        .cloned()
+}
+
 /// # Errors
 ///
 /// Will return `RepoError` if it cannot determine $HOME
@@ -55,58 +80,33 @@ pub fn list_repos(
                                 let components: Vec<Component> =
                                     dir_entry.components().collect();
 
-                                let mut repo =
-                                    host.map_or(Some(dir_entry), |host| {
-                                        if &(components[0]
-                                            .as_os_str()
-                                            .to_string_lossy()
-                                            .to_string())
-                                            == host
-                                        {
-                                            Some(dir_entry)
-                                        } else {
-                                            None
-                                        }
-                                    });
+                                let mut repo = filter_path(
+                                    Some(&dir_entry.to_path_buf()),
+                                    &components,
+                                    host,
+                                    0,
+                                );
 
-                                repo = if repo.is_some() {
-                                    owner.map_or(Some(dir_entry), |owner| {
-                                        if &(components[1]
-                                            .as_os_str()
-                                            .to_string_lossy()
-                                            .to_string())
-                                            == owner
-                                        {
-                                            Some(dir_entry)
-                                        } else {
-                                            None
-                                        }
-                                    })
-                                } else {
-                                    None
-                                };
+                                repo = filter_path(
+                                    repo.as_ref(),
+                                    &components,
+                                    owner,
+                                    1,
+                                );
 
-                                repo = if repo.is_some() {
-                                    name.map_or(Some(dir_entry), |name| {
-                                        if &(components[2]
-                                            .as_os_str()
-                                            .to_string_lossy()
-                                            .to_string())
-                                            == name
-                                        {
-                                            Some(dir_entry)
-                                        } else {
-                                            None
-                                        }
-                                    })
-                                } else {
-                                    None
-                                };
+                                repo = filter_path(
+                                    repo.as_ref(),
+                                    &components,
+                                    name,
+                                    2,
+                                );
 
-                                repo.map(|path| Path::new(root_directory)
-                                            .join(path)
-                                            .to_string_lossy()
-                                            .to_string())
+                                repo.map(|path| {
+                                    Path::new(root_directory)
+                                        .join(path)
+                                        .to_string_lossy()
+                                        .to_string()
+                                })
                             },
                         )
                     } else {
