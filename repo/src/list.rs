@@ -7,7 +7,7 @@ use walkdir::{DirEntry, WalkDir};
 use crate::error::SrcRepoError;
 use crate::repo::Repo;
 
-fn get_repo_paths(
+pub fn get_repo_paths(
     root_directory: &str,
     host: Option<&String>,
     owner: Option<&String>,

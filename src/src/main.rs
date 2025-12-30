@@ -32,7 +32,18 @@ enum List {
 #[derive(Subcommand)]
 enum Command {
     /// Add local or clone remote repositories
-    Add { repos: Vec<String> },
+    Add {
+        repos: Vec<String>,
+
+        // TODO
+        // #[arg(long)]
+        // cd: bool,
+        #[arg(long)]
+        force: bool,
+        // TODO
+        // #[arg(long)]
+        // open: bool,
+    },
 
     /// Change directory to a repository
     Cd { repo: Option<String> },
@@ -76,7 +87,7 @@ enum Command {
 
 fn main() {
     let result = match &Cli::parse().command {
-        Some(Command::Add { repos }) => add(repos),
+        Some(Command::Add { repos, force }) => add(repos, *force),
 
         Some(Command::Cd { repo: _ }) => {
             eprintln!("Implement cd!");
