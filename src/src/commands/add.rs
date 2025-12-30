@@ -20,13 +20,12 @@ fn parse_repos(repos: &[String]) -> Vec<Repo> {
         .collect()
 }
 
-fn filter_unique_repos(repos: Vec<Repo>) -> Vec<Repo> {
+fn filter_unique_repos(repos: &[Repo]) -> Vec<Repo> {
     let mut repos_to_add: Vec<Repo> = repos
-        .clone()
-        .into_iter()
+        .iter()
         .filter_map(|repo| {
             if repo.path.is_some() {
-                Some(repo)
+                Some(repo.clone())
             } else {
                 None
             }
@@ -34,10 +33,10 @@ fn filter_unique_repos(repos: Vec<Repo>) -> Vec<Repo> {
         .collect();
 
     let remote_repos: Vec<Repo> = repos
-        .into_iter()
+        .iter()
         .filter_map(|repo| {
-            if repo.path.is_none() && !repos_to_add.contains(&repo) {
-                Some(repo)
+            if repo.path.is_none() && !repos_to_add.contains(repo) {
+                Some(repo.clone())
             } else {
                 None
             }
@@ -51,7 +50,7 @@ fn filter_unique_repos(repos: Vec<Repo>) -> Vec<Repo> {
 
 pub fn add(repos: &[String]) -> Result<()> {
     if let Some(root_directory) = get_config()?.root_directory {
-        for repo in filter_unique_repos(parse_repos(repos)) {
+        for repo in filter_unique_repos(&parse_repos(repos)) {
             if let Ok(path) = repo.path(&root_directory) {
                 let repo = repo.path.map_or(Some(repo.url), |path| {
                     // TODO: print error if this fails
@@ -111,12 +110,12 @@ mod tests {
         ];
 
         assert_eq!(
-            filter_unique_repos(repos_with_local_first),
+            filter_unique_repos(&repos_with_local_first),
             vec![local_repo.clone()]
         );
 
         assert_eq!(
-            filter_unique_repos(repos_with_local_second),
+            filter_unique_repos(&repos_with_local_second),
             vec![local_repo]
         );
     }
