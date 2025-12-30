@@ -6,6 +6,52 @@ use walkdir::{DirEntry, WalkDir};
 use crate::error::SrcRepoError;
 use crate::repo::Repo;
 
+fn filter_path_by_component(
+    path: Option<&PathBuf>,
+    components: &[Component],
+    filter: Option<&String>,
+    index: usize,
+) -> Option<PathBuf> {
+    filter
+        .map_or_else(
+            || path,
+            |filter| {
+                if &(components[index]
+                    .as_os_str()
+                    .to_string_lossy()
+                    .to_string())
+                    == filter
+                {
+                    path
+                } else {
+                    None
+                }
+            },
+        )
+        .cloned()
+}
+
+fn filter_path(
+    path: &Path,
+
+    host: Option<&String>,
+    owner: Option<&String>,
+    name: Option<&String>,
+) -> Option<PathBuf> {
+    let components: Vec<Component> = path.components().collect();
+
+    let mut repo = filter_path_by_component(
+        Some(&path.to_path_buf()),
+        &components,
+        host,
+        0,
+    );
+
+    repo = filter_path_by_component(repo.as_ref(), &components, owner, 1);
+
+    filter_path_by_component(repo.as_ref(), &components, name, 2)
+}
+
 #[must_use]
 pub fn get_repo_paths(
     root_directory: &str,
@@ -15,42 +61,20 @@ pub fn get_repo_paths(
 ) -> Vec<String> {
     WalkDir::new(root_directory)
         .into_iter()
-        .filter_map(|dir_entry| {
-            dir_entry.as_ref().map_or(None, |dir_entry| {
-                if dir_entry.file_type().is_dir() && dir_entry.depth() == 3 {
-                    dir_entry.path().strip_prefix(root_directory).map_or(
+        .filter_map(|path| {
+            path.as_ref().map_or(None, |path| {
+                if path.file_type().is_dir() && path.depth() == 3 {
+                    path.path().strip_prefix(root_directory).map_or(
                         None,
                         |dir_entry| {
-                            let components: Vec<Component> =
-                                dir_entry.components().collect();
-
-                            let mut repo = filter_path(
-                                Some(&dir_entry.to_path_buf()),
-                                &components,
-                                host,
-                                0,
-                            );
-
-                            repo = filter_path(
-                                repo.as_ref(),
-                                &components,
-                                owner,
-                                1,
-                            );
-
-                            repo = filter_path(
-                                repo.as_ref(),
-                                &components,
-                                name,
-                                2,
-                            );
-
-                            repo.map(|path| {
-                                Path::new(root_directory)
-                                    .join(path)
-                                    .to_string_lossy()
-                                    .to_string()
-                            })
+                            filter_path(dir_entry, host, owner, name).map(
+                                |path| {
+                                    Path::new(root_directory)
+                                        .join(path)
+                                        .to_string_lossy()
+                                        .to_string()
+                                },
+                            )
                         },
                     )
                 } else {
@@ -76,31 +100,6 @@ pub fn get_repos(
         .collect();
 
     repos
-}
-
-fn filter_path(
-    path: Option<&PathBuf>,
-    components: &[Component],
-    filter: Option<&String>,
-    index: usize,
-) -> Option<PathBuf> {
-    filter
-        .map_or_else(
-            || path,
-            |filter| {
-                if &(components[index]
-                    .as_os_str()
-                    .to_string_lossy()
-                    .to_string())
-                    == filter
-                {
-                    path
-                } else {
-                    None
-                }
-            },
-        )
-        .cloned()
 }
 
 // TODO: use this in the src binary, so that it can print a warning about not
