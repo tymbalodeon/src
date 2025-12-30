@@ -33,7 +33,6 @@ fn filter_path_by_component(
 
 fn filter_path(
     path: &Path,
-
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
