@@ -103,30 +103,6 @@ fn filter_path(
         .cloned()
 }
 
-fn format_repo_list(
-    repos: &[String],
-    no_host: bool,
-    no_owner: bool,
-    path: bool,
-) -> Vec<String> {
-    let mut repos: Vec<String> = repos
-        .iter()
-        .filter_map(|repo| {
-            if path {
-                Some(repo.clone())
-            } else if let Ok(repo) = Repo::from(repo) {
-                Some(repo.display(no_host, no_owner))
-            } else {
-                None
-            }
-        })
-        .collect();
-
-    repos.sort();
-
-    repos
-}
-
 // TODO: use this in the src binary, so that it can print a warning about not
 // having git installed on error
 //
@@ -163,10 +139,21 @@ pub fn list_repos(
     no_owner: bool,
     path: bool,
 ) -> Vec<String> {
-    format_repo_list(
-        &get_repo_paths(root_directory, host, owner, name),
-        no_host,
-        no_owner,
-        path,
-    )
+    let mut repos: Vec<String> =
+        get_repo_paths(root_directory, host, owner, name)
+            .iter()
+            .filter_map(|repo| {
+                if path {
+                    Some(repo.clone())
+                } else if let Ok(repo) = Repo::from(repo) {
+                    Some(repo.display(no_host, no_owner))
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+    repos.sort();
+
+    repos
 }
