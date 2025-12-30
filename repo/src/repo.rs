@@ -44,10 +44,19 @@ impl Repo {
     pub fn from(repo: &str) -> Result<Self, SrcRepoError> {
         let local_repo_path = get_local_repo_path(repo);
 
-        parse_url(
-            &get_url(repo, local_repo_path.as_ref())?,
-            local_repo_path.as_ref(),
-        )
+        let url: Result<String, SrcRepoError> =
+            local_repo_path.as_ref().map_or_else(
+                || Ok(repo.to_string()),
+                |path| {
+                    Ok(Repository::open(path)?
+                        .find_remote("origin")?
+                        .url()
+                        .ok_or(SrcRepoError::GitUrl)?
+                        .to_owned())
+                },
+            );
+
+        parse_url(&url?, local_repo_path.as_ref())
     }
 
     #[must_use]
@@ -69,7 +78,7 @@ impl Repo {
 
     /// # Errors
     ///
-    /// Will return `SrcRepoError` if `self` data contains invalid unicode.
+    /// Will return `SrcRepoError` if `Repo` data contains invalid unicode.
     pub fn path(&self, base_directory: &Path) -> Result<String, SrcRepoError> {
         Ok(base_directory
             .join(&self.host)
@@ -97,28 +106,6 @@ pub fn get_local_repo_path(repo: &str) -> Option<PathBuf> {
     } else {
         None
     }
-}
-
-fn get_git_url_from_dir(dir: &Path) -> Result<String, SrcRepoError> {
-    Ok(Repository::open(dir)?
-        .find_remote("origin")?
-        .url()
-        .ok_or(SrcRepoError::GitUrl)?
-        .to_owned())
-}
-
-/// # Errors
-///
-/// Will return `SrcRepoError` if `local_repo_path` is `Some` but the path
-/// doesn't exist or it cannot determine a remote git url at that path.
-pub fn get_url(
-    repo: &str,
-    local_repo_path: Option<&PathBuf>,
-) -> Result<String, SrcRepoError> {
-    local_repo_path.as_ref().map_or_else(
-        || Ok(repo.to_string()),
-        |path| get_git_url_from_dir(path),
-    )
 }
 
 /// # Errors

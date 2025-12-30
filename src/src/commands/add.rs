@@ -53,7 +53,7 @@ fn filter_unique_repos(repos: &[Repo]) -> Vec<Repo> {
 
 pub fn add(repos: &[String], force: bool) -> Result<()> {
     let root_directory = get_root_directory()?;
-    let repo_paths = get_repo_paths(&root_directory, None, None, None)?;
+    let repo_paths = get_repo_paths(&root_directory, None, None, None);
     let root_directory = PathBuf::from(root_directory);
 
     for repo in filter_unique_repos(&parse_repos(repos)) {

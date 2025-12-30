@@ -1,86 +1,81 @@
 use std::path::{Component, Path, PathBuf};
 use std::process::Command;
 
-use dirs::home_dir;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::error::SrcRepoError;
 use crate::repo::Repo;
 
+#[must_use]
 pub fn get_repo_paths(
     root_directory: &str,
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
-) -> Result<Vec<String>, SrcRepoError> {
-    Ok(
-        WalkDir::new(home_dir().ok_or(SrcRepoError::HomeDir)?.join("src"))
-            .into_iter()
-            .filter_map(|dir_entry| {
-                dir_entry.as_ref().map_or(None, |dir_entry| {
-                    if dir_entry.file_type().is_dir() && dir_entry.depth() == 3
-                    {
-                        dir_entry.path().strip_prefix(root_directory).map_or(
-                            None,
-                            |dir_entry| {
-                                let components: Vec<Component> =
-                                    dir_entry.components().collect();
+) -> Vec<String> {
+    WalkDir::new(root_directory)
+        .into_iter()
+        .filter_map(|dir_entry| {
+            dir_entry.as_ref().map_or(None, |dir_entry| {
+                if dir_entry.file_type().is_dir() && dir_entry.depth() == 3 {
+                    dir_entry.path().strip_prefix(root_directory).map_or(
+                        None,
+                        |dir_entry| {
+                            let components: Vec<Component> =
+                                dir_entry.components().collect();
 
-                                let mut repo = filter_path(
-                                    Some(&dir_entry.to_path_buf()),
-                                    &components,
-                                    host,
-                                    0,
-                                );
+                            let mut repo = filter_path(
+                                Some(&dir_entry.to_path_buf()),
+                                &components,
+                                host,
+                                0,
+                            );
 
-                                repo = filter_path(
-                                    repo.as_ref(),
-                                    &components,
-                                    owner,
-                                    1,
-                                );
+                            repo = filter_path(
+                                repo.as_ref(),
+                                &components,
+                                owner,
+                                1,
+                            );
 
-                                repo = filter_path(
-                                    repo.as_ref(),
-                                    &components,
-                                    name,
-                                    2,
-                                );
+                            repo = filter_path(
+                                repo.as_ref(),
+                                &components,
+                                name,
+                                2,
+                            );
 
-                                repo.map(|path| {
-                                    Path::new(root_directory)
-                                        .join(path)
-                                        .to_string_lossy()
-                                        .to_string()
-                                })
-                            },
-                        )
-                    } else {
-                        None
-                    }
-                })
+                            repo.map(|path| {
+                                Path::new(root_directory)
+                                    .join(path)
+                                    .to_string_lossy()
+                                    .to_string()
+                            })
+                        },
+                    )
+                } else {
+                    None
+                }
             })
-            .collect(),
-    )
+        })
+        .collect()
 }
 
-/// # Errors
-///
-/// Will return `SrcRepoError` if it cannot determine the $HOME directory
+#[must_use]
 pub fn get_repos(
     root_directory: &str,
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
-) -> Result<Vec<Repo>, SrcRepoError> {
-    let repo_paths = get_repo_paths(root_directory, host, owner, name)?;
+) -> Vec<Repo> {
+    let repo_paths = get_repo_paths(root_directory, host, owner, name);
 
     let repos: Vec<Repo> = repo_paths
         .iter()
         .filter_map(|repo| Repo::from(repo).ok())
         .collect();
 
-    Ok(repos)
+    repos
 }
 
 fn filter_path(
@@ -158,9 +153,7 @@ pub fn filter_git_repos(
         .collect())
 }
 
-/// # Errors
-///
-/// Will return `SrcRepoError` if it cannot determine $HOME directory
+#[must_use]
 pub fn list_repos(
     root_directory: &str,
     host: Option<&String>,
@@ -169,11 +162,11 @@ pub fn list_repos(
     no_host: bool,
     no_owner: bool,
     path: bool,
-) -> Result<Vec<String>, SrcRepoError> {
-    Ok(format_repo_list(
-        &get_repo_paths(root_directory, host, owner, name)?,
+) -> Vec<String> {
+    format_repo_list(
+        &get_repo_paths(root_directory, host, owner, name),
         no_host,
         no_owner,
         path,
-    ))
+    )
 }

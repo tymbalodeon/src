@@ -7,7 +7,7 @@ use crate::config::get_root_directory;
 
 pub fn hosts() -> Result<()> {
     let mut hosts: Vec<String> =
-        get_repos(&get_root_directory()?, None, None, None)?
+        get_repos(&get_root_directory()?, None, None, None)
             .into_iter()
             .map(|repo| repo.host)
             .collect::<HashSet<_>>()
@@ -23,7 +23,7 @@ pub fn hosts() -> Result<()> {
 
 pub fn names() -> Result<()> {
     let mut hosts: Vec<String> =
-        get_repos(&get_root_directory()?, None, None, None)?
+        get_repos(&get_root_directory()?, None, None, None)
             .into_iter()
             .map(|repo| repo.name)
             .collect::<HashSet<_>>()
@@ -39,7 +39,7 @@ pub fn names() -> Result<()> {
 
 pub fn owners() -> Result<()> {
     let mut hosts: Vec<String> =
-        get_repos(&get_root_directory()?, None, None, None)?
+        get_repos(&get_root_directory()?, None, None, None)
             .into_iter()
             .map(|repo| repo.owner)
             .collect::<HashSet<_>>()
@@ -71,7 +71,7 @@ pub fn list(
             no_host,
             no_owner,
             path
-        )?
+        )
         .join("\n")
     );
 
