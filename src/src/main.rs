@@ -7,7 +7,7 @@ use commands::add::add;
 use commands::config::config;
 use commands::list::list;
 
-use crate::commands::list::{hosts, names, owners};
+use crate::commands::list::{hosts, names, owners, SortByComponent};
 
 /// Manage repositories in an organized way
 #[derive(Parser)]
@@ -72,7 +72,13 @@ enum Command {
         no_owner: bool,
 
         #[arg(long)]
+        non_managed: bool,
+
+        #[arg(long)]
         path: bool,
+
+        #[arg(long)]
+        sort_by: Option<SortByComponent>,
     },
 
     /// Create or initialize a new repository
@@ -104,7 +110,9 @@ fn main() {
             name,
             no_host,
             no_owner,
+            non_managed,
             path,
+            sort_by,
         }) => match command {
             None => list(
                 host.as_ref(),
@@ -112,7 +120,9 @@ fn main() {
                 name.as_ref(),
                 *no_host,
                 *no_owner,
+                *non_managed,
                 *path,
+                sort_by.as_ref(),
             ),
 
             Some(List::Hosts) => hosts(),

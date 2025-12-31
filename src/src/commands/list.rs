@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use anyhow::Result;
-use repo::list::{get_repos, list_repos};
+use repo::list::{get_non_managed_repo_paths, get_repos, list_repos};
 
 use crate::config::get_root_directory;
 
@@ -53,16 +53,32 @@ pub fn owners() -> Result<()> {
     Ok(())
 }
 
+#[derive(clap::ValueEnum, Clone)]
+pub enum SortByComponent {
+    Host,
+    Name,
+    Owner,
+}
+
 pub fn list(
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
     no_host: bool,
     no_owner: bool,
+    non_managed: bool,
     path: bool,
+    sort_by: Option<&SortByComponent>,
 ) -> Result<()> {
-    print!(
-        "{}",
+    if sort_by.is_some() {
+        println!("Implement me!");
+    }
+
+    let repos = if non_managed {
+        println!("Implement me!");
+
+        get_non_managed_repo_paths(&get_root_directory()?)
+    } else {
         list_repos(
             &get_root_directory()?,
             host,
@@ -70,10 +86,9 @@ pub fn list(
             name,
             no_host,
             no_owner,
-            path
+            path,
         )
-        .join("\n")
-    );
+    };
 
-    Ok(())
+    Ok(print!("{}", repos.join("\n")))
 }

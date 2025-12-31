@@ -1,6 +1,7 @@
 use std::path::{Component, Path, PathBuf};
 use std::process::Command;
 
+use dirs::home_dir;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::error::SrcRepoError;
@@ -92,6 +93,25 @@ pub fn get_repo_paths(
         .collect()
 }
 
+#[must_use]
+pub fn get_non_managed_repo_paths(_: &str) -> Vec<String> {
+    WalkDir::new(home_dir().unwrap())
+        .into_iter()
+        .filter_map(|path| {
+            path.as_ref().map_or(None, |path| {
+                if path.file_type().is_dir()
+                    && path.path().join(".git").exists()
+                    && is_git_repo(path)
+                {
+                    Some(path.path().to_string_lossy().to_string())
+                } else {
+                    None
+                }
+            })
+        })
+        .collect()
+}
+
 /// # Errors
 ///
 /// Will return `SrcRepoError` if it fails to parse a repo in `root_directory`
@@ -107,6 +127,17 @@ pub fn get_repos(
         .collect()
 }
 
+fn is_git_repo(path: &DirEntry) -> bool {
+    if let Ok(result) = Command::new("git")
+        .args(["-C", &path.path().to_string_lossy(), "rev-parse"])
+        .output()
+    {
+        result.status.success()
+    } else {
+        false
+    }
+}
+
 // TODO: use this in the src binary, so that it can print a warning about not
 // having git installed on error
 //
@@ -119,12 +150,7 @@ pub fn filter_git_repos(
     Ok(paths
         .iter()
         .filter_map(|dir_entry| {
-            if Command::new("git")
-                .args(["-C", &dir_entry.path().to_string_lossy(), "rev-parse"])
-                .status()
-                .ok()?
-                .success()
-            {
+            if is_git_repo(dir_entry) {
                 Some(dir_entry.clone())
             } else {
                 None
