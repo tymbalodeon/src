@@ -51,6 +51,30 @@ fn filter_path(
     filter_path_by_component(repo.as_ref(), &components, name, 2)
 }
 
+// TODO: test  me
+fn get_repo_path(
+    path: &DirEntry,
+    root_directory: &str,
+    host: Option<&String>,
+    owner: Option<&String>,
+    name: Option<&String>,
+) -> Option<String> {
+    if !path.file_type().is_dir() || path.depth() != 3 {
+        return None;
+    }
+
+    path.path()
+        .strip_prefix(root_directory)
+        .map_or(None, |dir_entry| {
+            filter_path(dir_entry, host, owner, name).map(|path| {
+                PathBuf::from(root_directory)
+                    .join(path)
+                    .to_string_lossy()
+                    .to_string()
+            })
+        })
+}
+
 #[must_use]
 pub fn get_repo_paths(
     root_directory: &str,
@@ -62,43 +86,25 @@ pub fn get_repo_paths(
         .into_iter()
         .filter_map(|path| {
             path.as_ref().map_or(None, |path| {
-                if path.file_type().is_dir() && path.depth() == 3 {
-                    path.path().strip_prefix(root_directory).map_or(
-                        None,
-                        |dir_entry| {
-                            filter_path(dir_entry, host, owner, name).map(
-                                |path| {
-                                    Path::new(root_directory)
-                                        .join(path)
-                                        .to_string_lossy()
-                                        .to_string()
-                                },
-                            )
-                        },
-                    )
-                } else {
-                    None
-                }
+                get_repo_path(path, root_directory, host, owner, name)
             })
         })
         .collect()
 }
 
-#[must_use]
+/// # Errors
+///
+/// Will return `SrcRepoError` if it fails to parse a repo in `root_directory`
 pub fn get_repos(
     root_directory: &str,
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
-) -> Vec<Repo> {
-    let repo_paths = get_repo_paths(root_directory, host, owner, name);
-
-    let repos: Vec<Repo> = repo_paths
+) -> Result<Vec<Repo>, SrcRepoError> {
+    get_repo_paths(root_directory, host, owner, name)
         .iter()
-        .filter_map(|repo| Repo::from(repo).ok())
-        .collect();
-
-    repos
+        .map(|repo| Repo::from(repo))
+        .collect()
 }
 
 // TODO: use this in the src binary, so that it can print a warning about not
