@@ -79,8 +79,8 @@ impl Repo {
     /// # Errors
     ///
     /// Will return `SrcRepoError` if `Repo` data contains invalid unicode.
-    pub fn path(&self, base_directory: &Path) -> Result<String, SrcRepoError> {
-        Ok(base_directory
+    pub fn path(&self, root_directory: &str) -> Result<String, SrcRepoError> {
+        Ok(Path::new(root_directory)
             .join(&self.host)
             .join(&self.owner)
             .join(&self.name)

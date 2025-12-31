@@ -1,7 +1,9 @@
 use std::collections::HashSet;
 
 use anyhow::Result;
-use repo::list::{get_repos, list_non_managed_repos, list_repos};
+use repo::list::{
+    get_repos, list_all_repos, list_non_managed_repos, list_repos,
+};
 
 use crate::config::get_root_directory;
 
@@ -60,32 +62,6 @@ pub enum SortByComponent {
     Owner,
 }
 
-pub fn list_non_managed(
-    include_hidden: bool,
-    host: Option<&String>,
-    owner: Option<&String>,
-    name: Option<&String>,
-    no_host: bool,
-    no_owner: bool,
-    path: bool,
-) -> Result<()> {
-    // TODO: only show unique when not using --path
-    let repos = list_non_managed_repos(
-        &get_root_directory()?,
-        include_hidden,
-        host,
-        owner,
-        name,
-        no_host,
-        no_owner,
-        path,
-    )?;
-
-    print!("{}", repos.join("\n"));
-
-    Ok(())
-}
-
 pub fn list(
     host: Option<&String>,
     owner: Option<&String>,
@@ -112,6 +88,56 @@ pub fn list(
         )
         .join("\n")
     );
+
+    Ok(())
+}
+
+pub fn list_non_managed(
+    include_hidden: bool,
+    host: Option<&String>,
+    owner: Option<&String>,
+    name: Option<&String>,
+    no_host: bool,
+    no_owner: bool,
+    path: bool,
+) -> Result<()> {
+    let repos = list_non_managed_repos(
+        &get_root_directory()?,
+        include_hidden,
+        host,
+        owner,
+        name,
+        no_host,
+        no_owner,
+        path,
+    )?;
+
+    print!("{}", repos.join("\n"));
+
+    Ok(())
+}
+
+pub fn list_all(
+    include_hidden: bool,
+    host: Option<&String>,
+    owner: Option<&String>,
+    name: Option<&String>,
+    no_host: bool,
+    no_owner: bool,
+    path: bool,
+) -> Result<()> {
+    let repos = list_all_repos(
+        &get_root_directory()?,
+        include_hidden,
+        host,
+        owner,
+        name,
+        no_host,
+        no_owner,
+        path,
+    )?;
+
+    print!("{}", repos.join("\n"));
 
     Ok(())
 }

@@ -8,7 +8,7 @@ use commands::config::config;
 use commands::list::list;
 
 use crate::commands::list::{
-    hosts, list_non_managed, names, owners, SortByComponent,
+    hosts, list_all, list_non_managed, names, owners, SortByComponent,
 };
 
 /// Manage repositories in an organized way
@@ -21,12 +21,37 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum ListSubcommand {
+    /// List managed and non-managed repositories
+    All {
+        #[arg(long)]
+        include_hidden: bool,
+
+        #[arg(long)]
+        host: Option<String>,
+
+        #[arg(long)]
+        owner: Option<String>,
+
+        #[arg(long)]
+        name: Option<String>,
+
+        #[arg(long)]
+        no_host: bool,
+
+        #[arg(long)]
+        no_owner: bool,
+
+        #[arg(long)]
+        path: bool,
+    },
+
     /// Show all hosts
     Hosts,
 
     /// Show all repository names
     Names,
 
+    /// List repositories in $HOME that are not managed by `src`
     NonManaged {
         #[arg(long)]
         include_hidden: bool,
@@ -143,6 +168,24 @@ fn main() {
                 *no_owner,
                 *path,
                 sort_by.as_ref(),
+            ),
+
+            Some(ListSubcommand::All {
+                include_hidden,
+                host,
+                owner,
+                name,
+                no_host,
+                no_owner,
+                path,
+            }) => list_all(
+                *include_hidden,
+                host.as_ref(),
+                owner.as_ref(),
+                name.as_ref(),
+                *no_host,
+                *no_owner,
+                *path,
             ),
 
             Some(ListSubcommand::Hosts) => hosts(),

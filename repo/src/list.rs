@@ -9,28 +9,23 @@ use crate::error::SrcRepoError;
 use crate::repo::Repo;
 
 fn filter_path_by_component(
-    path: Option<&PathBuf>,
+    path: Option<PathBuf>,
     components: &[Component],
     filter: Option<&String>,
     index: usize,
 ) -> Option<PathBuf> {
-    filter
-        .map_or_else(
-            || path,
-            |filter| {
-                if &(components[index]
-                    .as_os_str()
-                    .to_string_lossy()
-                    .to_string())
-                    == filter
-                {
-                    path
-                } else {
-                    None
-                }
-            },
-        )
-        .cloned()
+    match filter {
+        Some(filter) => {
+            if &(components[index].as_os_str().to_string_lossy().to_string())
+                == filter
+            {
+                path
+            } else {
+                None
+            }
+        }
+        None => path,
+    }
 }
 
 fn filter_path(
@@ -42,15 +37,15 @@ fn filter_path(
     let components: Vec<Component> = path.components().collect();
 
     let mut repo = filter_path_by_component(
-        Some(&path.to_path_buf()),
+        Some(path.to_path_buf()),
         &components,
         host,
         0,
     );
 
-    repo = filter_path_by_component(repo.as_ref(), &components, owner, 1);
+    repo = filter_path_by_component(repo, &components, owner, 1);
 
-    filter_path_by_component(repo.as_ref(), &components, name, 2)
+    filter_path_by_component(repo, &components, name, 2)
 }
 
 #[must_use]
@@ -117,13 +112,13 @@ fn is_git_repo(path: &DirEntry) -> bool {
 ///
 /// Will return `SrcRepoError` if it git is not installed
 pub fn filter_git_repos(
-    paths: &[DirEntry],
+    paths: Vec<DirEntry>,
 ) -> Result<Vec<DirEntry>, SrcRepoError> {
     Ok(paths
-        .iter()
+        .into_iter()
         .filter_map(|dir_entry| {
-            if is_git_repo(dir_entry) {
-                Some(dir_entry.clone())
+            if is_git_repo(&dir_entry) {
+                Some(dir_entry)
             } else {
                 None
             }
@@ -143,11 +138,11 @@ pub fn list_repos(
 ) -> Vec<String> {
     let mut repos: Vec<String> =
         get_repo_paths(root_directory, host, owner, name)
-            .iter()
+            .into_iter()
             .filter_map(|repo| {
                 if path {
-                    Some(repo.clone())
-                } else if let Ok(repo) = Repo::from(repo) {
+                    Some(repo)
+                } else if let Ok(repo) = Repo::from(&repo) {
                     Some(repo.display(no_host, no_owner))
                 } else {
                     None
@@ -160,8 +155,6 @@ pub fn list_repos(
     repos
 }
 
-// TODO: add equivalent for repos and use repos by default, then --path for this
-//
 /// # Errors
 ///
 /// Will return `SrcRepoError` if it fails to determine the `$HOME` directory
@@ -193,14 +186,19 @@ pub fn get_non_managed_repo_paths(
                     && is_git_repo(path)
                 {
                     filter_path(
-                        &Repo::from(&path.path().to_string_lossy())
-                            .ok()?
-                            .path?,
+                        Path::new(
+                            &Repo::from(&path.path().to_string_lossy())
+                                .ok()?
+                                .path(root_directory)
+                                .ok()?
+                                .strip_prefix(&format!("{root_directory}/"))
+                                .unwrap(),
+                        ),
                         host,
                         owner,
                         name,
                     )
-                    .map(|path| path.to_string_lossy().to_string())
+                    .map(|_| path.path().to_string_lossy().to_string())
                 } else {
                     None
                 }
@@ -229,11 +227,11 @@ pub fn list_non_managed_repos(
         owner,
         name,
     )?
-    .iter()
+    .into_iter()
     .filter_map(|repo| {
         if path {
-            Some(repo.clone())
-        } else if let Ok(repo) = Repo::from(repo) {
+            Some(repo)
+        } else if let Ok(repo) = Repo::from(&repo) {
             Some(repo.display(no_host, no_owner))
         } else {
             None
@@ -249,7 +247,39 @@ pub fn list_non_managed_repos(
             .collect();
     }
 
-    // TODO: use case insensitive sort
+    repos.sort_by(|a: &String, b: &String| {
+        a.to_lowercase().cmp(&b.to_lowercase())
+    });
+
+    Ok(repos)
+}
+
+pub fn list_all_repos(
+    root_directory: &str,
+    include_hidden: bool,
+    host: Option<&String>,
+    owner: Option<&String>,
+    name: Option<&String>,
+    no_host: bool,
+    no_owner: bool,
+    path: bool,
+) -> Result<Vec<String>, SrcRepoError> {
+    let mut repos: Vec<String>;
+
+    repos =
+        list_repos(root_directory, host, owner, name, no_host, no_owner, path);
+
+    repos.append(&mut list_non_managed_repos(
+        root_directory,
+        include_hidden,
+        host,
+        owner,
+        name,
+        no_host,
+        no_owner,
+        path,
+    )?);
+
     repos.sort();
 
     Ok(repos)

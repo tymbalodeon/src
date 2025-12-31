@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use anyhow::Result;
 use repo::list::get_repo_paths;
 use repo::repo::Repo;
@@ -54,7 +52,6 @@ fn filter_unique_repos(repos: &[Repo]) -> Vec<Repo> {
 pub fn add(repos: &[String], force: bool) -> Result<()> {
     let root_directory = get_root_directory()?;
     let repo_paths = get_repo_paths(&root_directory, None, None, None);
-    let root_directory = PathBuf::from(root_directory);
 
     for repo in filter_unique_repos(&parse_repos(repos)) {
         if let Ok(path) = repo.path(&root_directory) {
@@ -65,10 +62,17 @@ pub fn add(repos: &[String], force: bool) -> Result<()> {
                 })
             });
 
-            if let Some(repo) = repo
-                && (force || !repo_paths.contains(&repo)) {
-                    println!("Adding {repo} to {path}");
+            match repo {
+                Some(repo) => {
+                    let repo = Repo::from(&repo)?.path(&root_directory)?;
+
+                    if force || !repo_paths.contains(&repo) {
+                        println!("Adding {repo} to {path}");
+                    }
                 }
+
+                None => (),
+            }
         }
     }
 
