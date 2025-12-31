@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::path::{Component, Path, PathBuf};
 use std::process::Command;
 
@@ -240,6 +241,15 @@ pub fn list_non_managed_repos(
     })
     .collect();
 
+    if !path {
+        repos = repos
+            .into_iter()
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();
+    }
+
+    // TODO: use case insensitive sort
     repos.sort();
 
     Ok(repos)
