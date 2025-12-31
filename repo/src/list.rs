@@ -93,13 +93,18 @@ pub fn get_repo_paths(
         .collect()
 }
 
+// TODO: add ability to ignore hidden folders
+// TODO: add equivalent for repos and use repos by default, then --path for this
+// TODO: check for nested git repos within the src managed folders (git repos
+// NOT at depth 3)
 #[must_use]
-pub fn get_non_managed_repo_paths(_: &str) -> Vec<String> {
+pub fn get_non_managed_repo_paths(root_directory: &str) -> Vec<String> {
     WalkDir::new(home_dir().unwrap())
         .into_iter()
         .filter_map(|path| {
             path.as_ref().map_or(None, |path| {
                 if path.file_type().is_dir()
+                    && !path.path().starts_with(root_directory)
                     && path.path().join(".git").exists()
                     && is_git_repo(path)
                 {
