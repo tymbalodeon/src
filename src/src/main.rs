@@ -7,7 +7,9 @@ use commands::add::add;
 use commands::config::config;
 use commands::list::list;
 
-use crate::commands::list::{hosts, names, owners, SortByComponent};
+use crate::commands::list::{
+    hosts, list_non_managed, names, owners, SortByComponent,
+};
 
 /// Manage repositories in an organized way
 #[derive(Parser)]
@@ -18,12 +20,35 @@ struct Cli {
 }
 
 #[derive(Subcommand)]
-enum List {
+enum ListSubcommand {
     /// Show all hosts
     Hosts,
 
     /// Show all repository names
     Names,
+
+    NonManaged {
+        #[arg(long)]
+        include_hidden: bool,
+
+        #[arg(long)]
+        host: Option<String>,
+
+        #[arg(long)]
+        owner: Option<String>,
+
+        #[arg(long)]
+        name: Option<String>,
+
+        #[arg(long)]
+        no_host: bool,
+
+        #[arg(long)]
+        no_owner: bool,
+
+        #[arg(long)]
+        path: bool,
+    },
 
     /// Show all owners
     Owners,
@@ -54,7 +79,7 @@ enum Command {
     /// List repositories
     List {
         #[command(subcommand)]
-        command: Option<List>,
+        command: Option<ListSubcommand>,
 
         #[arg(long)]
         host: Option<String>,
@@ -70,9 +95,6 @@ enum Command {
 
         #[arg(long)]
         no_owner: bool,
-
-        #[arg(long)]
-        non_managed: bool,
 
         #[arg(long)]
         path: bool,
@@ -110,7 +132,6 @@ fn main() {
             name,
             no_host,
             no_owner,
-            non_managed,
             path,
             sort_by,
         }) => match command {
@@ -120,14 +141,32 @@ fn main() {
                 name.as_ref(),
                 *no_host,
                 *no_owner,
-                *non_managed,
                 *path,
                 sort_by.as_ref(),
             ),
 
-            Some(List::Hosts) => hosts(),
-            Some(List::Names) => names(),
-            Some(List::Owners) => owners(),
+            Some(ListSubcommand::Hosts) => hosts(),
+            Some(ListSubcommand::Names) => names(),
+
+            Some(ListSubcommand::NonManaged {
+                include_hidden,
+                host,
+                owner,
+                name,
+                no_host,
+                no_owner,
+                path,
+            }) => list_non_managed(
+                *include_hidden,
+                host.as_ref(),
+                owner.as_ref(),
+                name.as_ref(),
+                *no_host,
+                *no_owner,
+                *path,
+            ),
+
+            Some(ListSubcommand::Owners) => owners(),
         },
 
         Some(Command::New { path: _ }) => {

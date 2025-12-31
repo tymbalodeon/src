@@ -52,30 +52,6 @@ fn filter_path(
     filter_path_by_component(repo.as_ref(), &components, name, 2)
 }
 
-// TODO: test  me
-fn get_repo_path(
-    path: &DirEntry,
-    root_directory: &str,
-    host: Option<&String>,
-    owner: Option<&String>,
-    name: Option<&String>,
-) -> Option<String> {
-    if !path.file_type().is_dir() || path.depth() != 3 {
-        return None;
-    }
-
-    path.path()
-        .strip_prefix(root_directory)
-        .map_or(None, |dir_entry| {
-            filter_path(dir_entry, host, owner, name).map(|path| {
-                PathBuf::from(root_directory)
-                    .join(path)
-                    .to_string_lossy()
-                    .to_string()
-            })
-        })
-}
-
 #[must_use]
 pub fn get_repo_paths(
     root_directory: &str,
@@ -87,31 +63,21 @@ pub fn get_repo_paths(
         .into_iter()
         .filter_map(|path| {
             path.as_ref().map_or(None, |path| {
-                get_repo_path(path, root_directory, host, owner, name)
-            })
-        })
-        .collect()
-}
-
-// TODO: add ability to ignore hidden folders
-// TODO: add equivalent for repos and use repos by default, then --path for this
-// TODO: check for nested git repos within the src managed folders (git repos
-// NOT at depth 3)
-#[must_use]
-pub fn get_non_managed_repo_paths(root_directory: &str) -> Vec<String> {
-    WalkDir::new(home_dir().unwrap())
-        .into_iter()
-        .filter_map(|path| {
-            path.as_ref().map_or(None, |path| {
-                if path.file_type().is_dir()
-                    && !path.path().starts_with(root_directory)
-                    && path.path().join(".git").exists()
-                    && is_git_repo(path)
-                {
-                    Some(path.path().to_string_lossy().to_string())
-                } else {
-                    None
+                if !path.file_type().is_dir() || path.depth() != 3 {
+                    return None;
                 }
+
+                path.path().strip_prefix(root_directory).map_or(
+                    None,
+                    |dir_entry| {
+                        filter_path(dir_entry, host, owner, name).map(|path| {
+                            PathBuf::from(root_directory)
+                                .join(path)
+                                .to_string_lossy()
+                                .to_string()
+                        })
+                    },
+                )
             })
         })
         .collect()
@@ -191,4 +157,90 @@ pub fn list_repos(
     repos.sort();
 
     repos
+}
+
+// TODO: add equivalent for repos and use repos by default, then --path for this
+//
+/// # Errors
+///
+/// Will return `SrcRepoError` if it fails to determine the `$HOME` directory
+pub fn get_non_managed_repo_paths(
+    root_directory: &str,
+    include_hidden: bool,
+    host: Option<&String>,
+    owner: Option<&String>,
+    name: Option<&String>,
+) -> Result<Vec<String>, SrcRepoError> {
+    let home_dir = home_dir().ok_or(SrcRepoError::HomeDir)?;
+
+    Ok(WalkDir::new(&home_dir)
+        .into_iter()
+        .filter_map(|path| {
+            path.as_ref().map_or(None, |path| {
+                if path.file_type().is_dir()
+                    && path.path().join(".git").exists()
+                    && (!path.path().starts_with(root_directory)
+                        || path.depth() != 4)
+                    && (!path
+                        .path()
+                        .strip_prefix(&home_dir)
+                        .ok()?
+                        .to_string_lossy()
+                        .to_string()
+                        .starts_with('.')
+                        || include_hidden)
+                    && is_git_repo(path)
+                {
+                    filter_path(
+                        &Repo::from(&path.path().to_string_lossy())
+                            .ok()?
+                            .path?,
+                        host,
+                        owner,
+                        name,
+                    )
+                    .map(|path| path.to_string_lossy().to_string())
+                } else {
+                    None
+                }
+            })
+        })
+        .collect())
+}
+
+/// # Errors
+///
+/// Will return `SrcRepoError` if it fails to determine the `$HOME` directory
+pub fn list_non_managed_repos(
+    root_directory: &str,
+    include_hidden: bool,
+    host: Option<&String>,
+    owner: Option<&String>,
+    name: Option<&String>,
+    no_host: bool,
+    no_owner: bool,
+    path: bool,
+) -> Result<Vec<String>, SrcRepoError> {
+    let mut repos: Vec<String> = get_non_managed_repo_paths(
+        root_directory,
+        include_hidden,
+        host,
+        owner,
+        name,
+    )?
+    .iter()
+    .filter_map(|repo| {
+        if path {
+            Some(repo.clone())
+        } else if let Ok(repo) = Repo::from(repo) {
+            Some(repo.display(no_host, no_owner))
+        } else {
+            None
+        }
+    })
+    .collect();
+
+    repos.sort();
+
+    Ok(repos)
 }

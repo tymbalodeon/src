@@ -11,6 +11,9 @@ pub enum SrcRepoError {
     #[error("failed to parse git url")]
     GitUrlParseError(#[from] git_url_parse::GitUrlParseError),
 
+    #[error("failed to determine home directory")]
+    HomeDir,
+
     #[error("invalid characters in repo path")]
     RepoPath,
 }
