@@ -62,16 +62,12 @@ pub fn add(repos: &[String], force: bool) -> Result<()> {
                 })
             });
 
-            match repo {
-                Some(repo) => {
-                    let repo = Repo::from(&repo)?.path(&root_directory)?;
+            if let Some(repo) = repo {
+                let repo = Repo::from(&repo)?.path(&root_directory)?;
 
-                    if force || !repo_paths.contains(&repo) {
-                        println!("Adding {repo} to {path}");
-                    }
+                if force || !repo_paths.contains(&repo) {
+                    println!("Adding {repo} to {path}");
                 }
-
-                None => (),
             }
         }
     }

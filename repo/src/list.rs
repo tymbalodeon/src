@@ -126,7 +126,7 @@ pub fn filter_git_repos(
         .collect())
 }
 
-fn sort_case_insensitive(a: &String, b: &String) -> std::cmp::Ordering {
+fn sort_case_insensitive(a: &str, b: &str) -> std::cmp::Ordering {
     a.to_lowercase().cmp(&b.to_lowercase())
 }
 
@@ -154,7 +154,7 @@ pub fn list_repos(
             })
             .collect();
 
-    repos.sort_by(sort_case_insensitive);
+    repos.sort_by(|a: &String, b: &String| sort_case_insensitive(a, b));
 
     repos
 }
@@ -195,8 +195,7 @@ pub fn get_non_managed_repo_paths(
                                 .ok()?
                                 .path(root_directory)
                                 .ok()?
-                                .strip_prefix(&format!("{root_directory}/"))
-                                .unwrap(),
+                                .strip_prefix(&format!("{root_directory}/"))?,
                         ),
                         host,
                         owner,
@@ -251,11 +250,14 @@ pub fn list_non_managed_repos(
             .collect();
     }
 
-    repos.sort_by(sort_case_insensitive);
+    repos.sort_by(|a: &String, b: &String| sort_case_insensitive(a, b));
 
     Ok(repos)
 }
 
+/// # Errors
+///
+/// Will return `SrcRepoError` if it fails to determine the `$HOME` directory
 pub fn list_all_repos(
     root_directory: &str,
     include_hidden: bool,
@@ -282,7 +284,7 @@ pub fn list_all_repos(
         path,
     )?);
 
-    repos.sort_by(sort_case_insensitive);
+    repos.sort_by(|a: &String, b: &String| sort_case_insensitive(a, b));
 
     Ok(repos)
 }
