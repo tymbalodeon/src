@@ -126,6 +126,10 @@ pub fn filter_git_repos(
         .collect())
 }
 
+fn sort_case_insensitive(a: &String, b: &String) -> std::cmp::Ordering {
+    a.to_lowercase().cmp(&b.to_lowercase())
+}
+
 #[must_use]
 pub fn list_repos(
     root_directory: &str,
@@ -150,7 +154,7 @@ pub fn list_repos(
             })
             .collect();
 
-    repos.sort();
+    repos.sort_by(sort_case_insensitive);
 
     repos
 }
@@ -247,9 +251,7 @@ pub fn list_non_managed_repos(
             .collect();
     }
 
-    repos.sort_by(|a: &String, b: &String| {
-        a.to_lowercase().cmp(&b.to_lowercase())
-    });
+    repos.sort_by(sort_case_insensitive);
 
     Ok(repos)
 }
@@ -280,7 +282,7 @@ pub fn list_all_repos(
         path,
     )?);
 
-    repos.sort();
+    repos.sort_by(sort_case_insensitive);
 
     Ok(repos)
 }
