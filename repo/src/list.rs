@@ -127,6 +127,8 @@ fn sort_case_insensitive(a: &str, b: &str) -> std::cmp::Ordering {
     a.to_lowercase().cmp(&b.to_lowercase())
 }
 
+const FUZZY_SEARCH_THRESHOLD: f32 = 0.1;
+
 #[must_use]
 pub fn list_repos(
     root_directory: &str,
@@ -140,8 +142,6 @@ pub fn list_repos(
     // FIXME
     let repo_paths = get_repo_paths(root_directory);
 
-    // TODO: only if a filter is passed
-
     let mut repos: Vec<Repo> = repo_paths
         .iter()
         .filter_map(|path| Repo::from(path).ok())
@@ -151,57 +151,57 @@ pub fn list_repos(
         let hosts: Vec<&str> =
             repos.iter().map(|repo| repo.host.as_str()).collect();
 
-        repos = fuzzy_search_threshold(host, &hosts, 0.1)
+        repos = fuzzy_search_threshold(&host, &hosts, FUZZY_SEARCH_THRESHOLD)
             .iter()
             .map(|item| item.0)
             .collect::<HashSet<&str>>()
             .iter()
             .flat_map(|host| {
                 repos
-                    .clone()
-                    .into_iter()
+                    .iter()
+                    .cloned()
                     .filter(|repo| repo.host == *host)
                     .collect::<Vec<Repo>>()
             })
-            .collect();
+            .collect()
     }
 
     if let Some(owner) = owner {
         let owners: Vec<&str> =
             repos.iter().map(|repo| repo.owner.as_str()).collect();
 
-        repos = fuzzy_search_threshold(owner, &owners, 0.1)
+        repos = fuzzy_search_threshold(&owner, &owners, FUZZY_SEARCH_THRESHOLD)
             .iter()
             .map(|item| item.0)
             .collect::<HashSet<&str>>()
             .iter()
             .flat_map(|owner| {
                 repos
-                    .clone()
-                    .into_iter()
+                    .iter()
+                    .cloned()
                     .filter(|repo| repo.owner == *owner)
                     .collect::<Vec<Repo>>()
             })
-            .collect();
+            .collect()
     }
 
     if let Some(name) = name {
         let names: Vec<&str> =
             repos.iter().map(|repo| repo.name.as_str()).collect();
 
-        repos = fuzzy_search_threshold(name, &names, 0.1)
+        repos = fuzzy_search_threshold(&name, &names, FUZZY_SEARCH_THRESHOLD)
             .iter()
             .map(|item| item.0)
             .collect::<HashSet<&str>>()
             .iter()
             .flat_map(|name| {
                 repos
-                    .clone()
-                    .into_iter()
+                    .iter()
+                    .cloned()
                     .filter(|repo| repo.name == *name)
                     .collect::<Vec<Repo>>()
             })
-            .collect();
+            .collect()
     }
 
     let mut formatted_repos: Vec<String> = repos
