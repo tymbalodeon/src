@@ -1,5 +1,5 @@
 use std::collections::HashSet;
-use std::path::{Component, Path, PathBuf};
+use std::path::PathBuf;
 use std::process::Command;
 
 use dirs::home_dir;
@@ -8,46 +8,6 @@ use walkdir::{DirEntry, WalkDir};
 
 use crate::error::SrcRepoError;
 use crate::repo::Repo;
-
-fn filter_path_by_component(
-    path: Option<PathBuf>,
-    components: &[Component],
-    filter: Option<&String>,
-    index: usize,
-) -> Option<PathBuf> {
-    match filter {
-        Some(filter) => {
-            if &(components[index].as_os_str().to_string_lossy().to_string())
-                == filter
-            {
-                path
-            } else {
-                None
-            }
-        }
-        None => path,
-    }
-}
-
-fn filter_path(
-    path: &Path,
-    host: Option<&String>,
-    owner: Option<&String>,
-    name: Option<&String>,
-) -> Option<PathBuf> {
-    let components: Vec<Component> = path.components().collect();
-
-    let mut repo = filter_path_by_component(
-        Some(path.to_path_buf()),
-        &components,
-        host,
-        0,
-    );
-
-    repo = filter_path_by_component(repo, &components, owner, 1);
-
-    filter_path_by_component(repo, &components, name, 2)
-}
 
 #[must_use]
 pub fn get_repo_paths(root_directory: &str) -> Vec<String> {
@@ -139,7 +99,6 @@ pub fn list_repos(
     no_owner: bool,
     path: bool,
 ) -> Vec<String> {
-    // FIXME
     let repo_paths = get_repo_paths(root_directory);
 
     let mut repos: Vec<Repo> = repo_paths
@@ -158,7 +117,9 @@ pub fn list_repos(
             .iter()
             .flat_map(|host| {
                 repos
-                    .iter().filter(|&repo| repo.host == *host).cloned()
+                    .iter()
+                    .filter(|&repo| repo.host == *host)
+                    .cloned()
                     .collect::<Vec<Repo>>()
             })
             .collect();
@@ -175,7 +136,9 @@ pub fn list_repos(
             .iter()
             .flat_map(|owner| {
                 repos
-                    .iter().filter(|&repo| repo.owner == *owner).cloned()
+                    .iter()
+                    .filter(|&repo| repo.owner == *owner)
+                    .cloned()
                     .collect::<Vec<Repo>>()
             })
             .collect();
@@ -192,7 +155,9 @@ pub fn list_repos(
             .iter()
             .flat_map(|name| {
                 repos
-                    .iter().filter(|&repo| repo.name == *name).cloned()
+                    .iter()
+                    .filter(|&repo| repo.name == *name)
+                    .cloned()
                     .collect::<Vec<Repo>>()
             })
             .collect();
@@ -221,9 +186,6 @@ pub fn list_repos(
 pub fn get_non_managed_repo_paths(
     root_directory: &str,
     include_hidden: bool,
-    host: Option<&String>,
-    owner: Option<&String>,
-    name: Option<&String>,
 ) -> Result<Vec<String>, SrcRepoError> {
     let home_dir = home_dir().ok_or(SrcRepoError::HomeDir)?;
 
@@ -231,36 +193,34 @@ pub fn get_non_managed_repo_paths(
         .into_iter()
         .filter_map(|path| {
             path.as_ref().map_or(None, |path| {
-                if path.file_type().is_dir()
-                    && path.path().join(".git").exists()
-                    && (!path.path().starts_with(root_directory)
-                        || path.depth() != 4)
-                    && (!path
-                        .path()
-                        .strip_prefix(&home_dir)
-                        .ok()?
-                        .to_string_lossy()
-                        .to_string()
-                        .starts_with('.')
-                        || include_hidden)
-                    && is_git_repo(path)
+                if !path.file_type().is_dir()
+                    || !path.path().join(".git").exists()
+                    || (path.depth() == 4
+                        && path.path().starts_with(root_directory))
+                    || (!include_hidden
+                        && path
+                            .path()
+                            .strip_prefix(&home_dir)
+                            .ok()?
+                            .to_string_lossy()
+                            .to_string()
+                            .starts_with('.'))
+                    || !is_git_repo(path)
                 {
-                    filter_path(
-                        Path::new(
-                            &Repo::from(&path.path().to_string_lossy())
-                                .ok()?
-                                .path(root_directory)
-                                .ok()?
-                                .strip_prefix(&format!("{root_directory}/"))?,
-                        ),
-                        host,
-                        owner,
-                        name,
-                    )
-                    .map(|_| path.path().to_string_lossy().to_string())
-                } else {
-                    None
+                    return None;
                 }
+
+                path.path().strip_prefix(root_directory).map_or(
+                    None,
+                    |dir_entry| {
+                        Some(
+                            PathBuf::from(root_directory)
+                                .join(dir_entry)
+                                .to_string_lossy()
+                                .to_string(),
+                        )
+                    },
+                )
             })
         })
         .collect())
@@ -279,36 +239,86 @@ pub fn list_non_managed_repos(
     no_owner: bool,
     path: bool,
 ) -> Result<Vec<String>, SrcRepoError> {
-    let mut repos: Vec<String> = get_non_managed_repo_paths(
-        root_directory,
-        include_hidden,
-        host,
-        owner,
-        name,
-    )?
-    .into_iter()
-    .filter_map(|repo| {
-        if path {
-            Some(repo)
-        } else if let Ok(repo) = Repo::from(&repo) {
-            Some(repo.display(no_host, no_owner))
-        } else {
-            None
-        }
-    })
-    .collect();
+    let repo_paths =
+        get_non_managed_repo_paths(root_directory, include_hidden)?;
 
-    if !path {
-        repos = repos
-            .into_iter()
-            .collect::<HashSet<_>>()
-            .into_iter()
+    let mut repos: Vec<Repo> = repo_paths
+        .iter()
+        .filter_map(|path| Repo::from(path).ok())
+        .collect();
+
+    if let Some(host) = host {
+        let hosts: Vec<&str> =
+            repos.iter().map(|repo| repo.host.as_str()).collect();
+
+        repos = fuzzy_search_threshold(host, &hosts, FUZZY_SEARCH_THRESHOLD)
+            .iter()
+            .map(|item| item.0)
+            .collect::<HashSet<&str>>()
+            .iter()
+            .flat_map(|host| {
+                repos
+                    .iter()
+                    .filter(|&repo| repo.host == *host)
+                    .cloned()
+                    .collect::<Vec<Repo>>()
+            })
             .collect();
     }
 
-    repos.sort_by(|a: &String, b: &String| sort_case_insensitive(a, b));
+    if let Some(owner) = owner {
+        let owners: Vec<&str> =
+            repos.iter().map(|repo| repo.owner.as_str()).collect();
 
-    Ok(repos)
+        repos = fuzzy_search_threshold(owner, &owners, FUZZY_SEARCH_THRESHOLD)
+            .iter()
+            .map(|item| item.0)
+            .collect::<HashSet<&str>>()
+            .iter()
+            .flat_map(|owner| {
+                repos
+                    .iter()
+                    .filter(|&repo| repo.owner == *owner)
+                    .cloned()
+                    .collect::<Vec<Repo>>()
+            })
+            .collect();
+    }
+
+    if let Some(name) = name {
+        let names: Vec<&str> =
+            repos.iter().map(|repo| repo.name.as_str()).collect();
+
+        repos = fuzzy_search_threshold(name, &names, FUZZY_SEARCH_THRESHOLD)
+            .iter()
+            .map(|item| item.0)
+            .collect::<HashSet<&str>>()
+            .iter()
+            .flat_map(|name| {
+                repos
+                    .iter()
+                    .filter(|&repo| repo.name == *name)
+                    .cloned()
+                    .collect::<Vec<Repo>>()
+            })
+            .collect();
+    }
+
+    let mut formatted_repos: Vec<String> = repos
+        .iter()
+        .filter_map(|repo| {
+            if path {
+                repo.path(root_directory).ok()
+            } else {
+                Some(repo.display(no_host, no_owner))
+            }
+        })
+        .collect();
+
+    formatted_repos
+        .sort_by(|a: &String, b: &String| sort_case_insensitive(a, b));
+
+    Ok(formatted_repos)
 }
 
 /// # Errors

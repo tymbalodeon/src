@@ -23,24 +23,31 @@ struct Cli {
 enum ListSubcommand {
     /// List managed and non-managed repositories
     All {
+        /// Include hidden directories when searching for non-managed repositories
         #[arg(long)]
         include_hidden: bool,
 
+        /// Filter to repositories with host partially matching this value
         #[arg(long)]
         host: Option<String>,
 
+        /// Filter to repositories with owner partially matching this value
         #[arg(long)]
         owner: Option<String>,
 
+        /// Filter to repositories with name partially matching this value
         #[arg(long)]
         name: Option<String>,
 
+        /// (Not compatible with `--path`) Don't display host values
         #[arg(long)]
         no_host: bool,
 
+        /// (Not compatible with `--path`) Don't display owner values
         #[arg(long)]
         no_owner: bool,
 
+        /// List as paths
         #[arg(long)]
         path: bool,
     },
@@ -53,24 +60,31 @@ enum ListSubcommand {
 
     /// List repositories in $HOME that are not managed by `src`
     NonManaged {
+        /// Include hidden directories when searching for non-managed repositories
         #[arg(long)]
         include_hidden: bool,
 
+        /// Filter to repositories with host partially matching this value
         #[arg(long)]
         host: Option<String>,
 
+        /// Filter to repositories with owner partially matching this value
         #[arg(long)]
         owner: Option<String>,
 
+        /// Filter to repositories with name partially matching this value
         #[arg(long)]
         name: Option<String>,
 
+        /// (Not compatible with `--path`) Don't display host values
         #[arg(long)]
         no_host: bool,
 
+        /// (Not compatible with `--path`) Don't display owner values
         #[arg(long)]
         no_owner: bool,
 
+        /// List as paths
         #[arg(long)]
         path: bool,
     },
@@ -106,21 +120,27 @@ enum Command {
         #[command(subcommand)]
         command: Option<ListSubcommand>,
 
+        /// Filter to repositories with host partially matching this value
         #[arg(long)]
         host: Option<String>,
 
+        /// Filter to repositories with owner partially matching this value
         #[arg(long)]
         owner: Option<String>,
 
+        /// Filter to repositories with name partially matching this value
         #[arg(long)]
         name: Option<String>,
 
+        /// (Not compatible with `--path`) Don't display host values
         #[arg(long)]
         no_host: bool,
 
+        /// (Not compatible with `--path`) Don't display owner values
         #[arg(long)]
         no_owner: bool,
 
+        /// List as paths
         #[arg(long)]
         path: bool,
 
