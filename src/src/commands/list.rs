@@ -8,13 +8,14 @@ use repo::list::{
 
 use crate::config::get_root_directory;
 
-pub fn hosts() -> Result<()> {
-    let mut hosts: Vec<String> = get_repos(&get_root_directory()?)?
-        .into_iter()
-        .map(|repo| repo.host)
-        .collect::<HashSet<_>>()
-        .into_iter()
-        .collect();
+pub fn hosts(all: bool, hidden: bool) -> Result<()> {
+    let mut hosts: Vec<String> =
+        get_repos(&get_root_directory()?, all, hidden)?
+            .into_iter()
+            .map(|repo| repo.host)
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();
 
     hosts.sort();
 
@@ -23,13 +24,14 @@ pub fn hosts() -> Result<()> {
     Ok(())
 }
 
-pub fn names() -> Result<()> {
-    let mut hosts: Vec<String> = get_repos(&get_root_directory()?)?
-        .into_iter()
-        .map(|repo| repo.name)
-        .collect::<HashSet<_>>()
-        .into_iter()
-        .collect();
+pub fn names(all: bool, hidden: bool) -> Result<()> {
+    let mut hosts: Vec<String> =
+        get_repos(&get_root_directory()?, all, hidden)?
+            .into_iter()
+            .map(|repo| repo.name)
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();
 
     hosts.sort();
 
@@ -38,13 +40,14 @@ pub fn names() -> Result<()> {
     Ok(())
 }
 
-pub fn owners() -> Result<()> {
-    let mut hosts: Vec<String> = get_repos(&get_root_directory()?)?
-        .into_iter()
-        .map(|repo| repo.owner)
-        .collect::<HashSet<_>>()
-        .into_iter()
-        .collect();
+pub fn owners(all: bool, hidden: bool) -> Result<()> {
+    let mut hosts: Vec<String> =
+        get_repos(&get_root_directory()?, all, hidden)?
+            .into_iter()
+            .map(|repo| repo.owner)
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();
 
     hosts.sort();
 
@@ -100,7 +103,7 @@ pub fn list(
 }
 
 pub fn list_non_managed(
-    include_hidden: bool,
+    hidden: bool,
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
@@ -111,7 +114,7 @@ pub fn list_non_managed(
 ) -> Result<()> {
     let repos = list_non_managed_repos(
         &get_root_directory()?,
-        include_hidden,
+        hidden,
         host,
         owner,
         name,
@@ -127,7 +130,7 @@ pub fn list_non_managed(
 }
 
 pub fn list_all(
-    include_hidden: bool,
+    hidden: bool,
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
@@ -138,7 +141,7 @@ pub fn list_all(
 ) -> Result<()> {
     let repos = list_all_repos(
         &get_root_directory()?,
-        include_hidden,
+        hidden,
         host,
         owner,
         name,

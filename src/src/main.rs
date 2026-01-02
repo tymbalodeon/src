@@ -21,11 +21,11 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum ListSubcommand {
-    /// List managed and non-managed repositories
+    /// List managed and unmanaged repositories
     All {
-        /// Include hidden directories when searching for non-managed repositories
+        /// Include hidden directories when searching for unmanaged repositories
         #[arg(long)]
-        include_hidden: bool,
+        hidden: bool,
 
         /// Filter to repositories with host partially matching this value
         #[arg(long)]
@@ -56,16 +56,32 @@ enum ListSubcommand {
     },
 
     /// Show all hosts
-    Hosts,
+    Hosts {
+        /// Show hosts for unmanaged as well as managed repositories
+        #[arg(long)]
+        all: bool,
+
+        /// Include hidden directories when searching for unmanaged repositories
+        #[arg(long)]
+        hidden: bool,
+    },
 
     /// Show all repository names
-    Names,
+    Names {
+        /// Show hosts for unmanaged as well as managed repositories
+        #[arg(long)]
+        all: bool,
+
+        /// Include hidden directories when searching for unmanaged repositories
+        #[arg(long)]
+        hidden: bool,
+    },
 
     /// List repositories in $HOME that are not managed by `src`
     NonManaged {
-        /// Include hidden directories when searching for non-managed repositories
+        /// Include hidden directories when searching for unmanaged repositories
         #[arg(long)]
-        include_hidden: bool,
+        hidden: bool,
 
         /// Filter to repositories with host partially matching this value
         #[arg(long)]
@@ -96,7 +112,15 @@ enum ListSubcommand {
     },
 
     /// Show all owners
-    Owners,
+    Owners {
+        /// Show hosts for unmanaged as well as managed repositories
+        #[arg(long)]
+        all: bool,
+
+        /// Include hidden directories when searching for unmanaged repositories
+        #[arg(long)]
+        hidden: bool,
+    },
 }
 
 #[derive(Subcommand)]
@@ -197,7 +221,7 @@ fn main() {
             ),
 
             Some(ListSubcommand::All {
-                include_hidden,
+                hidden,
                 host,
                 owner,
                 name,
@@ -206,7 +230,7 @@ fn main() {
                 path,
                 sort_by,
             }) => list_all(
-                *include_hidden,
+                *hidden,
                 host.as_ref(),
                 owner.as_ref(),
                 name.as_ref(),
@@ -216,11 +240,18 @@ fn main() {
                 sort_by.as_ref(),
             ),
 
-            Some(ListSubcommand::Hosts) => hosts(),
-            Some(ListSubcommand::Names) => names(),
+            Some(ListSubcommand::Hosts {
+                all,
+                hidden,
+            }) => hosts(*all, *hidden),
+
+            Some(ListSubcommand::Names {
+                all,
+                hidden,
+            }) => names(*all, *hidden),
 
             Some(ListSubcommand::NonManaged {
-                include_hidden,
+                hidden,
                 host,
                 owner,
                 name,
@@ -229,7 +260,7 @@ fn main() {
                 path,
                 sort_by,
             }) => list_non_managed(
-                *include_hidden,
+                *hidden,
                 host.as_ref(),
                 owner.as_ref(),
                 name.as_ref(),
@@ -239,7 +270,10 @@ fn main() {
                 sort_by.as_ref(),
             ),
 
-            Some(ListSubcommand::Owners) => owners(),
+            Some(ListSubcommand::Owners {
+                all,
+                hidden,
+            }) => owners(*all, *hidden),
         },
 
         Some(Command::New { path: _ }) => {

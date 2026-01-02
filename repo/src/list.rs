@@ -38,12 +38,18 @@ pub fn get_managed_repo_paths(root_directory: &str) -> Vec<String> {
 /// # Errors
 ///
 /// Will return `SrcRepoError` if it fails to parse a repo in `root_directory`
-pub fn get_repos(root_directory: &str) -> Result<Vec<Repo>, SrcRepoError> {
-    // TODO: add back filters?
-    get_managed_repo_paths(root_directory)
-        .iter()
-        .map(|repo| Repo::from(repo))
-        .collect()
+pub fn get_repos(
+    root_directory: &str,
+    all: bool,
+    hidden: bool,
+) -> Result<Vec<Repo>, SrcRepoError> {
+    let paths = if all {
+        get_repo_paths(None, hidden)?
+    } else {
+        get_managed_repo_paths(root_directory)
+    };
+
+    paths.iter().map(|repo| Repo::from(repo)).collect()
 }
 
 fn is_git_repo(path: &DirEntry) -> bool {
@@ -239,7 +245,7 @@ fn is_managed_path(path: &DirEntry, root_directory: Option<&str>) -> bool {
 /// Will return `SrcRepoError` if it fails to determine the `$HOME` directory
 pub fn get_repo_paths(
     root_directory: Option<&str>,
-    include_hidden: bool,
+    hidden: bool,
 ) -> Result<Vec<String>, SrcRepoError> {
     let home_dir = home_dir().ok_or(SrcRepoError::HomeDir)?;
 
@@ -250,7 +256,7 @@ pub fn get_repo_paths(
                 if !path.file_type().is_dir()
                     || !path.path().join(".git").exists()
                     || is_managed_path(path, root_directory)
-                    || (!include_hidden
+                    || (!hidden
                         && path
                             .path()
                             .strip_prefix(&home_dir)
@@ -289,7 +295,7 @@ pub fn get_repo_paths(
 /// Will return `SrcRepoError` if it fails to determine the `$HOME` directory
 pub fn list_non_managed_repos(
     root_directory: &str,
-    include_hidden: bool,
+    hidden: bool,
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
@@ -300,7 +306,7 @@ pub fn list_non_managed_repos(
 ) -> Result<Vec<String>, SrcRepoError> {
     Ok(list_repos(
         root_directory,
-        &get_repo_paths(Some(root_directory), include_hidden)?,
+        &get_repo_paths(Some(root_directory), hidden)?,
         host,
         owner,
         name,
@@ -317,7 +323,7 @@ pub fn list_non_managed_repos(
 /// Will return `SrcRepoError` if it fails to determine the `$HOME` directory
 pub fn list_all_repos(
     root_directory: &str,
-    include_hidden: bool,
+    hidden: bool,
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
@@ -328,7 +334,7 @@ pub fn list_all_repos(
 ) -> Result<Vec<String>, SrcRepoError> {
     Ok(list_repos(
         root_directory,
-        &get_repo_paths(None, include_hidden)?,
+        &get_repo_paths(None, hidden)?,
         host,
         owner,
         name,
