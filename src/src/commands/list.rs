@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use anyhow::Result;
 use repo::list::{
-    get_repos, list_all_repos, list_non_managed_repos, list_repos,
+    get_repos, list_all_repos, list_managed_repos, list_non_managed_repos,
 };
 
 use crate::config::get_root_directory;
@@ -74,7 +74,7 @@ pub fn list(
 
     print!(
         "{}",
-        list_repos(
+        list_managed_repos(
             &get_root_directory()?,
             host,
             owner,
