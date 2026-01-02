@@ -87,6 +87,12 @@ fn sort_case_insensitive(a: &str, b: &str) -> std::cmp::Ordering {
     a.to_lowercase().cmp(&b.to_lowercase())
 }
 
+pub enum SortBy {
+    Host,
+    Name,
+    Owner,
+}
+
 const FUZZY_SEARCH_THRESHOLD: f32 = 0.1;
 
 fn list_repos(
@@ -99,6 +105,7 @@ fn list_repos(
     no_owner: bool,
     path: bool,
     unique: bool,
+    sort_by: Option<SortBy>,
 ) -> Vec<String> {
     let mut repos: Vec<Repo> = repo_paths
         .iter()
@@ -162,6 +169,16 @@ fn list_repos(
             .collect();
     }
 
+    match &sort_by {
+        Some(sort_by) => match sort_by {
+            SortBy::Host => repos.sort_by(|a, b| a.host.cmp(&b.host)),
+            SortBy::Name => repos.sort_by(|a, b| a.name.cmp(&b.name)),
+            SortBy::Owner => repos.sort_by(|a, b| a.owner.cmp(&b.owner)),
+        },
+
+        None => (),
+    }
+
     let mut formatted_repos: Vec<String> = repos
         .iter()
         .filter_map(|repo| {
@@ -181,8 +198,10 @@ fn list_repos(
             .collect();
     }
 
-    formatted_repos
-        .sort_by(|a: &String, b: &String| sort_case_insensitive(a, b));
+    if sort_by.is_none() {
+        formatted_repos
+            .sort_by(|a: &String, b: &String| sort_case_insensitive(a, b));
+    }
 
     formatted_repos
 }
@@ -196,6 +215,7 @@ pub fn list_managed_repos(
     no_host: bool,
     no_owner: bool,
     path: bool,
+    sort_by: Option<SortBy>,
 ) -> Vec<String> {
     list_repos(
         root_directory,
@@ -207,6 +227,7 @@ pub fn list_managed_repos(
         no_owner,
         path,
         false,
+        sort_by,
     )
 }
 
@@ -278,6 +299,7 @@ pub fn list_non_managed_repos(
     no_host: bool,
     no_owner: bool,
     path: bool,
+    sort_by: Option<SortBy>,
 ) -> Result<Vec<String>, SrcRepoError> {
     Ok(list_repos(
         root_directory,
@@ -289,6 +311,7 @@ pub fn list_non_managed_repos(
         no_owner,
         path,
         true,
+        sort_by,
     ))
 }
 
@@ -304,6 +327,7 @@ pub fn list_all_repos(
     no_host: bool,
     no_owner: bool,
     path: bool,
+    sort_by: Option<SortBy>,
 ) -> Result<Vec<String>, SrcRepoError> {
     Ok(list_repos(
         root_directory,
@@ -315,5 +339,6 @@ pub fn list_all_repos(
         no_owner,
         path,
         true,
+        sort_by,
     ))
 }

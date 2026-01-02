@@ -8,7 +8,7 @@ use commands::config::config;
 use commands::list::list;
 
 use crate::commands::list::{
-    hosts, list_all, list_non_managed, names, owners, SortByComponent,
+    hosts, list_all, list_non_managed, names, owners, SortByOption,
 };
 
 /// Manage repositories in an organized way
@@ -50,6 +50,9 @@ enum ListSubcommand {
         /// List as paths
         #[arg(long)]
         path: bool,
+
+        #[arg(long)]
+        sort_by: Option<SortByOption>,
     },
 
     /// Show all hosts
@@ -87,6 +90,9 @@ enum ListSubcommand {
         /// List as paths
         #[arg(long)]
         path: bool,
+
+        #[arg(long)]
+        sort_by: Option<SortByOption>,
     },
 
     /// Show all owners
@@ -145,7 +151,7 @@ enum Command {
         path: bool,
 
         #[arg(long)]
-        sort_by: Option<SortByComponent>,
+        sort_by: Option<SortByOption>,
     },
 
     /// Create or initialize a new repository
@@ -198,6 +204,7 @@ fn main() {
                 no_host,
                 no_owner,
                 path,
+                sort_by,
             }) => list_all(
                 *include_hidden,
                 host.as_ref(),
@@ -206,6 +213,7 @@ fn main() {
                 *no_host,
                 *no_owner,
                 *path,
+                sort_by.as_ref(),
             ),
 
             Some(ListSubcommand::Hosts) => hosts(),
@@ -219,6 +227,7 @@ fn main() {
                 no_host,
                 no_owner,
                 path,
+                sort_by,
             }) => list_non_managed(
                 *include_hidden,
                 host.as_ref(),
@@ -227,6 +236,7 @@ fn main() {
                 *no_host,
                 *no_owner,
                 *path,
+                sort_by.as_ref(),
             ),
 
             Some(ListSubcommand::Owners) => owners(),

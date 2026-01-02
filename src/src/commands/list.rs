@@ -3,6 +3,7 @@ use std::collections::HashSet;
 use anyhow::Result;
 use repo::list::{
     get_repos, list_all_repos, list_managed_repos, list_non_managed_repos,
+    SortBy,
 };
 
 use crate::config::get_root_directory;
@@ -53,10 +54,22 @@ pub fn owners() -> Result<()> {
 }
 
 #[derive(clap::ValueEnum, Clone)]
-pub enum SortByComponent {
+pub enum SortByOption {
     Host,
     Name,
     Owner,
+}
+
+const fn get_sort_by_value(sort_by: Option<&SortByOption>) -> Option<SortBy> {
+    match sort_by {
+        Some(sort_by) => match sort_by {
+            SortByOption::Host => Some(SortBy::Host),
+            SortByOption::Name => Some(SortBy::Name),
+            SortByOption::Owner => Some(SortBy::Owner),
+        },
+
+        None => None,
+    }
 }
 
 pub fn list(
@@ -66,12 +79,8 @@ pub fn list(
     no_host: bool,
     no_owner: bool,
     path: bool,
-    sort_by: Option<&SortByComponent>,
+    sort_by: Option<&SortByOption>,
 ) -> Result<()> {
-    if sort_by.is_some() {
-        println!("Implement me!");
-    }
-
     print!(
         "{}",
         list_managed_repos(
@@ -82,6 +91,7 @@ pub fn list(
             no_host,
             no_owner,
             path,
+            get_sort_by_value(sort_by)
         )
         .join("\n")
     );
@@ -97,6 +107,7 @@ pub fn list_non_managed(
     no_host: bool,
     no_owner: bool,
     path: bool,
+    sort_by: Option<&SortByOption>,
 ) -> Result<()> {
     let repos = list_non_managed_repos(
         &get_root_directory()?,
@@ -107,6 +118,7 @@ pub fn list_non_managed(
         no_host,
         no_owner,
         path,
+        get_sort_by_value(sort_by),
     )?;
 
     print!("{}", repos.join("\n"));
@@ -122,6 +134,7 @@ pub fn list_all(
     no_host: bool,
     no_owner: bool,
     path: bool,
+    sort_by: Option<&SortByOption>,
 ) -> Result<()> {
     let repos = list_all_repos(
         &get_root_directory()?,
@@ -132,6 +145,7 @@ pub fn list_all(
         no_host,
         no_owner,
         path,
+        get_sort_by_value(sort_by),
     )?;
 
     print!("{}", repos.join("\n"));
