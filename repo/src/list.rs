@@ -3,7 +3,7 @@ use std::path::{Component, Path, PathBuf};
 use std::process::Command;
 
 use dirs::home_dir;
-use rust_fuzzy_search::{fuzzy_search, fuzzy_search_threshold};
+use rust_fuzzy_search::fuzzy_search_threshold;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::error::SrcRepoError;
@@ -50,12 +50,7 @@ fn filter_path(
 }
 
 #[must_use]
-pub fn get_repo_paths(
-    root_directory: &str,
-    host: Option<&String>,
-    owner: Option<&String>,
-    name: Option<&String>,
-) -> Vec<String> {
+pub fn get_repo_paths(root_directory: &str) -> Vec<String> {
     WalkDir::new(root_directory)
         .into_iter()
         .filter_map(|path| {
@@ -67,12 +62,12 @@ pub fn get_repo_paths(
                 path.path().strip_prefix(root_directory).map_or(
                     None,
                     |dir_entry| {
-                        filter_path(dir_entry, host, owner, name).map(|path| {
+                        Some(
                             PathBuf::from(root_directory)
-                                .join(path)
+                                .join(dir_entry)
                                 .to_string_lossy()
-                                .to_string()
-                        })
+                                .to_string(),
+                        )
                     },
                 )
             })
@@ -85,11 +80,12 @@ pub fn get_repo_paths(
 /// Will return `SrcRepoError` if it fails to parse a repo in `root_directory`
 pub fn get_repos(
     root_directory: &str,
-    host: Option<&String>,
-    owner: Option<&String>,
-    name: Option<&String>,
+    // host: Option<&String>,
+    // owner: Option<&String>,
+    // name: Option<&String>,
 ) -> Result<Vec<Repo>, SrcRepoError> {
-    get_repo_paths(root_directory, host, owner, name)
+    // TODO: add back filters?
+    get_repo_paths(root_directory)
         .iter()
         .map(|repo| Repo::from(repo))
         .collect()
@@ -142,69 +138,87 @@ pub fn list_repos(
     path: bool,
 ) -> Vec<String> {
     // FIXME
-    // TODO: fix filter in repo_paths as well!
-    let repo_paths = get_repo_paths(root_directory, host, owner, name);
+    let repo_paths = get_repo_paths(root_directory);
 
     // TODO: only if a filter is passed
 
-    let repos: Vec<Repo> = repo_paths
+    let mut repos: Vec<Repo> = repo_paths
         .iter()
-        .filter_map(|path| {
-            if let Ok(repo) = Repo::from(path) {
-                Some(repo)
-            } else {
-                None
-            }
-        })
+        .filter_map(|path| Repo::from(path).ok())
         .collect();
 
-    // let hosts: Vec<&str> =
-    //     repos.iter().map(|repo| repo.host.as_str()).collect();
+    if let Some(host) = host {
+        let hosts: Vec<&str> =
+            repos.iter().map(|repo| repo.host.as_str()).collect();
 
-    let names: Vec<&str> =
-        repos.iter().map(|repo| repo.name.as_str()).collect();
-
-    let matching_names: HashSet<&str> =
-        fuzzy_search_threshold("gh", &names, 0.1)
+        repos = fuzzy_search_threshold(host, &hosts, 0.1)
             .iter()
             .map(|item| item.0)
-            .collect::<HashSet<&str>>();
+            .collect::<HashSet<&str>>()
+            .iter()
+            .flat_map(|host| {
+                repos
+                    .clone()
+                    .into_iter()
+                    .filter(|repo| repo.host == *host)
+                    .collect::<Vec<Repo>>()
+            })
+            .collect();
+    }
 
-    let matching_names: Vec<Repo> = matching_names
+    if let Some(owner) = owner {
+        let owners: Vec<&str> =
+            repos.iter().map(|repo| repo.owner.as_str()).collect();
+
+        repos = fuzzy_search_threshold(owner, &owners, 0.1)
+            .iter()
+            .map(|item| item.0)
+            .collect::<HashSet<&str>>()
+            .iter()
+            .flat_map(|owner| {
+                repos
+                    .clone()
+                    .into_iter()
+                    .filter(|repo| repo.owner == *owner)
+                    .collect::<Vec<Repo>>()
+            })
+            .collect();
+    }
+
+    if let Some(name) = name {
+        let names: Vec<&str> =
+            repos.iter().map(|repo| repo.name.as_str()).collect();
+
+        repos = fuzzy_search_threshold(name, &names, 0.1)
+            .iter()
+            .map(|item| item.0)
+            .collect::<HashSet<&str>>()
+            .iter()
+            .flat_map(|name| {
+                repos
+                    .clone()
+                    .into_iter()
+                    .filter(|repo| repo.name == *name)
+                    .collect::<Vec<Repo>>()
+            })
+            .collect();
+    }
+
+    let mut formatted_repos: Vec<String> = repos
         .iter()
-        .flat_map(|name| {
-            repos
-                .clone()
-                .into_iter()
-                .filter(|repo| repo.name == *name)
-                .collect::<Vec<Repo>>()
-        })
-        .collect();
-
-    dbg!(matching_names);
-
-    // let hosts: Vec<&str> =
-    //     repos.iter().map(|repo| repo.host.as_str()).collect();
-
-    // let owners: Vec<&str> =
-    //     repos.iter().map(|repo| repo.owner.as_str()).collect();
-
-    let mut repos: Vec<String> = repo_paths
-        .into_iter()
         .filter_map(|repo| {
             if path {
-                Some(repo)
-            } else if let Ok(repo) = Repo::from(&repo) {
-                Some(repo.display(no_host, no_owner))
+                repo.path(root_directory).ok()
             } else {
-                None
+                Some(repo.display(no_host, no_owner))
             }
         })
         .collect();
 
-    repos.sort_by(|a: &String, b: &String| sort_case_insensitive(a, b));
+    formatted_repos
+        .sort_by(|a: &String, b: &String| sort_case_insensitive(a, b));
 
-    repos
+    formatted_repos
 }
 
 /// # Errors
