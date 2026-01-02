@@ -10,7 +10,7 @@ use crate::error::SrcRepoError;
 use crate::repo::Repo;
 
 #[must_use]
-pub fn get_repo_paths(root_directory: &str) -> Vec<String> {
+pub fn get_managed_repo_paths(root_directory: &str) -> Vec<String> {
     WalkDir::new(root_directory)
         .into_iter()
         .filter_map(|path| {
@@ -38,14 +38,9 @@ pub fn get_repo_paths(root_directory: &str) -> Vec<String> {
 /// # Errors
 ///
 /// Will return `SrcRepoError` if it fails to parse a repo in `root_directory`
-pub fn get_repos(
-    root_directory: &str,
-    // host: Option<&String>,
-    // owner: Option<&String>,
-    // name: Option<&String>,
-) -> Result<Vec<Repo>, SrcRepoError> {
+pub fn get_repos(root_directory: &str) -> Result<Vec<Repo>, SrcRepoError> {
     // TODO: add back filters?
-    get_repo_paths(root_directory)
+    get_managed_repo_paths(root_directory)
         .iter()
         .map(|repo| Repo::from(repo))
         .collect()
@@ -105,7 +100,7 @@ fn list_repos(
     no_owner: bool,
     path: bool,
     unique: bool,
-    sort_by: Option<SortBy>,
+    sort_by: Option<&SortBy>,
 ) -> Vec<String> {
     let mut repos: Vec<Repo> = repo_paths
         .iter()
@@ -169,21 +164,23 @@ fn list_repos(
             .collect();
     }
 
-    match &sort_by {
-        Some(sort_by) => match sort_by {
+    if let Some(sort_by) = &sort_by {
+        match sort_by {
             SortBy::Host => repos.sort_by(|a, b| a.host.cmp(&b.host)),
             SortBy::Name => repos.sort_by(|a, b| a.name.cmp(&b.name)),
             SortBy::Owner => repos.sort_by(|a, b| a.owner.cmp(&b.owner)),
-        },
-
-        None => (),
+        }
     }
 
     let mut formatted_repos: Vec<String> = repos
         .iter()
         .filter_map(|repo| {
             if path {
-                repo.path(root_directory).ok()
+                if let Some(path) = &repo.local_source_path {
+                    Some(path.to_string_lossy().to_string())
+                } else {
+                    repo.managed_path(root_directory).ok()
+                }
             } else {
                 Some(repo.display(no_host, no_owner))
             }
@@ -215,11 +212,11 @@ pub fn list_managed_repos(
     no_host: bool,
     no_owner: bool,
     path: bool,
-    sort_by: Option<SortBy>,
+    sort_by: Option<&SortBy>,
 ) -> Vec<String> {
     list_repos(
         root_directory,
-        &get_repo_paths(root_directory),
+        &get_managed_repo_paths(root_directory),
         host,
         owner,
         name,
@@ -240,7 +237,7 @@ fn is_managed_path(path: &DirEntry, root_directory: Option<&str>) -> bool {
 /// # Errors
 ///
 /// Will return `SrcRepoError` if it fails to determine the `$HOME` directory
-pub fn get_non_managed_repo_paths(
+pub fn get_repo_paths(
     root_directory: Option<&str>,
     include_hidden: bool,
 ) -> Result<Vec<String>, SrcRepoError> {
@@ -299,11 +296,11 @@ pub fn list_non_managed_repos(
     no_host: bool,
     no_owner: bool,
     path: bool,
-    sort_by: Option<SortBy>,
+    sort_by: Option<&SortBy>,
 ) -> Result<Vec<String>, SrcRepoError> {
     Ok(list_repos(
         root_directory,
-        &get_non_managed_repo_paths(Some(root_directory), include_hidden)?,
+        &get_repo_paths(Some(root_directory), include_hidden)?,
         host,
         owner,
         name,
@@ -327,11 +324,11 @@ pub fn list_all_repos(
     no_host: bool,
     no_owner: bool,
     path: bool,
-    sort_by: Option<SortBy>,
+    sort_by: Option<&SortBy>,
 ) -> Result<Vec<String>, SrcRepoError> {
     Ok(list_repos(
         root_directory,
-        &get_non_managed_repo_paths(None, include_hidden)?,
+        &get_repo_paths(None, include_hidden)?,
         host,
         owner,
         name,

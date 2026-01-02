@@ -91,7 +91,7 @@ pub fn list(
             no_host,
             no_owner,
             path,
-            get_sort_by_value(sort_by)
+            get_sort_by_value(sort_by).as_ref()
         )
         .join("\n")
     );
@@ -118,7 +118,7 @@ pub fn list_non_managed(
         no_host,
         no_owner,
         path,
-        get_sort_by_value(sort_by),
+        get_sort_by_value(sort_by).as_ref(),
     )?;
 
     print!("{}", repos.join("\n"));
@@ -145,7 +145,7 @@ pub fn list_all(
         no_host,
         no_owner,
         path,
-        get_sort_by_value(sort_by),
+        get_sort_by_value(sort_by).as_ref(),
     )?;
 
     print!("{}", repos.join("\n"));

@@ -13,16 +13,37 @@ use crate::error::SrcRepoError;
 #[derivative(Eq, PartialEq, Hash)]
 pub struct Repo {
     pub host: String,
-    pub name: String,
     pub owner: String,
+    pub name: String,
 
     #[derivative(PartialEq = "ignore")]
-    pub path: Option<PathBuf>,
+    pub local_source_path: Option<PathBuf>,
 
     #[derivative(PartialEq = "ignore")]
     pub url: String,
 }
 
+fn parse_url(
+    url: &str,
+    local_source_path: Option<&PathBuf>,
+) -> Result<Repo, SrcRepoError> {
+    let git_url = GitUrl::parse(url)?;
+    let repo_provider = git_url.provider_info::<GenericProvider>()?;
+
+    let url = local_source_path.as_ref().map_or_else(
+        || Ok::<String, SrcRepoError>(url.to_owned()),
+        |path| Ok(path.to_str().ok_or(SrcRepoError::GitUrl)?.to_string()),
+    )?;
+
+    Ok(Repo {
+        host: git_url.host().ok_or(SrcRepoError::GitUrl)?.to_string(),
+        owner: repo_provider.owner().to_string(),
+        name: repo_provider.repo().to_string(),
+        local_source_path: local_source_path.cloned(),
+        url,
+        // managed_path: local_source_path.cloned(),
+    })
+}
 impl Repo {
     #[must_use]
     pub fn display(&self, no_host: bool, no_owner: bool) -> String {
@@ -42,10 +63,10 @@ impl Repo {
     /// Will return `SrcRepoError` if `repo` is a path but the path doesn't
     /// exist or it cannot determine a remote git url at that path.
     pub fn from(repo: &str) -> Result<Self, SrcRepoError> {
-        let local_repo_path = get_local_repo_path(repo);
+        let local_source_path = get_local_source_path(repo);
 
         let url: Result<String, SrcRepoError> =
-            local_repo_path.as_ref().map_or_else(
+            local_source_path.as_ref().map_or_else(
                 || Ok(repo.to_string()),
                 |path| {
                     Ok(Repository::open(path)?
@@ -56,22 +77,22 @@ impl Repo {
                 },
             );
 
-        parse_url(&url?, local_repo_path.as_ref())
+        parse_url(&url?, local_source_path.as_ref())
     }
 
     #[must_use]
     pub fn new(
         host: &str,
-        name: &str,
         owner: &str,
-        path: Option<PathBuf>,
+        name: &str,
+        local_source_path: Option<PathBuf>,
         url: &str,
     ) -> Self {
         Self {
             host: host.to_string(),
             name: name.to_string(),
             owner: owner.to_string(),
-            path,
+            local_source_path,
             url: url.to_string(),
         }
     }
@@ -79,7 +100,10 @@ impl Repo {
     /// # Errors
     ///
     /// Will return `SrcRepoError` if `Repo` data contains invalid unicode.
-    pub fn path(&self, root_directory: &str) -> Result<String, SrcRepoError> {
+    pub fn managed_path(
+        &self,
+        root_directory: &str,
+    ) -> Result<String, SrcRepoError> {
         Ok(Path::new(root_directory)
             .join(&self.host)
             .join(&self.owner)
@@ -97,7 +121,7 @@ impl fmt::Display for Repo {
 }
 
 #[must_use]
-pub fn get_local_repo_path(repo: &str) -> Option<PathBuf> {
+pub fn get_local_source_path(repo: &str) -> Option<PathBuf> {
     let path = tilde(repo).to_string();
     let path = Path::new(&path);
 
@@ -106,33 +130,6 @@ pub fn get_local_repo_path(repo: &str) -> Option<PathBuf> {
     } else {
         None
     }
-}
-
-/// # Errors
-///
-/// Will return `SrcRepoError` if it cannot parse `url` or `local_repo_path` is
-/// invalid.
-pub fn parse_url(
-    url: &str,
-    local_repo_path: Option<&PathBuf>,
-) -> Result<Repo, SrcRepoError> {
-    let git_url = GitUrl::parse(url)?;
-    let repo_provider = git_url.provider_info::<GenericProvider>()?;
-
-    let url = local_repo_path.as_ref().map_or_else(
-        || Ok::<String, SrcRepoError>(url.to_owned()),
-        |path| Ok(path.to_str().ok_or(SrcRepoError::GitUrl)?.to_string()),
-    )?;
-
-    let local_repo_path = local_repo_path.map(std::borrow::ToOwned::to_owned);
-
-    Ok(Repo::new(
-        git_url.host().ok_or(SrcRepoError::GitUrl)?,
-        repo_provider.repo(),
-        repo_provider.owner(),
-        local_repo_path,
-        &url,
-    ))
 }
 
 #[cfg(test)]

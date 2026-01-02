@@ -1,5 +1,5 @@
 use anyhow::Result;
-use repo::list::get_repo_paths;
+use repo::list::get_managed_repo_paths;
 use repo::repo::Repo;
 
 use crate::config::get_root_directory;
@@ -25,7 +25,7 @@ fn filter_unique_repos(repos: &[Repo]) -> Vec<Repo> {
     let mut repos_to_add: Vec<Repo> = repos
         .iter()
         .filter_map(|repo| {
-            if repo.path.is_some() {
+            if repo.local_source_path.is_some() {
                 Some(repo.clone())
             } else {
                 None
@@ -36,7 +36,8 @@ fn filter_unique_repos(repos: &[Repo]) -> Vec<Repo> {
     let remote_repos: Vec<Repo> = repos
         .iter()
         .filter_map(|repo| {
-            if repo.path.is_none() && !repos_to_add.contains(repo) {
+            if repo.local_source_path.is_none() && !repos_to_add.contains(repo)
+            {
                 Some(repo.clone())
             } else {
                 None
@@ -51,11 +52,11 @@ fn filter_unique_repos(repos: &[Repo]) -> Vec<Repo> {
 
 pub fn add(repos: &[String], force: bool) -> Result<()> {
     let root_directory = get_root_directory()?;
-    let repo_paths = get_repo_paths(&root_directory);
+    let repo_paths = get_managed_repo_paths(&root_directory);
 
     for repo in filter_unique_repos(&parse_repos(repos)) {
-        if let Ok(path) = repo.path(&root_directory) {
-            let repo = repo.path.map_or(Some(repo.url), |path| {
+        if let Ok(path) = repo.managed_path(&root_directory) {
+            let repo = repo.local_source_path.map_or(Some(repo.url), |path| {
                 // TODO: print error if this fails
                 path.canonicalize().map_or(None, |path| {
                     Some(path.to_string_lossy().to_string())
@@ -63,7 +64,7 @@ pub fn add(repos: &[String], force: bool) -> Result<()> {
             });
 
             if let Some(repo) = repo {
-                let repo = Repo::from(&repo)?.path(&root_directory)?;
+                let repo = Repo::from(&repo)?.managed_path(&root_directory)?;
 
                 if force || !repo_paths.contains(&repo) {
                     println!("Adding {repo} to {path}");
@@ -85,8 +86,8 @@ mod tests {
     fn it_prefers_local_paths_to_remote_urls() {
         let local_repo = Repo::new(
             "github.com",
-            "src",
             "tymbalodeon",
+            "src",
             Some(PathBuf::from(
                 "/home/benrosen/src/github.com/tymbalodeon/src",
             )),
@@ -97,8 +98,8 @@ mod tests {
             local_repo.clone(),
             Repo::new(
                 "github.com",
-                "src",
                 "tymbalodeon",
+                "src",
                 None,
                 "git@github.com:tymbalodeon/src.git",
             ),
@@ -107,8 +108,8 @@ mod tests {
         let repos_with_local_second = vec![
             Repo::new(
                 "github.com",
-                "src",
                 "tymbalodeon",
+                "src",
                 None,
                 "git@github.com:tymbalodeon/src.git",
             ),
