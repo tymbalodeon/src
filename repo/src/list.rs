@@ -151,57 +151,51 @@ pub fn list_repos(
         let hosts: Vec<&str> =
             repos.iter().map(|repo| repo.host.as_str()).collect();
 
-        repos = fuzzy_search_threshold(&host, &hosts, FUZZY_SEARCH_THRESHOLD)
+        repos = fuzzy_search_threshold(host, &hosts, FUZZY_SEARCH_THRESHOLD)
             .iter()
             .map(|item| item.0)
             .collect::<HashSet<&str>>()
             .iter()
             .flat_map(|host| {
                 repos
-                    .iter()
-                    .cloned()
-                    .filter(|repo| repo.host == *host)
+                    .iter().filter(|&repo| repo.host == *host).cloned()
                     .collect::<Vec<Repo>>()
             })
-            .collect()
+            .collect();
     }
 
     if let Some(owner) = owner {
         let owners: Vec<&str> =
             repos.iter().map(|repo| repo.owner.as_str()).collect();
 
-        repos = fuzzy_search_threshold(&owner, &owners, FUZZY_SEARCH_THRESHOLD)
+        repos = fuzzy_search_threshold(owner, &owners, FUZZY_SEARCH_THRESHOLD)
             .iter()
             .map(|item| item.0)
             .collect::<HashSet<&str>>()
             .iter()
             .flat_map(|owner| {
                 repos
-                    .iter()
-                    .cloned()
-                    .filter(|repo| repo.owner == *owner)
+                    .iter().filter(|&repo| repo.owner == *owner).cloned()
                     .collect::<Vec<Repo>>()
             })
-            .collect()
+            .collect();
     }
 
     if let Some(name) = name {
         let names: Vec<&str> =
             repos.iter().map(|repo| repo.name.as_str()).collect();
 
-        repos = fuzzy_search_threshold(&name, &names, FUZZY_SEARCH_THRESHOLD)
+        repos = fuzzy_search_threshold(name, &names, FUZZY_SEARCH_THRESHOLD)
             .iter()
             .map(|item| item.0)
             .collect::<HashSet<&str>>()
             .iter()
             .flat_map(|name| {
                 repos
-                    .iter()
-                    .cloned()
-                    .filter(|repo| repo.name == *name)
+                    .iter().filter(|&repo| repo.name == *name).cloned()
                     .collect::<Vec<Repo>>()
             })
-            .collect()
+            .collect();
     }
 
     let mut formatted_repos: Vec<String> = repos
