@@ -1,4 +1,5 @@
 use std::path::PathBuf;
+use std::process::Command;
 
 use anyhow::{Context, Result};
 use dirs::{config_dir, home_dir};
@@ -11,12 +12,37 @@ use serde::{Deserialize, Serialize};
 #[derive(Deserialize, Serialize)]
 pub struct Config {
     pub root_directory: Option<PathBuf>,
+    pub username: Option<String>,
+}
+
+fn get_git_config_user(host: &str) -> Option<String> {
+    if let Ok(result) = Command::new("git")
+        .args(["config", &format!("{host}.user")])
+        .output()
+    {
+        Some(
+            String::from_utf8_lossy(&result.stdout)
+                .to_string()
+                .trim_end()
+                .to_string(),
+        )
+    } else {
+        None
+    }
 }
 
 impl Default for Config {
     fn default() -> Self {
+        let mut username = get_git_config_user("github");
+
+        username = username.map_or_else(
+            || get_git_config_user("gitlab"),
+            |username| Some(username),
+        );
+
         Self {
             root_directory: home_dir().map(|home_dir| home_dir.join("src")),
+            username,
         }
     }
 }
