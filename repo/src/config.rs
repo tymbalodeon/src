@@ -46,35 +46,46 @@ impl Default for Config {
     }
 }
 
+/// # Errors
+///
+/// Will return `SrcRepoError` if it fails to parse the config file path
 pub fn get_config_path() -> Result<String, SrcRepoError> {
     Ok(config_dir()
-        .unwrap()
+        .ok_or(SrcRepoError::Config)?
         .join("src/config.toml")
         .to_str()
-        .unwrap()
+        .ok_or(SrcRepoError::Config)?
         .to_string())
 }
 
+/// # Errors
+///
+/// Will return `SrcRepoError` if it fails to merge configuration from the file
+/// and the environment
 pub fn get_config() -> Result<Config, SrcRepoError> {
-    if let Ok(config) = Figment::from(Serialized::defaults(Config::default()))
+    Figment::from(Serialized::defaults(Config::default()))
         .merge(Toml::file(get_config_path()?))
         .merge(Env::prefixed("SRC_"))
         .extract()
-    {
-        Ok(config)
-    } else {
-        Err(SrcRepoError::Config)
-    }
+        .map_or(Err(SrcRepoError::Config), Ok)
 }
 
+/// # Errors
+///
+/// Will return `SrcRepoError` if it fails to merge configuration from the file
+/// and the environment
 pub fn get_root_directory() -> Result<String, SrcRepoError> {
     Ok(get_config()?
         .root_directory
-        .unwrap()
+        .ok_or(SrcRepoError::Config)?
         .to_string_lossy()
         .to_string())
 }
 
+/// # Errors
+///
+/// Will return `SrcRepoError` if it fails to merge configuration from the file
+/// and the environment
 pub fn get_username() -> Result<String, SrcRepoError> {
-    Ok(get_config()?.username.unwrap())
+    get_config()?.username.ok_or(SrcRepoError::Config)
 }

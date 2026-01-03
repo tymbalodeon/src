@@ -85,6 +85,7 @@ pub fn filter_git_repos(
         .collect())
 }
 
+#[must_use]
 pub fn sort_case_insensitive(a: &str, b: &str) -> std::cmp::Ordering {
     a.to_lowercase().cmp(&b.to_lowercase())
 }
@@ -98,7 +99,7 @@ pub enum SortBy {
 const FUZZY_SEARCH_THRESHOLD: f32 = 0.1;
 
 fn list_repos(
-    config: Config,
+    config: &Config,
     repo_paths: &[String],
     host: Option<&String>,
     owner: Option<&String>,
@@ -224,9 +225,12 @@ fn list_repos(
     formatted_repos
 }
 
-#[must_use]
+/// # Errors
+///
+/// Will return `SrcRepoError` if it fails to merge configuration from the file
+/// and the environment
 pub fn list_managed_repos(
-    config: Config,
+    config: &Config,
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
@@ -311,7 +315,7 @@ pub fn get_repo_paths(
 ///
 /// Will return `SrcRepoError` if it fails to determine the `$HOME` directory
 pub fn list_non_managed_repos(
-    config: Config,
+    config: &Config,
     hidden: bool,
     host: Option<&String>,
     owner: Option<&String>,
@@ -341,7 +345,7 @@ pub fn list_non_managed_repos(
 ///
 /// Will return `SrcRepoError` if it fails to determine the `$HOME` directory
 pub fn list_all_repos(
-    config: Config,
+    config: &Config,
     hidden: bool,
     host: Option<&String>,
     owner: Option<&String>,

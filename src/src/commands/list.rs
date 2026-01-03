@@ -89,7 +89,7 @@ pub fn list(
     print!(
         "{}",
         list_managed_repos(
-            get_config()?,
+            &get_config()?,
             host,
             owner,
             name,
@@ -117,7 +117,7 @@ pub fn list_non_managed(
     sort_by: Option<&SortByOption>,
 ) -> Result<()> {
     let repos = list_non_managed_repos(
-        get_config()?,
+        &get_config()?,
         hidden,
         host,
         owner,
@@ -146,7 +146,7 @@ pub fn list_all(
     sort_by: Option<&SortByOption>,
 ) -> Result<()> {
     let repos = list_all_repos(
-        get_config()?,
+        &get_config()?,
         hidden,
         host,
         owner,
