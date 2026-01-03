@@ -5,7 +5,7 @@ use repo::{
     config::{get_config, get_root_directory},
     list::{
         get_repos, list_all_repos, list_managed_repos, list_non_managed_repos,
-        SortBy,
+        sort_case_insensitive, SortBy,
     },
 };
 
@@ -18,7 +18,7 @@ pub fn hosts(all: bool, hidden: bool) -> Result<()> {
             .into_iter()
             .collect();
 
-    hosts.sort();
+    hosts.sort_by(|a, b| sort_case_insensitive(a, b));
 
     println!("{}", hosts.join("\n"));
 
@@ -26,7 +26,7 @@ pub fn hosts(all: bool, hidden: bool) -> Result<()> {
 }
 
 pub fn names(all: bool, hidden: bool) -> Result<()> {
-    let mut hosts: Vec<String> =
+    let mut names: Vec<String> =
         get_repos(&get_root_directory()?, all, hidden)?
             .into_iter()
             .map(|repo| repo.name)
@@ -34,15 +34,15 @@ pub fn names(all: bool, hidden: bool) -> Result<()> {
             .into_iter()
             .collect();
 
-    hosts.sort();
+    names.sort_by(|a, b| sort_case_insensitive(a, b));
 
-    println!("{}", hosts.join("\n"));
+    println!("{}", names.join("\n"));
 
     Ok(())
 }
 
 pub fn owners(all: bool, hidden: bool) -> Result<()> {
-    let mut hosts: Vec<String> =
+    let mut owners: Vec<String> =
         get_repos(&get_root_directory()?, all, hidden)?
             .into_iter()
             .map(|repo| repo.owner)
@@ -50,9 +50,9 @@ pub fn owners(all: bool, hidden: bool) -> Result<()> {
             .into_iter()
             .collect();
 
-    hosts.sort();
+    owners.sort_by(|a, b| sort_case_insensitive(a, b));
 
-    println!("{}", hosts.join("\n"));
+    println!("{}", owners.join("\n"));
 
     Ok(())
 }

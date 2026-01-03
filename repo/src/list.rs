@@ -85,7 +85,7 @@ pub fn filter_git_repos(
         .collect())
 }
 
-fn sort_case_insensitive(a: &str, b: &str) -> std::cmp::Ordering {
+pub fn sort_case_insensitive(a: &str, b: &str) -> std::cmp::Ordering {
     a.to_lowercase().cmp(&b.to_lowercase())
 }
 
@@ -172,20 +172,19 @@ fn list_repos(
         let names: Vec<&str> =
             repos.iter().map(|repo| repo.name.as_str()).collect();
 
-        repos =
-            fuzzy_search_threshold(name, &names, FUZZY_SEARCH_THRESHOLD)
-                .iter()
-                .map(|item| item.0)
-                .collect::<HashSet<&str>>()
-                .iter()
-                .flat_map(|name| {
-                    repos
-                        .iter()
-                        .filter(|&repo| repo.name == *name)
-                        .cloned()
-                        .collect::<Vec<Repo>>()
-                })
-                .collect();
+        repos = fuzzy_search_threshold(name, &names, FUZZY_SEARCH_THRESHOLD)
+            .iter()
+            .map(|item| item.0)
+            .collect::<HashSet<&str>>()
+            .iter()
+            .flat_map(|name| {
+                repos
+                    .iter()
+                    .filter(|&repo| repo.name == *name)
+                    .cloned()
+                    .collect::<Vec<Repo>>()
+            })
+            .collect();
     }
 
     if let Some(sort_by) = &sort_by {
@@ -219,8 +218,7 @@ fn list_repos(
     }
 
     if sort_by.is_none() {
-        formatted_repos
-            .sort_by(|a: &String, b: &String| sort_case_insensitive(a, b));
+        formatted_repos.sort_by(|a, b| sort_case_insensitive(a, b));
     }
 
     formatted_repos
