@@ -37,7 +37,7 @@ impl Default for Config {
 
         username = username.map_or_else(
             || get_git_config_user("gitlab"),
-            |username| Some(username),
+            Some,
         );
 
         Self {
@@ -47,15 +47,18 @@ impl Default for Config {
     }
 }
 
+fn get_config_path() -> Result<String> {
+    Ok(config_dir()
+        .context("failed to determine $XDG_CONFIG_HOME")?
+        .join("src/config.toml")
+        .to_str()
+        .context("failed to decode the value of $XDG_CONFIG_DIR")?
+        .to_string())
+}
+
 pub fn get_config() -> Result<Config> {
     Figment::from(Serialized::defaults(Config::default()))
-        .merge(Toml::file(
-            config_dir()
-                .context("failed to determine $XDG_CONFIG_HOME")?
-                .join("src/config.toml")
-                .to_str()
-                .context("failed to decode the value of $XDG_CONFIG_DIR")?,
-        ))
+        .merge(Toml::file(get_config_path()?))
         .merge(Env::prefixed("SRC_"))
         .extract()
         .context("failed to generate configuration")
@@ -67,4 +70,10 @@ pub fn get_root_directory() -> Result<String> {
         .context("failed to determine root directory")?
         .to_string_lossy()
         .to_string())
+}
+
+pub fn edit_config() -> Result<()> {
+    Command::new("hx").arg(get_config_path()?).status()?;
+
+    Ok(())
 }

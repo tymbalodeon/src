@@ -182,11 +182,10 @@ fn list_repos(
         .iter()
         .filter_map(|repo| {
             if path {
-                if let Some(path) = &repo.local_source_path {
-                    Some(path.to_string_lossy().to_string())
-                } else {
-                    repo.managed_path(root_directory).ok()
-                }
+                repo.local_source_path.as_ref().map_or_else(
+                    || repo.managed_path(root_directory).ok(),
+                    |path| Some(path.to_string_lossy().to_string()),
+                )
             } else {
                 Some(repo.display(no_host, no_owner))
             }

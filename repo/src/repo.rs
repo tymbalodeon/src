@@ -37,8 +37,8 @@ fn parse_url(
 
     Ok(Repo {
         host: git_url.host().ok_or(SrcRepoError::GitUrl)?.to_string(),
-        owner: repo_provider.owner().to_string(),
-        name: repo_provider.repo().to_string(),
+        owner: repo_provider.owner().clone(),
+        name: repo_provider.repo().clone(),
         local_source_path: local_source_path.cloned(),
         url,
         // managed_path: local_source_path.cloned(),

@@ -7,8 +7,11 @@ use commands::add::add;
 use commands::config::config;
 use commands::list::list;
 
-use crate::commands::list::{
-    hosts, list_all, list_non_managed, names, owners, SortByOption,
+use crate::{
+    commands::list::{
+        hosts, list_all, list_non_managed, names, owners, SortByOption,
+    },
+    config::edit_config,
 };
 
 /// Manage repositories in an organized way
@@ -17,6 +20,12 @@ use crate::commands::list::{
 struct Cli {
     #[command(subcommand)]
     command: Option<Command>,
+}
+
+#[derive(Subcommand)]
+enum ConfigSubcommand {
+    /// Open config file in $EDITOR
+    Edit,
 }
 
 #[derive(Subcommand)]
@@ -143,7 +152,10 @@ enum Command {
     Cd { repo: Option<String> },
 
     /// View config file
-    Config,
+    Config {
+        #[command(subcommand)]
+        command: Option<ConfigSubcommand>,
+    },
 
     /// List repositories
     List {
@@ -198,7 +210,10 @@ fn main() {
             Ok(())
         }
 
-        Some(Command::Config) => config(),
+        Some(Command::Config { command }) => match command {
+            Some(ConfigSubcommand::Edit) => edit_config(),
+            None => config(),
+        },
 
         Some(Command::List {
             command,
@@ -240,15 +255,13 @@ fn main() {
                 sort_by.as_ref(),
             ),
 
-            Some(ListSubcommand::Hosts {
-                all,
-                hidden,
-            }) => hosts(*all, *hidden),
+            Some(ListSubcommand::Hosts { all, hidden }) => {
+                hosts(*all, *hidden)
+            }
 
-            Some(ListSubcommand::Names {
-                all,
-                hidden,
-            }) => names(*all, *hidden),
+            Some(ListSubcommand::Names { all, hidden }) => {
+                names(*all, *hidden)
+            }
 
             Some(ListSubcommand::NonManaged {
                 hidden,
@@ -270,10 +283,9 @@ fn main() {
                 sort_by.as_ref(),
             ),
 
-            Some(ListSubcommand::Owners {
-                all,
-                hidden,
-            }) => owners(*all, *hidden),
+            Some(ListSubcommand::Owners { all, hidden }) => {
+                owners(*all, *hidden)
+            }
         },
 
         Some(Command::New { path: _ }) => {
