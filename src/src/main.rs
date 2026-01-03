@@ -1,5 +1,4 @@
 mod commands;
-mod config;
 mod log;
 
 use clap::{Parser, Subcommand};
@@ -7,11 +6,9 @@ use commands::add::add;
 use commands::config::config;
 use commands::list::list;
 
-use crate::{
-    commands::list::{
-        hosts, list_all, list_non_managed, names, owners, SortByOption,
-    },
+use crate::commands::{
     config::edit_config,
+    list::{hosts, list_all, list_non_managed, names, owners, SortByOption},
 };
 
 /// Manage repositories in an organized way
@@ -43,6 +40,10 @@ enum ListSubcommand {
         /// Filter to repositories with owner partially matching this value
         #[arg(long)]
         owner: Option<String>,
+
+        /// Filter to repositories with owner matching the value of config.username
+        #[arg(long)]
+        me: bool,
 
         /// Filter to repositories with name partially matching this value
         #[arg(long)]
@@ -99,6 +100,10 @@ enum ListSubcommand {
         /// Filter to repositories with owner partially matching this value
         #[arg(long)]
         owner: Option<String>,
+
+        /// Filter to repositories with owner matching the value of config.username
+        #[arg(long)]
+        me: bool,
 
         /// Filter to repositories with name partially matching this value
         #[arg(long)]
@@ -170,6 +175,10 @@ enum Command {
         #[arg(long)]
         owner: Option<String>,
 
+        /// Filter to repositories with owner matching the value of config.username
+        #[arg(long)]
+        me: bool,
+
         /// Filter to repositories with name partially matching this value
         #[arg(long)]
         name: Option<String>,
@@ -219,6 +228,7 @@ fn main() {
             command,
             host,
             owner,
+            me,
             name,
             no_host,
             no_owner,
@@ -229,6 +239,7 @@ fn main() {
                 host.as_ref(),
                 owner.as_ref(),
                 name.as_ref(),
+                *me,
                 *no_host,
                 *no_owner,
                 *path,
@@ -240,6 +251,7 @@ fn main() {
                 host,
                 owner,
                 name,
+                me,
                 no_host,
                 no_owner,
                 path,
@@ -249,6 +261,7 @@ fn main() {
                 host.as_ref(),
                 owner.as_ref(),
                 name.as_ref(),
+                *me,
                 *no_host,
                 *no_owner,
                 *path,
@@ -268,6 +281,7 @@ fn main() {
                 host,
                 owner,
                 name,
+                me,
                 no_host,
                 no_owner,
                 path,
@@ -277,6 +291,7 @@ fn main() {
                 host.as_ref(),
                 owner.as_ref(),
                 name.as_ref(),
+                *me,
                 *no_host,
                 *no_owner,
                 *path,

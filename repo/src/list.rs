@@ -6,6 +6,7 @@ use dirs::home_dir;
 use rust_fuzzy_search::fuzzy_search_threshold;
 use walkdir::{DirEntry, WalkDir};
 
+use crate::config::{get_root_directory, Config};
 use crate::error::SrcRepoError;
 use crate::repo::Repo;
 
@@ -97,11 +98,12 @@ pub enum SortBy {
 const FUZZY_SEARCH_THRESHOLD: f32 = 0.1;
 
 fn list_repos(
-    root_directory: &str,
+    config: Config,
     repo_paths: &[String],
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
+    me: bool,
     no_host: bool,
     no_owner: bool,
     path: bool,
@@ -151,23 +153,39 @@ fn list_repos(
             .collect();
     }
 
-    if let Some(name) = name {
+    if me {
+        repos = repos
+            .into_iter()
+            .filter_map(|repo| {
+                if let Some(username) = &config.username {
+                    if &repo.owner == username {
+                        Some(repo)
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            })
+            .collect();
+    } else if let Some(name) = name {
         let names: Vec<&str> =
             repos.iter().map(|repo| repo.name.as_str()).collect();
 
-        repos = fuzzy_search_threshold(name, &names, FUZZY_SEARCH_THRESHOLD)
-            .iter()
-            .map(|item| item.0)
-            .collect::<HashSet<&str>>()
-            .iter()
-            .flat_map(|name| {
-                repos
-                    .iter()
-                    .filter(|&repo| repo.name == *name)
-                    .cloned()
-                    .collect::<Vec<Repo>>()
-            })
-            .collect();
+        repos =
+            fuzzy_search_threshold(name, &names, FUZZY_SEARCH_THRESHOLD)
+                .iter()
+                .map(|item| item.0)
+                .collect::<HashSet<&str>>()
+                .iter()
+                .flat_map(|name| {
+                    repos
+                        .iter()
+                        .filter(|&repo| repo.name == *name)
+                        .cloned()
+                        .collect::<Vec<Repo>>()
+                })
+                .collect();
     }
 
     if let Some(sort_by) = &sort_by {
@@ -183,7 +201,7 @@ fn list_repos(
         .filter_map(|repo| {
             if path {
                 repo.local_source_path.as_ref().map_or_else(
-                    || repo.managed_path(root_directory).ok(),
+                    || repo.managed_path(&get_root_directory().ok()?).ok(),
                     |path| Some(path.to_string_lossy().to_string()),
                 )
             } else {
@@ -210,27 +228,29 @@ fn list_repos(
 
 #[must_use]
 pub fn list_managed_repos(
-    root_directory: &str,
+    config: Config,
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
+    me: bool,
     no_host: bool,
     no_owner: bool,
     path: bool,
     sort_by: Option<&SortBy>,
-) -> Vec<String> {
-    list_repos(
-        root_directory,
-        &get_managed_repo_paths(root_directory),
+) -> Result<Vec<String>, SrcRepoError> {
+    Ok(list_repos(
+        config,
+        &get_managed_repo_paths(&get_root_directory()?),
         host,
         owner,
         name,
+        me,
         no_host,
         no_owner,
         path,
         false,
         sort_by,
-    )
+    ))
 }
 
 fn is_managed_path(path: &DirEntry, root_directory: Option<&str>) -> bool {
@@ -293,22 +313,24 @@ pub fn get_repo_paths(
 ///
 /// Will return `SrcRepoError` if it fails to determine the `$HOME` directory
 pub fn list_non_managed_repos(
-    root_directory: &str,
+    config: Config,
     hidden: bool,
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
+    me: bool,
     no_host: bool,
     no_owner: bool,
     path: bool,
     sort_by: Option<&SortBy>,
 ) -> Result<Vec<String>, SrcRepoError> {
     Ok(list_repos(
-        root_directory,
-        &get_repo_paths(Some(root_directory), hidden)?,
+        config,
+        &get_repo_paths(Some(&get_root_directory()?), hidden)?,
         host,
         owner,
         name,
+        me,
         no_host,
         no_owner,
         path,
@@ -321,22 +343,24 @@ pub fn list_non_managed_repos(
 ///
 /// Will return `SrcRepoError` if it fails to determine the `$HOME` directory
 pub fn list_all_repos(
-    root_directory: &str,
+    config: Config,
     hidden: bool,
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
+    me: bool,
     no_host: bool,
     no_owner: bool,
     path: bool,
     sort_by: Option<&SortBy>,
 ) -> Result<Vec<String>, SrcRepoError> {
     Ok(list_repos(
-        root_directory,
+        config,
         &get_repo_paths(None, hidden)?,
         host,
         owner,
         name,
+        me,
         no_host,
         no_owner,
         path,

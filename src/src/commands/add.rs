@@ -1,8 +1,7 @@
 use anyhow::Result;
-use repo::list::get_managed_repo_paths;
 use repo::repo::Repo;
+use repo::{config::get_root_directory, list::get_managed_repo_paths};
 
-use crate::config::get_root_directory;
 use crate::log::{log, LogLevel};
 
 fn parse_repos(repos: &[String]) -> Vec<Repo> {

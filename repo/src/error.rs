@@ -1,7 +1,10 @@
 use thiserror::Error;
 
-#[derive(Error, Debug)]
+#[derive(Debug, Error)]
 pub enum SrcRepoError {
+    #[error("failed to get config")]
+    Config,
+
     #[error("failed to read git directory")]
     Git(#[from] git2::Error),
 

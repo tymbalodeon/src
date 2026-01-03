@@ -1,12 +1,13 @@
 use std::collections::HashSet;
 
 use anyhow::Result;
-use repo::list::{
-    get_repos, list_all_repos, list_managed_repos, list_non_managed_repos,
-    SortBy,
+use repo::{
+    config::{get_config, get_root_directory},
+    list::{
+        get_repos, list_all_repos, list_managed_repos, list_non_managed_repos,
+        SortBy,
+    },
 };
-
-use crate::config::get_root_directory;
 
 pub fn hosts(all: bool, hidden: bool) -> Result<()> {
     let mut hosts: Vec<String> =
@@ -79,6 +80,7 @@ pub fn list(
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
+    me: bool,
     no_host: bool,
     no_owner: bool,
     path: bool,
@@ -87,15 +89,16 @@ pub fn list(
     print!(
         "{}",
         list_managed_repos(
-            &get_root_directory()?,
+            get_config()?,
             host,
             owner,
             name,
+            me,
             no_host,
             no_owner,
             path,
             get_sort_by_value(sort_by).as_ref()
-        )
+        )?
         .join("\n")
     );
 
@@ -107,17 +110,19 @@ pub fn list_non_managed(
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
+    me: bool,
     no_host: bool,
     no_owner: bool,
     path: bool,
     sort_by: Option<&SortByOption>,
 ) -> Result<()> {
     let repos = list_non_managed_repos(
-        &get_root_directory()?,
+        get_config()?,
         hidden,
         host,
         owner,
         name,
+        me,
         no_host,
         no_owner,
         path,
@@ -134,17 +139,19 @@ pub fn list_all(
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
+    me: bool,
     no_host: bool,
     no_owner: bool,
     path: bool,
     sort_by: Option<&SortByOption>,
 ) -> Result<()> {
     let repos = list_all_repos(
-        &get_root_directory()?,
+        get_config()?,
         hidden,
         host,
         owner,
         name,
+        me,
         no_host,
         no_owner,
         path,
