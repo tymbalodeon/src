@@ -35,10 +35,8 @@ impl Default for Config {
     fn default() -> Self {
         let mut username = get_git_config_user("github");
 
-        username = username.map_or_else(
-            || get_git_config_user("gitlab"),
-            Some,
-        );
+        username =
+            username.map_or_else(|| get_git_config_user("gitlab"), Some);
 
         Self {
             root_directory: home_dir().map(|home_dir| home_dir.join("src")),
