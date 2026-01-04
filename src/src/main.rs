@@ -9,6 +9,7 @@ use commands::list::list;
 use crate::commands::{
     config::edit_config,
     list::{hosts, list_all, list_non_managed, names, owners, SortByOption},
+    remove::remove,
 };
 
 /// Manage repositories in an organized way
@@ -207,10 +208,10 @@ enum Command {
     New { path: Option<String> },
 
     /// Remove repositories
-    Remove { repo: Vec<String> },
+    Remove { repos: Vec<String> },
 
     /// Sync repositories
-    Sync { repo: Vec<String> },
+    Sync { repos: Vec<String> },
 }
 
 fn main() {
@@ -313,13 +314,9 @@ fn main() {
             Ok(())
         }
 
-        Some(Command::Remove { repo: _ }) => {
-            eprintln!("Implement remove!");
+        Some(Command::Remove { repos }) => remove(repos),
 
-            Ok(())
-        }
-
-        Some(Command::Sync { repo: _ }) => {
+        Some(Command::Sync { repos: _ }) => {
             eprintln!("Implement sync!");
 
             Ok(())
