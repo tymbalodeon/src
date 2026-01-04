@@ -120,6 +120,11 @@ impl fmt::Display for Repo {
     }
 }
 
+#[must_use] 
+pub fn parse_repos(repos: &[String]) -> Vec<Result<Repo, SrcRepoError>> {
+    repos.iter().map(|repo| Repo::from(repo)).collect()
+}
+
 #[must_use]
 pub fn get_local_source_path(repo: &str) -> Option<PathBuf> {
     let path = tilde(repo).to_string();

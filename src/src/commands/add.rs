@@ -1,26 +1,10 @@
 use std::process::Command;
 
 use anyhow::Result;
-use repo::repo::Repo;
+use repo::repo::{parse_repos, Repo};
 use repo::{config::get_root_directory, list::get_managed_repo_paths};
 
 use crate::log::{log, LogLevel};
-
-fn parse_repos(repos: &[String]) -> Vec<Repo> {
-    repos
-        .iter()
-        .filter_map(|repo| {
-            Repo::from(repo).map_or_else(
-                |_| {
-                    log(&LogLevel::Error, &format!("invalid path {repo:?}"));
-
-                    None
-                },
-                Some,
-            )
-        })
-        .collect()
-}
 
 fn filter_unique_repos(repos: &[Repo]) -> Vec<Repo> {
     let mut repos_to_add: Vec<Repo> = repos
@@ -55,7 +39,20 @@ pub fn add(repos: &[String], force: bool) -> Result<()> {
     let root_directory = get_root_directory()?;
     let repo_paths = get_managed_repo_paths(&root_directory);
 
-    for repo in filter_unique_repos(&parse_repos(repos)) {
+    let repos: Vec<Repo> = parse_repos(repos)
+        .into_iter()
+        .filter_map(|repo| match repo {
+            Ok(repo) => Some(repo),
+
+            Err(error) => {
+                log(&LogLevel::Error, &error.to_string());
+
+                None
+            }
+        })
+        .collect();
+
+    for repo in filter_unique_repos(&repos) {
         if let Ok(path) = repo.managed_path(&root_directory) {
             if let Some(ref local_source_path) = repo.local_source_path {
                 let managed_path = &repo.managed_path(&root_directory)?;
@@ -65,9 +62,7 @@ pub fn add(repos: &[String], force: bool) -> Result<()> {
 
                     Command::new("mv")
                         .args(vec![
-                            &local_source_path
-                                .to_string_lossy()
-                                .to_string(),
+                            &local_source_path.to_string_lossy().to_string(),
                             &format!(
                                 "{root_directory}/{}/{}",
                                 repo.host, repo.owner
