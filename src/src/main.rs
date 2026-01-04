@@ -85,6 +85,10 @@ enum ListSubcommand {
         /// Include hidden directories when searching for unmanaged repositories
         #[arg(long)]
         hidden: bool,
+
+        /// Filter to repositories with owner matching the value of config.username
+        #[arg(long)]
+        me: bool,
     },
 
     /// List repositories in $HOME that are not managed by `src`
@@ -272,8 +276,8 @@ fn main() {
                 hosts(*all, *hidden)
             }
 
-            Some(ListSubcommand::Names { all, hidden }) => {
-                names(*all, *hidden)
+            Some(ListSubcommand::Names { all, hidden, me }) => {
+                names(*all, *hidden, *me)
             }
 
             Some(ListSubcommand::NonManaged {

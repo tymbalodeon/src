@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use anyhow::Result;
 use repo::{
-    config::{get_config, get_root_directory},
+    config::{get_config, get_root_directory, get_username},
     list::{
         get_repos, list_all_repos, list_managed_repos, list_non_managed_repos,
         sort_case_insensitive, SortBy,
@@ -25,22 +25,6 @@ pub fn hosts(all: bool, hidden: bool) -> Result<()> {
     Ok(())
 }
 
-pub fn names(all: bool, hidden: bool) -> Result<()> {
-    let mut names: Vec<String> =
-        get_repos(&get_root_directory()?, all, hidden)?
-            .into_iter()
-            .map(|repo| repo.name)
-            .collect::<HashSet<_>>()
-            .into_iter()
-            .collect();
-
-    names.sort_by(|a, b| sort_case_insensitive(a, b));
-
-    println!("{}", names.join("\n"));
-
-    Ok(())
-}
-
 pub fn owners(all: bool, hidden: bool) -> Result<()> {
     let mut owners: Vec<String> =
         get_repos(&get_root_directory()?, all, hidden)?
@@ -53,6 +37,32 @@ pub fn owners(all: bool, hidden: bool) -> Result<()> {
     owners.sort_by(|a, b| sort_case_insensitive(a, b));
 
     println!("{}", owners.join("\n"));
+
+    Ok(())
+}
+
+pub fn names(all: bool, hidden: bool, me: bool) -> Result<()> {
+    let mut names: Vec<String> =
+        get_repos(&get_root_directory()?, all, hidden)?
+            .into_iter()
+            .filter_map(|repo| {
+                if me {
+                    if repo.owner == get_username().ok()? {
+                        Some(repo.name)
+                    } else {
+                        None
+                    }
+                } else {
+                    Some(repo.name)
+                }
+            })
+            .collect::<HashSet<_>>()
+            .into_iter()
+            .collect();
+
+    names.sort_by(|a, b| sort_case_insensitive(a, b));
+
+    println!("{}", names.join("\n"));
 
     Ok(())
 }
