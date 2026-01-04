@@ -154,7 +154,7 @@ dependencies = [
  "heck",
  "proc-macro2",
  "quote",
- "syn 2.0.112",
+ "syn 2.0.113",
 ]
 
 [[package]]
@@ -224,7 +224,7 @@ checksum = "97369cbbc041bc366949bc74d34658d6cda5621039731c6310521892a3a20ae0"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.112",
+ "syn 2.0.113",
 ]
 
 [[package]]
@@ -298,7 +298,7 @@ dependencies = [
  "proc-macro-error2",
  "proc-macro2",
  "quote",
- "syn 2.0.112",
+ "syn 2.0.113",
 ]
 
 [[package]]
@@ -607,7 +607,7 @@ dependencies = [
  "proc-macro2",
  "proc-macro2-diagnostics",
  "quote",
- "syn 2.0.112",
+ "syn 2.0.113",
 ]
 
 [[package]]
@@ -677,7 +677,7 @@ dependencies = [
  "proc-macro-error-attr2",
  "proc-macro2",
  "quote",
- "syn 2.0.112",
+ "syn 2.0.113",
 ]
 
 [[package]]
@@ -697,7 +697,7 @@ checksum = "af066a9c399a26e020ada66a034357a868728e72cd426f3adcd35f80d88d88c8"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.112",
+ "syn 2.0.113",
  "version_check",
  "yansi",
 ]
@@ -792,7 +792,7 @@ checksum = "d540f220d3187173da220f885ab66608367b6574e925011a9353e4badda91d79"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.112",
+ "syn 2.0.113",
 ]
 
 [[package]]
@@ -874,9 +874,9 @@ dependencies = [
 
 [[package]]
 name = "syn"
-version = "2.0.112"
+version = "2.0.113"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "21f182278bf2d2bcb3c88b1b08a37df029d71ce3d3ae26168e3c653b213b99d4"
+checksum = "678faa00651c9eb72dd2020cbdf275d92eccb2400d568e419efdd64838145cb4"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -891,7 +891,7 @@ checksum = "728a70f3dbaf5bab7f0c4b1ac8d7ae5ea60a4b5549c8a5914361c99147a709d2"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.112",
+ "syn 2.0.113",
 ]
 
 [[package]]
@@ -917,7 +917,7 @@ checksum = "3ff15c8ecd7de3849db632e14d18d2571fa09dfc5ed93479bc4485c7a517c913"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.112",
+ "syn 2.0.113",
 ]
 
 [[package]]
@@ -1238,7 +1238,7 @@ checksum = "b659052874eb698efe5b9e8cf382204678a0086ebf46982b79d6ca3182927e5d"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.112",
+ "syn 2.0.113",
  "synstructure",
 ]
 
@@ -1259,7 +1259,7 @@ checksum = "d71e5d6e06ab090c67b5e44993ec16b72dcbaabc526db883a360057678b48502"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.112",
+ "syn 2.0.113",
  "synstructure",
 ]
 
@@ -1293,5 +1293,5 @@ checksum = "eadce39539ca5cb3985590102671f2567e659fca9666581ad3411d59207951f3"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn 2.0.112",
+ "syn 2.0.113",
 ]
