@@ -1,11 +1,22 @@
+use std::process::Command;
+
 use anyhow::Result;
-use repo::repo::parse_repos;
+use repo::config::get_root_directory;
+
+use crate::repo::get_repos;
 
 pub fn remove(repos: &[String]) -> Result<()> {
-    let repos = parse_repos(repos);
+    for repo in get_repos(repos) {
+        Command::new("rm")
+            .args(vec![
+                "--force",
+                "--recursive",
+                &repo.managed_path(&get_root_directory()?)?,
+            ])
+            .status()?;
 
-    dbg!(repos);
-    println!("Removing repos");
+        println!("Removed {repo}.");
+    }
 
     Ok(())
 }

@@ -1,5 +1,6 @@
 mod commands;
 mod log;
+mod repo;
 
 use clap::{Parser, Subcommand};
 use commands::add::add;

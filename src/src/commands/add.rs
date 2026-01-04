@@ -1,10 +1,10 @@
 use std::process::Command;
 
 use anyhow::Result;
-use repo::repo::{parse_repos, Repo};
+use repo::repo::Repo;
 use repo::{config::get_root_directory, list::get_managed_repo_paths};
 
-use crate::log::{log, LogLevel};
+use crate::repo::get_repos;
 
 fn filter_unique_repos(repos: &[Repo]) -> Vec<Repo> {
     let mut repos_to_add: Vec<Repo> = repos
@@ -36,29 +36,18 @@ fn filter_unique_repos(repos: &[Repo]) -> Vec<Repo> {
 }
 
 pub fn add(repos: &[String], force: bool) -> Result<()> {
+    let repos = get_repos(repos);
     let root_directory = get_root_directory()?;
     let repo_paths = get_managed_repo_paths(&root_directory);
 
-    let repos: Vec<Repo> = parse_repos(repos)
-        .into_iter()
-        .filter_map(|repo| match repo {
-            Ok(repo) => Some(repo),
-
-            Err(error) => {
-                log(&LogLevel::Error, &error.to_string());
-
-                None
-            }
-        })
-        .collect();
-
     for repo in filter_unique_repos(&repos) {
-        if let Ok(path) = repo.managed_path(&root_directory) {
+        if let Ok(managed_path) = repo.managed_path(&root_directory) {
             if let Some(ref local_source_path) = repo.local_source_path {
-                let managed_path = &repo.managed_path(&root_directory)?;
-
-                if force || !repo_paths.contains(managed_path) {
-                    println!("Adding {managed_path} to {path}");
+                if force || !repo_paths.contains(&managed_path) {
+                    println!(
+                        "Moving {} to {managed_path}",
+                        local_source_path.to_string_lossy()
+                    );
 
                     Command::new("mv")
                         .args(vec![
@@ -74,7 +63,7 @@ pub fn add(repos: &[String], force: bool) -> Result<()> {
                 let managed_path = repo.managed_path(&root_directory)?;
 
                 if force || !repo_paths.contains(&managed_path) {
-                    println!("Adding {repo} to {path}");
+                    println!("Cloning {} to {managed_path}", repo.url);
 
                     Command::new("git")
                         .args(vec![
