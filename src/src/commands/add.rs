@@ -4,7 +4,7 @@ use anyhow::Result;
 use repo::repo::Repo;
 use repo::{config::get_root_directory, list::get_managed_repo_paths};
 
-use crate::repo::get_repos;
+use crate::repo::parse_repos_with_error_log;
 
 fn filter_unique_repos(repos: &[Repo]) -> Vec<Repo> {
     let mut repos_to_add: Vec<Repo> = repos
@@ -36,7 +36,7 @@ fn filter_unique_repos(repos: &[Repo]) -> Vec<Repo> {
 }
 
 pub fn add(repos: &[String], force: bool) -> Result<()> {
-    let repos = get_repos(repos);
+    let repos = parse_repos_with_error_log(repos);
     let root_directory = get_root_directory()?;
     let repo_paths = get_managed_repo_paths(&root_directory);
 

@@ -3,10 +3,10 @@ use std::process::Command;
 use anyhow::Result;
 use repo::config::get_root_directory;
 
-use crate::repo::get_repos;
+use crate::repo::parse_repos_with_error_log;
 
 pub fn remove(repos: &[String]) -> Result<()> {
-    for repo in get_repos(repos) {
+    for repo in parse_repos_with_error_log(repos) {
         Command::new("rm")
             .args(vec![
                 "--force",

@@ -120,7 +120,7 @@ impl fmt::Display for Repo {
     }
 }
 
-#[must_use] 
+#[must_use]
 pub fn parse_repos(repos: &[String]) -> Vec<Result<Repo, SrcRepoError>> {
     repos.iter().map(|repo| Repo::from(repo)).collect()
 }
