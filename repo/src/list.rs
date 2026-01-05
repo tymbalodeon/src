@@ -196,19 +196,24 @@ fn list_repos(
         }
     }
 
-    let mut formatted_repos: Vec<String> = repos
-        .iter()
-        .filter_map(|repo| {
-            if path {
-                repo.local_source_path.as_ref().map_or_else(
-                    || repo.managed_path(&get_root_directory().ok()?).ok(),
-                    |path| Some(path.to_string_lossy().to_string()),
-                )
-            } else {
-                Some(repo.display(no_host, no_owner))
-            }
-        })
-        .collect();
+    let mut formatted_repos: Vec<String> =
+        repos
+            .iter()
+            .filter_map(|repo| {
+                if path {
+                    repo.local_source_path.as_ref().map_or_else(
+                        || {
+                            Some(repo.managed_path_name(
+                                &get_root_directory().ok()?,
+                            ))
+                        },
+                        |path| Some(path.to_string_lossy().to_string()),
+                    )
+                } else {
+                    Some(repo.display(no_host, no_owner))
+                }
+            })
+            .collect();
 
     if unique {
         formatted_repos = formatted_repos

@@ -11,7 +11,7 @@ pub fn remove(repos: &[String]) -> Result<()> {
             .args(vec![
                 "--force",
                 "--recursive",
-                &repo.managed_path(&get_root_directory()?)?,
+                &repo.managed_path_name(&get_root_directory()?),
             ])
             .status()?;
 

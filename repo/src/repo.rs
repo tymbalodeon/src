@@ -77,20 +77,19 @@ impl Repo {
         parse_url(&url, local_source_path.as_ref())
     }
 
-    /// # Errors
-    ///
-    /// Will return `SrcRepoError` if `Repo` data contains invalid unicode.
-    pub fn managed_path(
-        &self,
-        root_directory: &str,
-    ) -> Result<String, SrcRepoError> {
-        Ok(Path::new(root_directory)
+    #[must_use] 
+    pub fn managed_path(&self, root_directory: &str) -> PathBuf {
+        PathBuf::from(root_directory)
             .join(&self.host)
             .join(&self.owner)
             .join(&self.name)
-            .to_str()
-            .ok_or(SrcRepoError::RepoPath)?
-            .to_owned())
+    }
+
+    #[must_use] 
+    pub fn managed_path_name(&self, root_directory: &str) -> String {
+        self.managed_path(root_directory)
+            .to_string_lossy()
+            .to_string()
     }
 
     #[must_use]
@@ -110,6 +109,7 @@ impl Repo {
         }
     }
 
+    #[must_use] 
     pub fn url(self) -> String {
         format!("git@{}", self.url)
     }

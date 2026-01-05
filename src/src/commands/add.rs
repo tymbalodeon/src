@@ -43,45 +43,35 @@ pub fn add(repos: &[String], force: bool) -> Result<()> {
     let repo_paths = get_managed_repo_paths(&root_directory);
 
     for repo in filter_unique_repos(&repos) {
-        if let Ok(managed_path) = repo.managed_path(&root_directory) {
-            if let Some(ref local_source_path) = repo.local_source_path {
-                if force || !repo_paths.contains(&managed_path) {
-                    println!(
-                        "Moving {} to {managed_path}",
-                        local_source_path.to_string_lossy()
-                    );
+        let managed_path = repo.managed_path_name(&root_directory);
 
-                    Command::new("mv")
-                        .args(vec![
-                            &local_source_path.to_string_lossy().to_string(),
-                            &format!(
-                                "{root_directory}/{}/{}",
-                                repo.host, repo.owner
-                            ),
-                        ])
-                        .status()?;
-                }
-            } else {
-                let managed_path = repo.managed_path(&root_directory)?;
+        if let Some(ref local_source_path) = repo.local_source_path {
+            if force || !repo_paths.contains(&managed_path) {
+                println!(
+                    "Moving {} to {managed_path}",
+                    local_source_path.to_string_lossy()
+                );
 
-                if force || !repo_paths.contains(&managed_path) {
-                    let managed_path = repo.managed_path(&root_directory)?;
-
-                    if force && Path::new(&managed_path).exists() {
-                        Command::new("rm")
-                            .args(vec![
-                                "--force",
-                                "--recursive",
-                                &managed_path,
-                            ])
-                            .status()?;
-                    }
-
-                    Command::new("git")
-                        .args(vec!["clone", &repo.url(), &managed_path])
-                        .status()?;
-                }
+                Command::new("mv")
+                    .args(vec![
+                        &local_source_path.to_string_lossy().to_string(),
+                        &format!(
+                            "{root_directory}/{}/{}",
+                            repo.host, repo.owner
+                        ),
+                    ])
+                    .status()?;
             }
+        } else if force || !repo_paths.contains(&managed_path) {
+            if force && Path::new(&managed_path).exists() {
+                Command::new("rm")
+                    .args(vec!["--force", "--recursive", &managed_path])
+                    .status()?;
+            }
+
+            Command::new("git")
+                .args(vec!["clone", &repo.url(), &managed_path])
+                .status()?;
         }
     }
 

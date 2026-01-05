@@ -1,5 +1,3 @@
-use std::path::PathBuf;
-
 use repo::{
     config::{get_root_directory, Config},
     repo::{parse_repos, Repo},
@@ -18,13 +16,9 @@ pub fn parse_repos_with_error_log(
         .filter_map(|repo| match repo {
             Ok(repo) => {
                 if must_exist {
-                    let path = PathBuf::from(
-                        &repo
-                            .managed_path(&get_root_directory().unwrap())
-                            .unwrap(),
-                    );
-
-                    if path.exists() {
+                    if repo.managed_path(&get_root_directory().unwrap())
+                        .exists()
+                    {
                         Some(repo)
                     } else {
                         None
