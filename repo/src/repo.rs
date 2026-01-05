@@ -41,7 +41,6 @@ fn parse_url(
         name: repo_provider.repo().clone(),
         local_source_path: local_source_path.cloned(),
         url,
-        // managed_path: local_source_path.cloned(),
     })
 }
 impl Repo {
@@ -121,8 +120,47 @@ impl fmt::Display for Repo {
 }
 
 #[must_use]
-pub fn parse_repos(repos: &[String]) -> Vec<Result<Repo, SrcRepoError>> {
-    repos.iter().map(|repo| Repo::from(repo)).collect()
+pub fn parse_repos(
+    repos: &[String],
+    default_host: Option<&str>,
+    default_owner: Option<&str>,
+) -> Vec<Result<Repo, SrcRepoError>> {
+    repos
+        .iter()
+        .map(|repo| {
+            Repo::from(repo).map_or_else(
+                |_| {
+                    let mut owner: Option<&str> = None;
+                    let name: Option<&str>;
+
+                    let owner_separator = '/';
+
+                    if repo.contains(owner_separator) {
+                        let mut components = repo.split(owner_separator);
+
+                        owner = components.next();
+                        name = components.next();
+                    } else {
+                        name = repo.split('/').next_back();
+                    }
+
+                    if owner.is_none() {
+                        owner = default_owner;
+                    }
+
+                    let url = &format!(
+                        "{}:{}/{}",
+                        default_host.unwrap(),
+                        owner.unwrap(),
+                        name.unwrap()
+                    );
+
+                    Repo::from(url)
+                },
+                Ok,
+            )
+        })
+        .collect()
 }
 
 #[must_use]

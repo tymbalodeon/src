@@ -13,7 +13,8 @@ use crate::error::SrcRepoError;
 #[derive(Deserialize, Serialize)]
 pub struct Config {
     pub root_directory: Option<PathBuf>,
-    pub username: Option<String>,
+    pub host: Option<String>,
+    pub owner: Option<String>,
 }
 
 fn get_git_config_user(host: &str) -> Option<String> {
@@ -41,7 +42,8 @@ impl Default for Config {
 
         Self {
             root_directory: home_dir().map(|home_dir| home_dir.join("src")),
-            username,
+            host: Some("github.com".to_string()),
+            owner: username,
         }
     }
 }
@@ -87,5 +89,5 @@ pub fn get_root_directory() -> Result<String, SrcRepoError> {
 /// Will return `SrcRepoError` if it fails to merge configuration from the file
 /// and the environment
 pub fn get_username() -> Result<String, SrcRepoError> {
-    get_config()?.username.ok_or(SrcRepoError::Config)
+    get_config()?.owner.ok_or(SrcRepoError::Config)
 }

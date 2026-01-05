@@ -158,7 +158,7 @@ fn list_repos(
         repos = repos
             .into_iter()
             .filter_map(|repo| {
-                if let Some(username) = &config.username {
+                if let Some(username) = &config.owner {
                     if &repo.owner == username {
                         Some(repo)
                     } else {

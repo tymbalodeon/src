@@ -1,6 +1,7 @@
 use std::process::Command;
 
 use anyhow::Result;
+use repo::config::get_config;
 use repo::repo::Repo;
 use repo::{config::get_root_directory, list::get_managed_repo_paths};
 
@@ -36,7 +37,7 @@ fn filter_unique_repos(repos: &[Repo]) -> Vec<Repo> {
 }
 
 pub fn add(repos: &[String], force: bool) -> Result<()> {
-    let repos = parse_repos_with_error_log(repos);
+    let repos = parse_repos_with_error_log(&get_config()?, repos, false);
     let root_directory = get_root_directory()?;
     let repo_paths = get_managed_repo_paths(&root_directory);
 
