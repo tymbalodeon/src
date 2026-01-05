@@ -1,4 +1,5 @@
 use std::fmt;
+use std::fmt::Write;
 use std::path::{Path, PathBuf};
 
 use derivative::Derivative;
@@ -77,7 +78,7 @@ impl Repo {
         parse_url(&url, local_source_path.as_ref())
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn managed_path(&self, root_directory: &str) -> PathBuf {
         PathBuf::from(root_directory)
             .join(&self.host)
@@ -85,7 +86,7 @@ impl Repo {
             .join(&self.name)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn managed_path_name(&self, root_directory: &str) -> String {
         self.managed_path(root_directory)
             .to_string_lossy()
@@ -109,7 +110,7 @@ impl Repo {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn url(self) -> String {
         format!("git@{}", self.url)
     }
@@ -150,32 +151,21 @@ pub fn parse_repos(
                         owner = default_owner;
                     }
 
-                    let url = &format!(
-                        "{}:{}/{}",
-                        default_host.unwrap(),
-                        owner.unwrap(),
-                        name.unwrap()
-                    );
+                    let mut url: String = String::new();
 
-                    Repo::from(url)
+                    if let Some(default_host) = default_host {
+                        let _ = write!(url, "{default_host}:");
+                    }
 
-                    // let mut url: String = "".to_string();
+                    if let Some(owner) = owner {
+                        let _ = write!(url, "{owner}");
+                    }
 
-                    // if let Some(default_host) = default_host {
-                    //     url.push_str(&format!("{default_host}:"));
-                    // }
+                    if let Some(name) = name {
+                        let _ = write!(url, "{}", &format!("/{name}"));
+                    }
 
-                    // if let Some(owner) = owner {
-                    //     url.push_str(&format!("{url}{owner}"));
-                    // }
-
-                    // if let Some(name) = name {
-                    //     url.push_str(&format!("{url}/{name}"));
-                    // }
-
-                    // dbg!(&url);
-
-                    // Repo::from(&url)
+                    Repo::from(&url)
                 },
                 Ok,
             )

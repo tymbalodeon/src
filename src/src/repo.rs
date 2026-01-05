@@ -16,13 +16,13 @@ pub fn parse_repos_with_error_log(
         .filter_map(|repo| match repo {
             Ok(repo) => {
                 if must_exist {
-                    if repo.managed_path(&get_root_directory().unwrap())
-                        .exists()
-                    {
-                        Some(repo)
-                    } else {
-                        None
-                    }
+                    get_root_directory().map_or(None, |root_directory| {
+                        if repo.managed_path(&root_directory).exists() {
+                            Some(repo)
+                        } else {
+                            None
+                        }
+                    })
                 } else {
                     Some(repo)
                 }
