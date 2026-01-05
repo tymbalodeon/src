@@ -1,3 +1,4 @@
+use std::path::Path;
 use std::process::Command;
 
 use anyhow::Result;
@@ -64,14 +65,20 @@ pub fn add(repos: &[String], force: bool) -> Result<()> {
                 let managed_path = repo.managed_path(&root_directory)?;
 
                 if force || !repo_paths.contains(&managed_path) {
-                    println!("Cloning {} to {managed_path}", repo.url);
+                    let managed_path = repo.managed_path(&root_directory)?;
+
+                    if force && Path::new(&managed_path).exists() {
+                        Command::new("rm")
+                            .args(vec![
+                                "--force",
+                                "--recursive",
+                                &managed_path,
+                            ])
+                            .status()?;
+                    }
 
                     Command::new("git")
-                        .args(vec![
-                            "clone",
-                            &repo.url,
-                            &repo.managed_path(&root_directory)?,
-                        ])
+                        .args(vec!["clone", &repo.url(), &managed_path])
                         .status()?;
                 }
             }
