@@ -6,6 +6,7 @@ use repo::config::get_config;
 use repo::repo::Repo;
 use repo::{config::get_root_directory, list::get_managed_repo_paths};
 
+use crate::commands::remove::remove_repo;
 use crate::repo::parse_repos_with_error_log;
 
 fn filter_unique_repos(repos: &[Repo]) -> Vec<Repo> {
@@ -64,9 +65,7 @@ pub fn add(repos: &[String], force: bool) -> Result<()> {
             }
         } else if force || !repo_paths.contains(&managed_path) {
             if force && Path::new(&managed_path).exists() {
-                Command::new("rm")
-                    .args(vec!["--force", "--recursive", &managed_path])
-                    .status()?;
+                remove_repo(&managed_path)?;
             }
 
             Command::new("git")
