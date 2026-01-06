@@ -4,7 +4,7 @@ use anyhow::Result;
 use repo::{
     config::{get_config, get_root_directory, get_username},
     list::{
-        get_repos, list_all_repos, list_managed_repos, list_non_managed_repos,
+        get_repos, list_all_repos, list_managed_repos, list_unmanaged_repos,
         sort_case_insensitive, SortBy,
     },
 };
@@ -115,7 +115,7 @@ pub fn list(
     Ok(())
 }
 
-pub fn list_non_managed(
+pub fn list_unmanaged(
     hidden: bool,
     host: Option<&String>,
     owner: Option<&String>,
@@ -126,7 +126,7 @@ pub fn list_non_managed(
     path: bool,
     sort_by: Option<&SortByOption>,
 ) -> Result<()> {
-    let repos = list_non_managed_repos(
+    let repos = list_unmanaged_repos(
         &get_config()?,
         hidden,
         host,

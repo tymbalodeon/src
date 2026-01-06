@@ -319,7 +319,7 @@ pub fn get_repo_paths(
 /// # Errors
 ///
 /// Will return `SrcRepoError` if it fails to determine the `$HOME` directory
-pub fn list_non_managed_repos(
+pub fn list_unmanaged_repos(
     config: &Config,
     hidden: bool,
     host: Option<&String>,

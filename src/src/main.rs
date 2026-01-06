@@ -10,7 +10,7 @@ use commands::list::list;
 use crate::commands::{
     config::{edit_config, get_config_value},
     hook::hook,
-    list::{hosts, list_all, list_non_managed, names, owners, SortByOption},
+    list::{hosts, list_all, list_unmanaged, names, owners, SortByOption},
     remove::remove,
 };
 
@@ -63,7 +63,7 @@ enum ListSubcommand {
     },
 
     /// List repositories in $HOME that are not managed by `src`
-    NonManaged {
+    Unmanaged {
         /// Include hidden directories when searching for unmanaged repositories
         #[arg(long)]
         hidden: bool,
@@ -219,7 +219,7 @@ fn main() {
                 names(*all, *hidden, *me)
             }
 
-            Some(ListSubcommand::NonManaged { hidden }) => list_non_managed(
+            Some(ListSubcommand::Unmanaged { hidden }) => list_unmanaged(
                 *hidden,
                 host.as_ref(),
                 owner.as_ref(),
