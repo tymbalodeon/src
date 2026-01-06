@@ -9,6 +9,7 @@ use commands::list::list;
 
 use crate::commands::{
     config::{edit_config, get_config_value},
+    hook::hook,
     list::{hosts, list_all, list_non_managed, names, owners, SortByOption},
     remove::remove,
 };
@@ -105,6 +106,9 @@ enum Command {
         command: Option<ConfigSubcommand>,
     },
 
+    /// Generate shell hook (required for `cd`)
+    Hook,
+
     /// List repositories
     List {
         #[command(subcommand)]
@@ -170,6 +174,8 @@ fn main() {
                     ConfigSubcommand::Get { key } => get_config_value(key),
                 })
         }
+
+        Some(Command::Hook) => hook(),
 
         Some(Command::List {
             command,
