@@ -11,6 +11,7 @@ The default location for the configuration file is `$XDG_CONFIG_HOME/src/config.
 The available configuration options and their default values are shown below.
 
 ```toml
-default_remote_name = "origin"
+host = "github.com"
+owner = "<git config github.user>"
 root_directory = "$HOME/src"
 ```
