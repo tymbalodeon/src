@@ -162,14 +162,14 @@ fn main() {
             Ok(())
         }
 
-        Some(Command::Config { command }) => match command {
-            Some(command) => match command {
-                ConfigSubcommand::Edit => edit_config(),
-                ConfigSubcommand::Get { key } => get_config_value(key),
-            },
-
-            None => config(),
-        },
+        Some(Command::Config { command }) => {
+            command
+                .as_ref()
+                .map_or_else(config, |command| match command {
+                    ConfigSubcommand::Edit => edit_config(),
+                    ConfigSubcommand::Get { key } => get_config_value(key),
+                })
+        }
 
         Some(Command::List {
             command,

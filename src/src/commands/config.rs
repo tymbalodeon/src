@@ -26,20 +26,20 @@ pub fn get_config_value(key: &str) -> Result<()> {
     let value = match key {
         "host" => config
             .host
-            .map_or("".to_string(), |value| value.to_string()),
+            .map_or(String::new(), |value| value),
 
         "owner" => config
             .owner
-            .map_or("".to_string(), |value| value.to_string()),
+            .map_or(String::new(), |value| value),
 
         "root_directory" => config
             .root_directory
-            .map_or("".to_string(), |value| value.display().to_string()),
+            .map_or(String::new(), |value| value.display().to_string()),
 
         _ => {
             log(&LogLevel::Error, &format!("key {key:?} does not exist"));
 
-            "".to_string()
+            String::new()
         }
     };
 
