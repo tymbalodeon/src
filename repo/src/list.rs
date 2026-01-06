@@ -266,6 +266,10 @@ fn is_managed_path(path: &DirEntry, root_directory: Option<&str>) -> bool {
     })
 }
 
+fn convert_to_string(path: &DirEntry) -> String {
+    path.path().to_string_lossy().to_string()
+}
+
 /// # Errors
 ///
 /// Will return `SrcRepoError` if it fails to determine the `$HOME` directory
@@ -296,10 +300,10 @@ pub fn get_repo_paths(
                 }
 
                 root_directory.map_or_else(
-                    || Some(path.path().to_string_lossy().to_string()),
+                    || Some(convert_to_string(path)),
                     |root_directory| {
-                        path.path().strip_prefix(root_directory).map_or(
-                            None,
+                        path.path().strip_prefix(root_directory).map_or_else(
+                            |_| Some(convert_to_string(path)),
                             |dir_entry| {
                                 Some(
                                     PathBuf::from(root_directory)
