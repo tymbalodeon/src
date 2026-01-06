@@ -1,7 +1,7 @@
 use anyhow::Result;
 
 pub fn hook() -> Result<()> {
-    let script = "".to_string();
+    let script = String::new();
 
     println!("{script}");
 
