@@ -43,7 +43,7 @@ enum ListSubcommand {
         #[arg(long)]
         owner: Option<String>,
 
-        /// Filter to repositories with owner matching the value of config.username
+        /// Filter to repositories with owner matching the value of config.owner
         #[arg(long)]
         me: bool,
 
