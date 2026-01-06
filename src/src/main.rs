@@ -38,6 +38,37 @@ enum ListSubcommand {
         /// Include hidden directories when searching for unmanaged repositories
         #[arg(long)]
         hidden: bool,
+
+        /// Filter to repositories with host partially matching this value
+        #[arg(long)]
+        host: Option<String>,
+
+        /// Filter to repositories with owner partially matching this value
+        #[arg(long)]
+        owner: Option<String>,
+
+        /// Filter to repositories with owner matching the value of config.username
+        #[arg(long)]
+        me: bool,
+
+        /// Filter to repositories with name partially matching this value
+        #[arg(long)]
+        name: Option<String>,
+
+        /// (Not compatible with `--path`) Don't display host values
+        #[arg(long)]
+        no_host: bool,
+
+        /// (Not compatible with `--path`) Don't display owner values
+        #[arg(long)]
+        no_owner: bool,
+
+        /// List as paths
+        #[arg(long)]
+        path: bool,
+
+        #[arg(long)]
+        sort_by: Option<SortByOption>,
     },
 
     /// Show all hosts
@@ -67,6 +98,37 @@ enum ListSubcommand {
         /// Include hidden directories when searching for unmanaged repositories
         #[arg(long)]
         hidden: bool,
+
+        /// Filter to repositories with host partially matching this value
+        #[arg(long)]
+        host: Option<String>,
+
+        /// Filter to repositories with owner partially matching this value
+        #[arg(long)]
+        owner: Option<String>,
+
+        /// Filter to repositories with owner matching the value of config.username
+        #[arg(long)]
+        me: bool,
+
+        /// Filter to repositories with name partially matching this value
+        #[arg(long)]
+        name: Option<String>,
+
+        /// (Not compatible with `--path`) Don't display host values
+        #[arg(long)]
+        no_host: bool,
+
+        /// (Not compatible with `--path`) Don't display owner values
+        #[arg(long)]
+        no_owner: bool,
+
+        /// List as paths
+        #[arg(long)]
+        path: bool,
+
+        #[arg(long)]
+        sort_by: Option<SortByOption>,
     },
 
     /// Show all owners
@@ -199,17 +261,39 @@ fn main() {
                 sort_by.as_ref(),
             ),
 
-            Some(ListSubcommand::All { hidden }) => list_all(
-                *hidden,
-                host.as_ref(),
-                owner.as_ref(),
-                name.as_ref(),
-                *me,
-                *no_host,
-                *no_owner,
-                *path,
-                sort_by.as_ref(),
-            ),
+            Some(ListSubcommand::All {
+                hidden,
+                host: all_host,
+                owner: all_owner,
+                me: all_me,
+                name: all_name,
+                no_host: all_no_host,
+                no_owner: all_no_owner,
+                path: all_path,
+                sort_by: all_sort_by,
+            }) => {
+                let host = all_host.as_ref().map_or(host, |_| all_host);
+                let me = *all_me || *me;
+                let name = all_name.clone().map_or(name, |_| all_name);
+                let no_host = *all_no_host || *no_host;
+                let no_owner = *all_no_owner || *no_owner;
+                let owner = all_owner.clone().map_or(owner, |_| all_owner);
+                let path = *all_path || *path;
+                let sort_by =
+                    all_sort_by.clone().map_or(sort_by, |_| all_sort_by);
+
+                list_all(
+                    *hidden,
+                    host.as_ref(),
+                    owner.as_ref(),
+                    name.as_ref(),
+                    me,
+                    no_host,
+                    no_owner,
+                    path,
+                    sort_by.as_ref(),
+                )
+            }
 
             Some(ListSubcommand::Hosts { all, hidden }) => {
                 hosts(*all, *hidden)
@@ -219,17 +303,39 @@ fn main() {
                 names(*all, *hidden, *me)
             }
 
-            Some(ListSubcommand::Unmanaged { hidden }) => list_unmanaged(
-                *hidden,
-                host.as_ref(),
-                owner.as_ref(),
-                name.as_ref(),
-                *me,
-                *no_host,
-                *no_owner,
-                *path,
-                sort_by.as_ref(),
-            ),
+            Some(ListSubcommand::Unmanaged {
+                hidden,
+                host: all_host,
+                owner: all_owner,
+                me: all_me,
+                name: all_name,
+                no_host: all_no_host,
+                no_owner: all_no_owner,
+                path: all_path,
+                sort_by: all_sort_by,
+            }) => {
+                let host = all_host.as_ref().map_or(host, |_| all_host);
+                let me = *all_me || *me;
+                let name = all_name.clone().map_or(name, |_| all_name);
+                let no_host = *all_no_host || *no_host;
+                let no_owner = *all_no_owner || *no_owner;
+                let owner = all_owner.clone().map_or(owner, |_| all_owner);
+                let path = *all_path || *path;
+                let sort_by =
+                    all_sort_by.clone().map_or(sort_by, |_| all_sort_by);
+
+                list_unmanaged(
+                    *hidden,
+                    host.as_ref(),
+                    owner.as_ref(),
+                    name.as_ref(),
+                    me,
+                    no_host,
+                    no_owner,
+                    path,
+                    sort_by.as_ref(),
+                )
+            }
 
             Some(ListSubcommand::Owners { all, hidden }) => {
                 owners(*all, *hidden)
