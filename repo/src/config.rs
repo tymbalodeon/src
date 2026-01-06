@@ -12,9 +12,9 @@ use crate::error::SrcRepoError;
 
 #[derive(Deserialize, Serialize)]
 pub struct Config {
-    pub root_directory: Option<PathBuf>,
     pub host: Option<String>,
     pub owner: Option<String>,
+    pub root_directory: Option<PathBuf>,
 }
 
 fn get_git_config_user(host: &str) -> Option<String> {

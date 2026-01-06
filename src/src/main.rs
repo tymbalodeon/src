@@ -8,7 +8,7 @@ use commands::config::config;
 use commands::list::list;
 
 use crate::commands::{
-    config::edit_config,
+    config::{edit_config, get_config_value},
     list::{hosts, list_all, list_non_managed, names, owners, SortByOption},
     remove::remove,
 };
@@ -25,6 +25,9 @@ struct Cli {
 enum ConfigSubcommand {
     /// Open config file in $EDITOR
     Edit,
+
+    /// Get a config value
+    Get { key: String },
 }
 
 #[derive(Subcommand)]
@@ -160,7 +163,11 @@ fn main() {
         }
 
         Some(Command::Config { command }) => match command {
-            Some(ConfigSubcommand::Edit) => edit_config(),
+            Some(command) => match command {
+                ConfigSubcommand::Edit => edit_config(),
+                ConfigSubcommand::Get { key } => get_config_value(key),
+            },
+
             None => config(),
         },
 
