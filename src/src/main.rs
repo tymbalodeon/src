@@ -34,37 +34,6 @@ enum ListSubcommand {
         /// Include hidden directories when searching for unmanaged repositories
         #[arg(long)]
         hidden: bool,
-
-        /// Filter to repositories with host partially matching this value
-        #[arg(long)]
-        host: Option<String>,
-
-        /// Filter to repositories with owner partially matching this value
-        #[arg(long)]
-        owner: Option<String>,
-
-        /// Filter to repositories with owner matching the value of config.owner
-        #[arg(long)]
-        me: bool,
-
-        /// Filter to repositories with name partially matching this value
-        #[arg(long)]
-        name: Option<String>,
-
-        /// (Not compatible with `--path`) Don't display host values
-        #[arg(long)]
-        no_host: bool,
-
-        /// (Not compatible with `--path`) Don't display owner values
-        #[arg(long)]
-        no_owner: bool,
-
-        /// List as paths
-        #[arg(long)]
-        path: bool,
-
-        #[arg(long)]
-        sort_by: Option<SortByOption>,
     },
 
     /// Show all hosts
@@ -87,10 +56,6 @@ enum ListSubcommand {
         /// Include hidden directories when searching for unmanaged repositories
         #[arg(long)]
         hidden: bool,
-
-        /// Filter to repositories with owner matching the value of config.username
-        #[arg(long)]
-        me: bool,
     },
 
     /// List repositories in $HOME that are not managed by `src`
@@ -98,37 +63,6 @@ enum ListSubcommand {
         /// Include hidden directories when searching for unmanaged repositories
         #[arg(long)]
         hidden: bool,
-
-        /// Filter to repositories with host partially matching this value
-        #[arg(long)]
-        host: Option<String>,
-
-        /// Filter to repositories with owner partially matching this value
-        #[arg(long)]
-        owner: Option<String>,
-
-        /// Filter to repositories with owner matching the value of config.username
-        #[arg(long)]
-        me: bool,
-
-        /// Filter to repositories with name partially matching this value
-        #[arg(long)]
-        name: Option<String>,
-
-        /// (Not compatible with `--path`) Don't display host values
-        #[arg(long)]
-        no_host: bool,
-
-        /// (Not compatible with `--path`) Don't display owner values
-        #[arg(long)]
-        no_owner: bool,
-
-        /// List as paths
-        #[arg(long)]
-        path: bool,
-
-        #[arg(long)]
-        sort_by: Option<SortByOption>,
     },
 
     /// Show all owners
@@ -252,17 +186,7 @@ fn main() {
                 sort_by.as_ref(),
             ),
 
-            Some(ListSubcommand::All {
-                hidden,
-                host,
-                owner,
-                name,
-                me,
-                no_host,
-                no_owner,
-                path,
-                sort_by,
-            }) => list_all(
+            Some(ListSubcommand::All { hidden }) => list_all(
                 *hidden,
                 host.as_ref(),
                 owner.as_ref(),
@@ -278,21 +202,11 @@ fn main() {
                 hosts(*all, *hidden)
             }
 
-            Some(ListSubcommand::Names { all, hidden, me }) => {
+            Some(ListSubcommand::Names { all, hidden }) => {
                 names(*all, *hidden, *me)
             }
 
-            Some(ListSubcommand::NonManaged {
-                hidden,
-                host,
-                owner,
-                name,
-                me,
-                no_host,
-                no_owner,
-                path,
-                sort_by,
-            }) => list_non_managed(
+            Some(ListSubcommand::NonManaged { hidden }) => list_non_managed(
                 *hidden,
                 host.as_ref(),
                 owner.as_ref(),
