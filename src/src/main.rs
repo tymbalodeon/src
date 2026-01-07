@@ -159,7 +159,7 @@ enum Command {
         // open: bool,
     },
 
-    /// Change directory to a repository
+    /// Change directory to a repository (requires shell hook -- see `hook`)
     Cd { repo: Option<String> },
 
     /// View config file
