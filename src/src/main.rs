@@ -159,8 +159,12 @@ enum Command {
         // open: bool,
     },
 
+    Browse,
+
     /// Change directory to a repository (requires shell hook -- see `hook`)
-    Cd { repo: Option<String> },
+    Cd {
+        repo: Option<String>,
+    },
 
     /// View config file
     Config {
@@ -209,18 +213,30 @@ enum Command {
     },
 
     /// Create or initialize a new repository
-    New { path: Option<String> },
+    New {
+        path: Option<String>,
+    },
 
     /// Remove repositories
-    Remove { repos: Vec<String> },
+    Remove {
+        repos: Vec<String>,
+    },
 
     /// Sync repositories
-    Sync { repos: Vec<String> },
+    Sync {
+        repos: Vec<String>,
+    },
 }
 
 fn main() {
     let result = match &Cli::parse().command {
         Some(Command::Add { repos, force }) => add(repos, *force),
+
+        Some(Command::Browse) => {
+            println!("Implement me!");
+
+            Ok(())
+        }
 
         Some(Command::Cd { repo: _ }) => {
             eprintln!("Implement cd!");
