@@ -297,16 +297,31 @@ def "main sync" [
 def "main tug" [] {
   let current_bookmark = (get-current-bookmark)
 
+  let revision = if (
+    jj log --no-graph --revisions @ --template "empty"
+    | into bool
+  ) {
+    "@-"
+  } else {
+    "@"
+  }
+
+  if (jj log --no-graph --revisions $current_bookmark --template "change_id") == (
+    jj log --no-graph --revisions $revision --template "change_id"
+  ) {
+    return
+  }
+
   let empty_revisions = (
     jj log
       --no-graph
-      --revisions $"($current_bookmark)::@ & empty\(\)"
+      --revisions $"($current_bookmark)+::@ & empty\(\)"
       --template "change_id ++ '\n'"
     | lines
   )
 
   if ($empty_revisions | is-not-empty) {
-    jj abandon ...$empty_revisions
+    jj abandon ...$empty_revisions err> /dev/null
   }
 
   let descriptions = (
@@ -350,18 +365,19 @@ def "main tug" [] {
           | get change_id
         )
 
-        jj squash --from $revision.change_id --into $closest_described_revision_id
+        if (
+          jj log
+            --no-graph
+            --revisions $closest_described_revision_id
+            --template "immutable"
+          | into bool
+        ) {
+          jj describe --message $"chore: tug ($current_bookmark)" $revision.change_id
+        } else {
+          jj squash --from $revision.change_id --into $closest_described_revision_id
+        }
       }
     }
-  }
-
-  let revision = if (
-    jj log --no-graph --revisions @ --template "empty"
-    | into bool
-  ) {
-    "@-"
-  } else {
-    "@"
   }
 
   jj bookmark move --from "heads(::@ & bookmarks())" --to @
