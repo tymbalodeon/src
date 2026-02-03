@@ -183,7 +183,7 @@ def "main merge" [
   name?: string # The name of the bookmark to sync with trunk
 ] {
   let bookmark = if ($name | is-empty) {
-    get-current-bookmark 
+    get-current-bookmark
   } else {
     $name
   }
@@ -281,7 +281,7 @@ def "main sync" [
   name?: string # The name of the bookmark to sync with trunk
 ] {
   let bookmark = if ($name | is-empty) {
-    get-current-bookmark 
+    get-current-bookmark
   } else {
     $name
   }
@@ -293,9 +293,27 @@ def "main sync" [
   jj rebase --branch $bookmark --onto trunk
 }
 
+def get-change-id [revision: string] {
+  jj log --no-graph --revisions $revision --template "change_id"
+}
+
 # Set the current branch to the current revision
 def "main tug" [] {
   let current_bookmark = (get-current-bookmark)
+
+  if not (
+    jj bookmark list
+      --revisions $current_bookmark
+      --template "name ++ '|' ++ synced ++ '\n'"
+    | lines
+    | uniq
+    | first
+    | split row "|"
+    | last
+    | into bool
+  ) {
+    jj git push
+  }
 
   let revision = if (
     jj log --no-graph --revisions @ --template "empty"
@@ -306,9 +324,7 @@ def "main tug" [] {
     "@"
   }
 
-  if (jj log --no-graph --revisions $current_bookmark --template "change_id") == (
-    jj log --no-graph --revisions $revision --template "change_id"
-  ) {
+  if (get-change-id $current_bookmark) == (get-change-id $revision) {
     return
   }
 
