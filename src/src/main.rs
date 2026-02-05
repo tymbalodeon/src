@@ -253,7 +253,7 @@ fn main() {
                 })
         }
 
-        Some(Command::Hook) => hook(),
+        Some(Command::Hook) => hook::hook(),
 
         Some(Command::List {
             command,
