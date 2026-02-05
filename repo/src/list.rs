@@ -3,7 +3,6 @@ use std::path::PathBuf;
 use std::process::Command;
 
 use dirs::home_dir;
-use rust_fuzzy_search::fuzzy_search_threshold;
 use walkdir::{DirEntry, WalkDir};
 
 use crate::config::{get_root_directory, Config};
@@ -96,8 +95,6 @@ pub enum SortBy {
     Owner,
 }
 
-const FUZZY_SEARCH_THRESHOLD: f32 = 0.1;
-
 fn list_repos(
     config: &Config,
     repo_paths: &[String],
@@ -117,40 +114,16 @@ fn list_repos(
         .collect();
 
     if let Some(host) = host {
-        let hosts: Vec<&str> =
-            repos.iter().map(|repo| repo.host.as_str()).collect();
-
-        repos = fuzzy_search_threshold(host, &hosts, FUZZY_SEARCH_THRESHOLD)
-            .iter()
-            .map(|item| item.0)
-            .collect::<HashSet<&str>>()
-            .iter()
-            .flat_map(|host| {
-                repos
-                    .iter()
-                    .filter(|&repo| repo.host == *host)
-                    .cloned()
-                    .collect::<Vec<Repo>>()
-            })
+        repos = repos
+            .into_iter()
+            .filter(|repo| &repo.host == host)
             .collect();
     }
 
     if let Some(owner) = owner {
-        let owners: Vec<&str> =
-            repos.iter().map(|repo| repo.owner.as_str()).collect();
-
-        repos = fuzzy_search_threshold(owner, &owners, FUZZY_SEARCH_THRESHOLD)
-            .iter()
-            .map(|item| item.0)
-            .collect::<HashSet<&str>>()
-            .iter()
-            .flat_map(|owner| {
-                repos
-                    .iter()
-                    .filter(|&repo| repo.owner == *owner)
-                    .cloned()
-                    .collect::<Vec<Repo>>()
-            })
+        repos = repos
+            .into_iter()
+            .filter(|repo| &repo.owner == owner)
             .collect();
     }
 
@@ -170,21 +143,9 @@ fn list_repos(
             })
             .collect();
     } else if let Some(name) = name {
-        let names: Vec<&str> =
-            repos.iter().map(|repo| repo.name.as_str()).collect();
-
-        repos = fuzzy_search_threshold(name, &names, FUZZY_SEARCH_THRESHOLD)
-            .iter()
-            .map(|item| item.0)
-            .collect::<HashSet<&str>>()
-            .iter()
-            .flat_map(|name| {
-                repos
-                    .iter()
-                    .filter(|&repo| repo.name == *name)
-                    .cloned()
-                    .collect::<Vec<Repo>>()
-            })
+        repos = repos
+            .into_iter()
+            .filter(|repo| &repo.name == name)
             .collect();
     }
 
