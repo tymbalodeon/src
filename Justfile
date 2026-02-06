@@ -95,11 +95,13 @@ mod just ".environments/just/Justfile"
 mod markdown ".environments/markdown/Justfile"
 mod nix ".environments/nix/Justfile"
 mod rust ".environments/rust/Justfile"
+mod src ".environments/src/Justfile"
 mod yaml ".environments/yaml/Justfile"
 
 alias add := rust::add
 alias build := rust::build
 alias deps := rust::deps
+alias hook := src::hook
 alias install := rust::install
 alias leaks := git::leaks
 alias open := documentation::open

@@ -1,0 +1,9 @@
+set working-directory := "../.."
+
+# View help text
+@help *args:
+    .environments/src/scripts/help.nu {{ args }}
+
+# Load the shell hook
+@hook *args:
+    .environments/src/scripts/hook.nu {{ args }}
