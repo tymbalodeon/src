@@ -1,9 +1,5 @@
-use anyhow::Result;
-
 use crate::log::{log, LogLevel};
 
-pub fn cd() -> Result<()> {
+pub fn cd() {
     log(&LogLevel::Error, "The shell hook has not been initialized.");
-
-    Ok(())
 }

@@ -95,6 +95,22 @@ pub enum SortBy {
     Owner,
 }
 
+fn unique_repos(repos: &[Repo]) -> Vec<Repo> {
+    let mut unique_repos: Vec<Repo> = vec![];
+    let mut unique_repo_urls: Vec<String> = vec![];
+
+    for repo in repos.iter().cloned() {
+        let formatted_repo = format!("{repo}");
+
+        if !unique_repo_urls.contains(&formatted_repo) {
+            unique_repos.push(repo);
+            unique_repo_urls.push(formatted_repo);
+        }
+    }
+
+    unique_repos
+}
+
 fn list_repos(
     config: &Config,
     repo_paths: &[String],
@@ -114,17 +130,11 @@ fn list_repos(
         .collect();
 
     if let Some(host) = host {
-        repos = repos
-            .into_iter()
-            .filter(|repo| &repo.host == host)
-            .collect();
+        repos.retain(|repo| &repo.host == host);
     }
 
     if let Some(owner) = owner {
-        repos = repos
-            .into_iter()
-            .filter(|repo| &repo.owner == owner)
-            .collect();
+        repos.retain(|repo| &repo.owner == owner);
     }
 
     if me {
@@ -143,10 +153,7 @@ fn list_repos(
             })
             .collect();
     } else if let Some(name) = name {
-        repos = repos
-            .into_iter()
-            .filter(|repo| &repo.name == name)
-            .collect();
+        repos.retain(|repo| &repo.name == name);
     }
 
     if let Some(sort_by) = &sort_by {
@@ -155,6 +162,10 @@ fn list_repos(
             SortBy::Name => repos.sort_by(|a, b| a.name.cmp(&b.name)),
             SortBy::Owner => repos.sort_by(|a, b| a.owner.cmp(&b.owner)),
         }
+    }
+
+    if !path {
+        repos = unique_repos(&repos);
     }
 
     let mut formatted_repos: Vec<String> =

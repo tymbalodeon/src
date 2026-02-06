@@ -7,13 +7,13 @@ use commands::{
     add::add,
     cd::cd,
     config::{config, edit_config, get_config_value},
-    hook::hook::hook,
+    hook::hook,
     list::list,
     list::{hosts, list_all, list_unmanaged, names, owners, SortByOption},
     remove::remove,
 };
 
-/// Manage repositories in an organized way
+/// Manage source code repositories
 #[derive(Parser)]
 #[command(arg_required_else_help(true))]
 struct Cli {
@@ -158,6 +158,7 @@ enum Command {
         // open: bool,
     },
 
+    /// Open the remote repository web page in the browser
     Browse,
 
     /// Change directory to a repository (requires shell hook -- see `hook`)
@@ -225,19 +226,13 @@ enum Command {
     },
 
     /// Create or initialize a new repository
-    New {
-        path: Option<String>,
-    },
+    New { path: Option<String> },
 
     /// Remove repositories
-    Remove {
-        repos: Vec<String>,
-    },
+    Remove { repos: Vec<String> },
 
     /// Sync repositories
-    Sync {
-        repos: Vec<String>,
-    },
+    Sync { repos: Vec<String> },
 }
 
 fn main() {
@@ -255,7 +250,10 @@ fn main() {
             host: _,
             name: _,
             owner: _,
-        }) => cd(),
+        }) => {
+            cd();
+            Ok(())
+        },
 
         Some(Command::Config { command }) => {
             command
@@ -266,7 +264,10 @@ fn main() {
                 })
         }
 
-        Some(Command::Hook) => hook(),
+        Some(Command::Hook) => {
+            hook();
+            Ok(())
+        },
 
         Some(Command::List {
             command,

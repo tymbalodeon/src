@@ -1,9 +1,5 @@
-use anyhow::Result;
-
 const HOOK: &str = include_str!("./hook.nu");
 
-pub fn hook() -> Result<()> {
+pub fn hook() {
     print!("{HOOK}");
-
-    Ok(())
 }
