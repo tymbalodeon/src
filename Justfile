@@ -105,6 +105,7 @@ alias hook := src::hook
 alias install := rust::install
 alias leaks := git::leaks
 alias open := documentation::open
+alias package := src::package
 alias remove := rust::remove
 alias run := rust::run
 alias serve := documentation::serve
