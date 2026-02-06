@@ -18,12 +18,23 @@ def "main generate" [] {
   crate2nix generate
 }
 
+# Install the built package in the current shell
+def --env "main install" [] {
+  main build out> /dev/null
+
+  nu --execute $"
+    $env.PATH = \($env.PATH | prepend ./result/bin\)
+
+    (just run hook)
+  "
+}
+
 # Run the built package
 def --wrapped "main run" [...args: string] {
   let binary = "./result/bin/src"
 
   if ($binary | path type) != file {
-    main build
+    main build out> /dev/null
   }
 
   if ($binary | path type) == file {

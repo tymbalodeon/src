@@ -101,7 +101,6 @@ mod yaml ".environments/yaml/Justfile"
 alias add := rust::add
 alias build := rust::build
 alias deps := rust::deps
-alias hook := src::hook
 alias install := rust::install
 alias leaks := git::leaks
 alias open := documentation::open

@@ -13,8 +13,7 @@ def get-option [
 
 def --env --wrapped "src cd" [...args: string] {
   if "-h" in $args or "--help" in $args {
-    # FIXME: change to `src cd` when ready!
-    just run cd --help
+    ^src cd --help
 
     return
   }
@@ -62,9 +61,8 @@ def --env --wrapped "src cd" [...args: string] {
     return
   }
 
-  # FIXME: change to `src list` when ready!
   let path = (
-    just run list --name $name --path
+    ^src list --name $name --path
     | lines
   )
 

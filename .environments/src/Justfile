@@ -7,7 +7,3 @@ set working-directory := "../.."
 # Manage the nix package
 @package *args:
     .environments/src/scripts/package.nu {{ args }}
-
-# Load the shell hook
-@hook *args:
-    .environments/src/scripts/hook.nu {{ args }}
