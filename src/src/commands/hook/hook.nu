@@ -1,5 +1,5 @@
 def get-option [
-  options: table<value: int, name: string, index: int>
+  options: table<index: int, name: string, value: string>
   option: string
 ] {
   let value = ($options | where name == $option)
