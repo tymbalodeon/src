@@ -3,13 +3,12 @@ mod log;
 mod repo;
 
 use clap::{Parser, Subcommand};
-use commands::add::add;
-use commands::config::config;
-use commands::list::list;
-
-use crate::commands::{
-    config::{edit_config, get_config_value},
-    hook::hook,
+use commands::{
+    add::add,
+    cd::cd,
+    config::{config, edit_config, get_config_value},
+    hook::hook::hook,
+    list::list,
     list::{hosts, list_all, list_unmanaged, names, owners, SortByOption},
     remove::remove,
 };
@@ -238,11 +237,7 @@ fn main() {
             Ok(())
         }
 
-        Some(Command::Cd { repo: _ }) => {
-            eprintln!("Implement cd!");
-
-            Ok(())
-        }
+        Some(Command::Cd { repo: _ }) => cd(),
 
         Some(Command::Config { command }) => {
             command
@@ -253,7 +248,7 @@ fn main() {
                 })
         }
 
-        Some(Command::Hook) => hook::hook(),
+        Some(Command::Hook) => hook(),
 
         Some(Command::List {
             command,
