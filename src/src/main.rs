@@ -162,6 +162,19 @@ enum Command {
 
     /// Change directory to a repository (requires shell hook -- see `hook`)
     Cd {
+        /// Filter to repositories with host partially matching this value
+        #[arg(long)]
+        host: Option<String>,
+
+        /// Filter to repositories with name partially matching this value
+        #[arg(long)]
+        name: Option<String>,
+
+        /// Filter to repositories with owner partially matching this value
+        #[arg(long)]
+        owner: Option<String>,
+
+        /// Repository name
         repo: Option<String>,
     },
 
@@ -237,7 +250,12 @@ fn main() {
             Ok(())
         }
 
-        Some(Command::Cd { repo: _ }) => cd(),
+        Some(Command::Cd {
+            repo: _,
+            host: _,
+            name: _,
+            owner: _,
+        }) => cd(),
 
         Some(Command::Config { command }) => {
             command
