@@ -61,20 +61,29 @@ def --env --wrapped "src cd" [...args: string] {
     return
   }
 
-  let path = (
-    ^src list --name $name --path
+  let paths = (
+    src list --name $name --path
     | lines
   )
 
-  if ($path | is-empty) {
-    return
+  let paths = if ($paths | is-empty) {
+    let paths = (
+      src list --path
+      | find --no-highlight $name
+    )
+
+    if ($paths | is-empty) {
+      return
+    }
+
+    $paths
   }
 
-  let path = if ($path | length) > 1 {
-    $path
+  let path = if ($paths | length) > 1 {
+    $paths
     | input list
   } else {
-    $path
+    $paths
     | first
   }
 
