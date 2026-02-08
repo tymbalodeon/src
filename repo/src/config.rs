@@ -3,8 +3,8 @@ use std::process::Command;
 
 use dirs::{config_dir, home_dir};
 use figment::{
-    providers::{Env, Format, Serialized, Toml},
     Figment,
+    providers::{Env, Format, Serialized, Toml},
 };
 use serde::{Deserialize, Serialize};
 

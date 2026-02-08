@@ -3,8 +3,8 @@ use std::fmt::Write;
 use std::path::{Path, PathBuf};
 
 use derivative::Derivative;
+use git_url_parse::{GitUrl, types::provider::GenericProvider};
 use git2::Repository;
-use git_url_parse::{types::provider::GenericProvider, GitUrl};
 use shellexpand::tilde;
 
 use crate::error::SrcRepoError;
@@ -127,6 +127,8 @@ pub fn parse_repos(
     repos: &[String],
     default_host: Option<&str>,
     default_owner: Option<&str>,
+    host_filter: Option<&String>,
+    owner_filter: Option<&String>,
 ) -> Vec<Result<Repo, SrcRepoError>> {
     repos
         .iter()
@@ -135,7 +137,6 @@ pub fn parse_repos(
                 |_| {
                     let mut owner: Option<&str> = None;
                     let name: Option<&str>;
-
                     let owner_separator = '/';
 
                     if repo.contains(owner_separator) {
@@ -147,14 +148,57 @@ pub fn parse_repos(
                         name = repo.split('/').next_back();
                     }
 
-                    if owner.is_none() {
-                        owner = default_owner;
+                    match owner {
+                        Some(owner) => {
+                            if let Some(owner_filter) = owner_filter
+                                && owner.to_lowercase()
+                                    != owner_filter.to_lowercase()
+                            {
+                                return Err(SrcRepoError::Config);
+                            }
+                        }
+
+                        None => {
+                            if let Some(owner_filter) = owner_filter {
+                                owner = Some(owner_filter);
+                            } else {
+                                owner = default_owner;
+                            }
+                        }
+                    }
+
+                    let mut host: Option<&str> = None;
+                    let host_separator = ':';
+
+                    if repo.contains(host_separator) {
+                        let mut components = repo.split(host_separator);
+
+                        host = components.next();
+                    }
+
+                    match host {
+                        Some(host) => {
+                            if let Some(host_filter) = host_filter
+                                && host.to_lowercase()
+                                    != host_filter.to_lowercase()
+                            {
+                                return Err(SrcRepoError::Config);
+                            }
+                        }
+
+                        None => {
+                            if let Some(host_filter) = host_filter {
+                                host = Some(host_filter);
+                            } else {
+                                host = default_host;
+                            }
+                        }
                     }
 
                     let mut url: String = String::new();
 
-                    if let Some(default_host) = default_host {
-                        let _ = write!(url, "{default_host}:");
+                    if let Some(host) = host {
+                        let _ = write!(url, "{host}:");
                     }
 
                     if let Some(owner) = owner {
@@ -169,6 +213,11 @@ pub fn parse_repos(
                 },
                 Ok,
             )
+        })
+        .filter_map(|repo| match repo {
+            Ok(repo) => Some(Ok(repo)),
+            Err(SrcRepoError::Filter) => None,
+            _ => Some(repo),
         })
         .collect()
 }

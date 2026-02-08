@@ -5,6 +5,9 @@ pub enum SrcRepoError {
     #[error("failed to get config")]
     Config,
 
+    #[error("")]
+    Filter,
+
     #[error("failed to read git directory")]
     Git(#[from] git2::Error),
 

@@ -38,8 +38,17 @@ fn filter_unique_repos(repos: &[Repo]) -> Vec<Repo> {
     repos_to_add
 }
 
-pub fn add(repos: &[String], force: bool) -> Result<()> {
-    let repos = parse_repos_with_error_log(&get_config()?, repos, false);
+pub fn add(
+    repos: &[String],
+    host: Option<&String>,
+    owner: Option<&String>,
+    me: bool,
+    force: bool,
+) -> Result<()> {
+    let config = get_config()?;
+    let owner = if me { config.owner.as_ref() } else { owner };
+    let repos =
+        parse_repos_with_error_log(&config, repos, host, owner, false)?;
     let root_directory = get_root_directory()?;
     let repo_paths = get_managed_repo_paths(&root_directory);
 

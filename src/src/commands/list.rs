@@ -4,19 +4,22 @@ use anyhow::Result;
 use repo::{
     config::{get_config, get_root_directory, get_username},
     list::{
-        get_repos, list_all_repos, list_managed_repos, list_unmanaged_repos,
-        sort_case_insensitive, SortBy,
+        SortBy, get_repos, list_all_repos, list_managed_repos,
+        list_unmanaged_repos, sort_case_insensitive,
     },
 };
 
+pub fn get_host_names(all: bool, hidden: bool) -> Result<Vec<String>> {
+    Ok(get_repos(&get_root_directory()?, all, hidden)?
+        .into_iter()
+        .map(|repo| repo.host)
+        .collect::<HashSet<_>>()
+        .into_iter()
+        .collect())
+}
+
 pub fn hosts(all: bool, hidden: bool) -> Result<()> {
-    let mut hosts: Vec<String> =
-        get_repos(&get_root_directory()?, all, hidden)?
-            .into_iter()
-            .map(|repo| repo.host)
-            .collect::<HashSet<_>>()
-            .into_iter()
-            .collect();
+    let mut hosts = get_host_names(all, hidden)?;
 
     hosts.sort_by(|a, b| sort_case_insensitive(a, b));
 
@@ -25,14 +28,17 @@ pub fn hosts(all: bool, hidden: bool) -> Result<()> {
     Ok(())
 }
 
+pub fn get_owner_names(all: bool, hidden: bool) -> Result<Vec<String>> {
+    Ok(get_repos(&get_root_directory()?, all, hidden)?
+        .into_iter()
+        .map(|repo| repo.owner)
+        .collect::<HashSet<_>>()
+        .into_iter()
+        .collect())
+}
+
 pub fn owners(all: bool, hidden: bool) -> Result<()> {
-    let mut owners: Vec<String> =
-        get_repos(&get_root_directory()?, all, hidden)?
-            .into_iter()
-            .map(|repo| repo.owner)
-            .collect::<HashSet<_>>()
-            .into_iter()
-            .collect();
+    let mut owners = get_owner_names(all, hidden)?;
 
     owners.sort_by(|a, b| sort_case_insensitive(a, b));
 

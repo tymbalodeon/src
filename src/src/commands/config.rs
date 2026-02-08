@@ -4,7 +4,7 @@ use std::process::Command;
 use anyhow::Result;
 use repo::config::{get_config, get_config_path};
 
-use crate::log::{log, LogLevel};
+use crate::log::{LogLevel, log};
 
 pub fn config() -> Result<()> {
     print!("{}", toml::to_string(&get_config()?)?);
@@ -24,13 +24,9 @@ pub fn get_config_value(key: &str) -> Result<()> {
     let config = get_config()?;
 
     let value = match key {
-        "host" => config
-            .host
-            .map_or(String::new(), |value| value),
+        "host" => config.host.map_or(String::new(), |value| value),
 
-        "owner" => config
-            .owner
-            .map_or(String::new(), |value| value),
+        "owner" => config.owner.map_or(String::new(), |value| value),
 
         "root_directory" => config
             .root_directory

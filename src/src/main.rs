@@ -9,7 +9,7 @@ use commands::{
     config::{config, edit_config, get_config_value},
     hook::hook,
     list::list,
-    list::{hosts, list_all, list_unmanaged, names, owners, SortByOption},
+    list::{SortByOption, hosts, list_all, list_unmanaged, names, owners},
     remove::remove,
 };
 
@@ -148,6 +148,18 @@ enum Command {
     Add {
         repos: Vec<String>,
 
+        /// Filter to repositories with host partially matching this value
+        #[arg(long)]
+        host: Option<String>,
+
+        /// Filter to repositories with owner partially matching this value
+        #[arg(long)]
+        owner: Option<String>,
+
+        /// Filter to repositories with owner matching the value of config.username
+        #[arg(long)]
+        me: bool,
+
         // TODO
         // #[arg(long)]
         // cd: bool,
@@ -229,7 +241,24 @@ enum Command {
     New { path: Option<String> },
 
     /// Remove repositories
-    Remove { repos: Vec<String> },
+    Remove {
+        repos: Vec<String>,
+
+        /// Filter to repositories with host partially matching this value
+        #[arg(long)]
+        host: Option<String>,
+
+        /// Filter to repositories with owner partially matching this value
+        #[arg(long)]
+        owner: Option<String>,
+
+        /// Filter to repositories with owner matching the value of config.username
+        #[arg(long)]
+        me: bool,
+
+        #[arg(long)]
+        force: bool,
+    },
 
     /// Sync repositories
     Sync { repos: Vec<String> },
@@ -237,7 +266,13 @@ enum Command {
 
 fn main() {
     let result = match &Cli::parse().command {
-        Some(Command::Add { repos, force }) => add(repos, *force),
+        Some(Command::Add {
+            repos,
+            host,
+            owner,
+            me,
+            force,
+        }) => add(repos, host.as_ref(), owner.as_ref(), *me, *force),
 
         Some(Command::Browse) => {
             println!("Implement me!");
@@ -252,8 +287,9 @@ fn main() {
             owner: _,
         }) => {
             cd();
+
             Ok(())
-        },
+        }
 
         Some(Command::Config { command }) => {
             command
@@ -266,8 +302,9 @@ fn main() {
 
         Some(Command::Hook) => {
             hook();
+
             Ok(())
-        },
+        }
 
         Some(Command::List {
             command,
@@ -378,7 +415,13 @@ fn main() {
             Ok(())
         }
 
-        Some(Command::Remove { repos }) => remove(repos),
+        Some(Command::Remove {
+            repos,
+            host,
+            owner,
+            me,
+            force,
+        }) => remove(repos, host.as_ref(), owner.as_ref(), *me, *force),
 
         Some(Command::Sync { repos: _ }) => {
             eprintln!("Implement sync!");
