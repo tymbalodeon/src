@@ -77,6 +77,8 @@ def --env --wrapped "src cd" [...args: string] {
     }
 
     $paths
+  } else {
+    $paths
   }
 
   let path = if ($paths | length) > 1 {
