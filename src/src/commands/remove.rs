@@ -26,7 +26,11 @@ pub fn remove(
     let repos = parse_repos_with_error_log(&config, repos, host, owner, true)?;
     let root_directory = &get_root_directory()?;
 
-    if !force && repos.len() > 0 {
+    if repos.len() < 1 {
+        return Ok(());
+    }
+
+    if !force {
         println!(
             "The following repositories would be removed:\n\n{}\n",
             repos
