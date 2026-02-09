@@ -1,4 +1,4 @@
-const HOOK: &str = include_str!("./hook.nu");
+const HOOK: &str = include_str!("./src-cd.nu");
 
 pub fn hook() {
     print!("{HOOK}");
