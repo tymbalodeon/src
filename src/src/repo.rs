@@ -44,6 +44,8 @@ pub fn parse_repos_with_error_log(
     owner: Option<&String>,
     must_exist: bool,
 ) -> Result<Vec<Repo>> {
+    // TODO: allow repos to be null and select all matching a host and/or owner
+
     let hosts = get_values(must_exist, host.cloned(), get_host_names)?;
     let owners = get_values(must_exist, owner.cloned(), get_owner_names)?;
     let default_host = config.host.as_deref();
