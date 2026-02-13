@@ -150,13 +150,12 @@ pub fn parse_repos(
 
                     match owner {
                         Some(owner) => {
-                            if let Some(owner_filter) = owner_filter {
-                                if owner.to_lowercase()
+                            if let Some(owner_filter) = owner_filter
+                                && owner.to_lowercase()
                                     != owner_filter.to_lowercase()
                                 {
                                     return Err(SrcRepoError::Config);
                                 }
-                            }
                         }
 
                         None => {
@@ -179,13 +178,12 @@ pub fn parse_repos(
 
                     match host {
                         Some(host) => {
-                            if let Some(host_filter) = host_filter {
-                                if host.to_lowercase()
+                            if let Some(host_filter) = host_filter
+                                && host.to_lowercase()
                                     != host_filter.to_lowercase()
                                 {
                                     return Err(SrcRepoError::Config);
                                 }
-                            }
                         }
 
                         None => {
