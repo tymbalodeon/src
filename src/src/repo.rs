@@ -2,14 +2,14 @@ use std::collections::HashSet;
 
 use anyhow::Result;
 use repo::{
-    config::{get_root_directory, Config},
+    config::{Config, get_root_directory},
     error::SrcRepoError,
-    repo::{parse_repos, Repo},
+    repo::{Repo, parse_repos},
 };
 
 use crate::{
     commands::list::{get_host_names, get_owner_names},
-    log::{log, LogLevel},
+    log::{LogLevel, log},
 };
 
 type GetValues = fn(bool, bool) -> Result<Vec<String>>;

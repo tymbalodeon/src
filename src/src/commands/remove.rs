@@ -55,18 +55,16 @@ pub fn remove(
             // TODO: exit with error?
             return Ok(());
         }
-    } else {
-        if let Some(repo) = repos.first() {
-            message = format!(
-                "Are you sure you want to remove {}?",
-                repo.managed_path_name(root_directory).cyan()
-            );
+    } else if let Some(repo) = repos.first() {
+        message = format!(
+            "Are you sure you want to remove {}?",
+            repo.managed_path_name(root_directory).cyan()
+        );
 
-            repos
-        } else {
-            // TODO: exit with error?
-            return Ok(());
-        }
+        repos
+    } else {
+        // TODO: exit with error?
+        return Ok(());
     };
 
     let remove = force
