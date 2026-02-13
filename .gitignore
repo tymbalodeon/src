@@ -1,22 +1,22 @@
-target
 **/*.rs.bk
-.idea
 *.iml
-/result*
 *.log
 *~
-
-# cachix tmp file
-store-path-pre-build
-
 # Devenv
 .devenv*
-devenv.local.nix
-
 # direnv
 .direnv
-
+.env
+.envrc
+.helix/config.toml
+.idea
 # pre-commit
 .pre-commit-config.yaml
-
+/result*
+devenv.local.nix
+documentation/book
+result
+# cachix tmp file
+store-path-pre-build
+target
 template/flake.lock

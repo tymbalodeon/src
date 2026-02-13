@@ -1,75 +1,131 @@
 {
-  description = "Rust-Nix";
-
   inputs = {
-    flake-parts = {
-      url = "github:hercules-ci/flake-parts";
-      inputs.nixpkgs-lib.follows = "nixpkgs";
-    };
-    rust-overlay.url = "github:oxalica/rust-overlay";
-    crate2nix.url = "github:nix-community/crate2nix";
-
-    # Development
-
-    devshell = {
-      url = "github:numtide/devshell";
+    crate2nix = {
       inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:nix-community/crate2nix";
     };
+
+    environments = {
+      inputs.nixpkgs.follows = "nixpkgs";
+      url = "github:tymbalodeon/environments/trunk?dir=src";
+    };
+
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+
+    nutest = {
+      flake = false;
+      url = "github:vyadh/nutest";
+    };
+
+    systems.url = "github:nix-systems/default";
   };
 
-  nixConfig = {
-    extra-trusted-public-keys = "eigenvalue.cachix.org-1:ykerQDDa55PGxU25CETy9wF6uVDpadGGXYrFNJA3TUs=";
-    extra-substituters = "https://eigenvalue.cachix.org";
-    allow-import-from-derivation = true;
-  };
+  outputs = {
+    crate2nix,
+    environments,
+    nixpkgs,
+    nutest,
+    systems,
+    ...
+  }: let
+    inherit (nixpkgs.lib) genAttrs;
+  in {
+    devShells = genAttrs (import systems) (
+      system: let
+        mergeModuleAttrs = {
+          attr,
+          nullValue,
+        }:
+          pkgs.lib.lists.flatten
+          (map (module: module.${attr} or nullValue) modules);
 
-  outputs =
-    inputs @ { self
-    , nixpkgs
-    , flake-parts
-    , rust-overlay
-    , crate2nix
-    , ...
-    }: flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = [
-        "x86_64-linux"
-        "aarch64-linux"
-        "x86_64-darwin"
-        "aarch64-darwin"
-      ];
+        modules =
+          map
+          (module: (import module {inherit pkgs;}))
+          (builtins.filter
+            (module: builtins.pathExists module)
+            (map
+              (item: ./.environments/${item.name}/shell.nix)
+              (builtins.filter
+                (item: item.value == "directory")
+                (
+                  if (builtins.pathExists ./.environments)
+                  then
+                    nixpkgs.lib.attrsets.attrsToList
+                    (builtins.readDir ./.environments)
+                  else []
+                ))));
 
-      imports = [
-        ./nix/rust-overlay/flake-module.nix
-        ./nix/devshell/flake-module.nix
-      ];
-
-      perSystem = { system, pkgs, lib, inputs', ... }:
-        let
-          # If you dislike IFD, you can also generate it with `crate2nix generate` 
-          # on each dependency change and import it here with `import ./Cargo.nix`.
-          cargoNix = inputs.crate2nix.tools.${system}.appliedCargoNix {
-            name = "rustnix";
-            src = ./.;
-          };
-        in
-        rec {
-          checks = {
-            rustnix = cargoNix.rootCrate.build.override {
-              runTests = true;
-            };
-          };
-
-          packages = {
-            rustnix = cargoNix.rootCrate.build;
-            default = packages.rustnix;
-
-            inherit (pkgs) rust-toolchain;
-
-            rust-toolchain-versions = pkgs.writeScriptBin "rust-toolchain-versions" ''
-              ${pkgs.rust-toolchain}/bin/cargo --version
-              ${pkgs.rust-toolchain}/bin/rustc --version
-            '';
-          };
+        pkgs = import nixpkgs {
+          inherit system;
+          config.allowUnfree = true;
         };
-    };
+      in {
+        default = pkgs.mkShellNoCC ({
+            inputsFrom =
+              map
+              (environment: environments.devShells.${system}.${environment})
+              ((
+                  if builtins.pathExists ./.environments/environments.toml
+                  then let
+                    environments =
+                      fromTOML
+                      (builtins.readFile ./.environments/environments.toml);
+                  in
+                    if builtins.hasAttr "environments" environments
+                    then
+                      map (environment: environment.name)
+                      environments.environments
+                    else []
+                  else []
+                )
+                ++ [
+                  "default"
+                  "git"
+                  "just"
+                  "markdown"
+                  "nix"
+                  "toml"
+                  "yaml"
+                ]);
+
+            packages = mergeModuleAttrs {
+              attr = "packages";
+              nullValue = [];
+            };
+
+            shellHook = with pkgs;
+              lib.concatLines (
+                [
+                  ''
+                    export NUTEST=${nutest}
+                    export ENVIRONMENTS=${environments}
+                    ${nushell}/bin/nu ${environments}/shell-hook.nu
+                  ''
+                ]
+                ++ mergeModuleAttrs {
+                  attr = "shellHook";
+                  nullValue = "";
+                }
+              );
+          }
+          // builtins.foldl'
+          (a: b: a // b)
+          {}
+          (map
+            (module: removeAttrs module ["packages" "shellHook"])
+            modules));
+      }
+    );
+
+    packages = genAttrs (import systems) (system: {
+      default = let
+        cargoNix = crate2nix.tools.${system}.appliedCargoNix {
+          name = "src";
+          src = ./.;
+        };
+      in
+        cargoNix.workspaceMembers.src.build;
+    });
+  };
 }
