@@ -1,13 +1,13 @@
-use std::env;
 use std::process::Command;
+use std::{env, path::PathBuf};
 
 use anyhow::Result;
 use repo::config::{get_config, get_config_path};
 
-use crate::log::{LogLevel, log};
+use crate::log::{log, LogLevel};
 
-pub fn config() -> Result<()> {
-    print!("{}", toml::to_string(&get_config()?)?);
+pub fn config(config_file: Option<&PathBuf>) -> Result<()> {
+    print!("{}", toml::to_string(&get_config(config_file)?)?);
 
     Ok(())
 }
@@ -20,8 +20,11 @@ pub fn edit_config() -> Result<()> {
     Ok(())
 }
 
-pub fn get_config_value(key: &str) -> Result<()> {
-    let config = get_config()?;
+pub fn get_config_value(
+    config_file: Option<&PathBuf>,
+    key: &str,
+) -> Result<()> {
+    let config = get_config(config_file)?;
 
     let value = match key {
         "host" => config.host.map_or(String::new(), |value| value),

@@ -5,7 +5,7 @@ use std::process::Command;
 use dirs::home_dir;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::config::{Config, get_root_directory};
+use crate::config::{get_root_directory, Config};
 use crate::error::SrcRepoError;
 use crate::repo::Repo;
 
@@ -168,24 +168,23 @@ fn list_repos(
         repos = unique_repos(&repos);
     }
 
-    let mut formatted_repos: Vec<String> =
-        repos
-            .iter()
-            .filter_map(|repo| {
-                if path {
-                    repo.local_source_path.as_ref().map_or_else(
-                        || {
-                            Some(repo.managed_path_name(
-                                &get_root_directory().ok()?,
-                            ))
-                        },
-                        |path| Some(path.to_string_lossy().to_string()),
-                    )
-                } else {
-                    Some(repo.display(no_host, no_owner))
-                }
-            })
-            .collect();
+    let mut formatted_repos: Vec<String> = repos
+        .iter()
+        .filter_map(|repo| {
+            if path {
+                repo.local_source_path.as_ref().map_or_else(
+                    || {
+                        Some(repo.managed_path_name(
+                            &get_root_directory(Some(config)).ok()?,
+                        ))
+                    },
+                    |path| Some(path.to_string_lossy().to_string()),
+                )
+            } else {
+                Some(repo.display(no_host, no_owner))
+            }
+        })
+        .collect();
 
     if unique {
         formatted_repos = formatted_repos
@@ -219,7 +218,7 @@ pub fn list_managed_repos(
 ) -> Result<Vec<String>, SrcRepoError> {
     Ok(list_repos(
         config,
-        &get_managed_repo_paths(&get_root_directory()?),
+        &get_managed_repo_paths(&get_root_directory(Some(config))?),
         host,
         owner,
         name,
@@ -309,7 +308,7 @@ pub fn list_unmanaged_repos(
 ) -> Result<Vec<String>, SrcRepoError> {
     Ok(list_repos(
         config,
-        &get_repo_paths(Some(&get_root_directory()?), hidden)?,
+        &get_repo_paths(Some(&get_root_directory(Some(config))?), hidden)?,
         host,
         owner,
         name,

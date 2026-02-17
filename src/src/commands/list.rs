@@ -1,16 +1,20 @@
-use std::collections::HashSet;
+use std::{collections::HashSet, path::PathBuf};
 
 use anyhow::Result;
 use repo::{
-    config::{get_config, get_root_directory, get_username},
+    config::{get_config, get_root_directory, get_username, Config},
     list::{
-        SortBy, get_repos, list_all_repos, list_managed_repos,
-        list_unmanaged_repos, sort_case_insensitive,
+        get_repos, list_all_repos, list_managed_repos, list_unmanaged_repos,
+        sort_case_insensitive, SortBy,
     },
 };
 
-pub fn get_host_names(all: bool, hidden: bool) -> Result<Vec<String>> {
-    Ok(get_repos(&get_root_directory()?, all, hidden)?
+pub fn get_host_names(
+    config: Option<&Config>,
+    all: bool,
+    hidden: bool,
+) -> Result<Vec<String>> {
+    Ok(get_repos(&get_root_directory(config)?, all, hidden)?
         .into_iter()
         .map(|repo| repo.host)
         .collect::<HashSet<_>>()
@@ -18,8 +22,8 @@ pub fn get_host_names(all: bool, hidden: bool) -> Result<Vec<String>> {
         .collect())
 }
 
-pub fn hosts(all: bool, hidden: bool) -> Result<()> {
-    let mut hosts = get_host_names(all, hidden)?;
+pub fn hosts(config: Option<&Config>, all: bool, hidden: bool) -> Result<()> {
+    let mut hosts = get_host_names(config, all, hidden)?;
 
     hosts.sort_by(|a, b| sort_case_insensitive(a, b));
 
@@ -28,8 +32,12 @@ pub fn hosts(all: bool, hidden: bool) -> Result<()> {
     Ok(())
 }
 
-pub fn get_owner_names(all: bool, hidden: bool) -> Result<Vec<String>> {
-    Ok(get_repos(&get_root_directory()?, all, hidden)?
+pub fn get_owner_names(
+    config: Option<&Config>,
+    all: bool,
+    hidden: bool,
+) -> Result<Vec<String>> {
+    Ok(get_repos(&get_root_directory(config)?, all, hidden)?
         .into_iter()
         .map(|repo| repo.owner)
         .collect::<HashSet<_>>()
@@ -37,8 +45,8 @@ pub fn get_owner_names(all: bool, hidden: bool) -> Result<Vec<String>> {
         .collect())
 }
 
-pub fn owners(all: bool, hidden: bool) -> Result<()> {
-    let mut owners = get_owner_names(all, hidden)?;
+pub fn owners(config: Option<&Config>, all: bool, hidden: bool) -> Result<()> {
+    let mut owners = get_owner_names(config, all, hidden)?;
 
     owners.sort_by(|a, b| sort_case_insensitive(a, b));
 
@@ -47,13 +55,18 @@ pub fn owners(all: bool, hidden: bool) -> Result<()> {
     Ok(())
 }
 
-pub fn names(all: bool, hidden: bool, me: bool) -> Result<()> {
+pub fn names(
+    config: Option<&Config>,
+    all: bool,
+    hidden: bool,
+    me: bool,
+) -> Result<()> {
     let mut names: Vec<String> =
-        get_repos(&get_root_directory()?, all, hidden)?
+        get_repos(&get_root_directory(config)?, all, hidden)?
             .into_iter()
             .filter_map(|repo| {
                 if me {
-                    if repo.owner == get_username().ok()? {
+                    if repo.owner == get_username(config).ok()? {
                         Some(repo.name)
                     } else {
                         None
@@ -93,6 +106,7 @@ const fn get_sort_by_value(sort_by: Option<&SortByOption>) -> Option<SortBy> {
 }
 
 pub fn list(
+    config_file: Option<&PathBuf>,
     host: Option<&String>,
     owner: Option<&String>,
     name: Option<&String>,
@@ -105,7 +119,7 @@ pub fn list(
     print!(
         "{}",
         list_managed_repos(
-            &get_config()?,
+            &get_config(config_file)?,
             host,
             owner,
             name,
@@ -122,6 +136,7 @@ pub fn list(
 }
 
 pub fn list_unmanaged(
+    config_file: Option<&PathBuf>,
     hidden: bool,
     host: Option<&String>,
     owner: Option<&String>,
@@ -133,7 +148,7 @@ pub fn list_unmanaged(
     sort_by: Option<&SortByOption>,
 ) -> Result<()> {
     let repos = list_unmanaged_repos(
-        &get_config()?,
+        &get_config(config_file)?,
         hidden,
         host,
         owner,
@@ -151,6 +166,7 @@ pub fn list_unmanaged(
 }
 
 pub fn list_all(
+    config_file: Option<&PathBuf>,
     hidden: bool,
     host: Option<&String>,
     owner: Option<&String>,
@@ -162,7 +178,7 @@ pub fn list_all(
     sort_by: Option<&SortByOption>,
 ) -> Result<()> {
     let repos = list_all_repos(
-        &get_config()?,
+        &get_config(config_file)?,
         hidden,
         host,
         owner,

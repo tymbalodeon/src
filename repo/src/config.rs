@@ -3,14 +3,14 @@ use std::process::Command;
 
 use dirs::{config_dir, home_dir};
 use figment::{
-    Figment,
     providers::{Env, Format, Serialized, Toml},
+    Figment,
 };
 use serde::{Deserialize, Serialize};
 
 use crate::error::SrcRepoError;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, Deserialize, Serialize)]
 pub struct Config {
     pub host: Option<String>,
     pub owner: Option<String>,
@@ -64,20 +64,41 @@ pub fn get_config_path() -> Result<String, SrcRepoError> {
 ///
 /// Will return `SrcRepoError` if it fails to merge configuration from the file
 /// and the environment
-pub fn get_config() -> Result<Config, SrcRepoError> {
-    Figment::from(Serialized::defaults(Config::default()))
-        .merge(Toml::file(get_config_path()?))
+pub fn get_config(
+    config_file: Option<&PathBuf>,
+) -> Result<Config, SrcRepoError> {
+    let config = Figment::from(Serialized::defaults(Config::default()));
+
+    let config = if let Some(config_file) = config_file {
+        config.merge(Toml::file(config_file))
+    } else if let Ok(config_path) = get_config_path() {
+        config.merge(Toml::file(config_path))
+    } else {
+        config
+    };
+
+    config
         .merge(Env::prefixed("SRC_"))
         .extract()
         .map_or(Err(SrcRepoError::Config), Ok)
+}
+
+fn select_config(config: Option<&Config>) -> Option<Config> {
+    config.map_or_else(
+        || get_config(None).ok(),
+        |config| Some(config.to_owned()),
+    )
 }
 
 /// # Errors
 ///
 /// Will return `SrcRepoError` if it fails to merge configuration from the file
 /// and the environment
-pub fn get_root_directory() -> Result<String, SrcRepoError> {
-    Ok(get_config()?
+pub fn get_root_directory(
+    config: Option<&Config>,
+) -> Result<String, SrcRepoError> {
+    Ok(select_config(config)
+        .ok_or(SrcRepoError::Config)?
         .root_directory
         .ok_or(SrcRepoError::Config)?
         .to_string_lossy()
@@ -88,6 +109,9 @@ pub fn get_root_directory() -> Result<String, SrcRepoError> {
 ///
 /// Will return `SrcRepoError` if it fails to merge configuration from the file
 /// and the environment
-pub fn get_username() -> Result<String, SrcRepoError> {
-    get_config()?.owner.ok_or(SrcRepoError::Config)
+pub fn get_username(config: Option<&Config>) -> Result<String, SrcRepoError> {
+    select_config(config)
+        .ok_or(SrcRepoError::Config)?
+        .owner
+        .ok_or(SrcRepoError::Config)
 }

@@ -1,6 +1,8 @@
 mod commands;
 mod log;
-mod repo;
+mod repository;
+
+use std::path::PathBuf;
 
 use clap::{Parser, Subcommand};
 use commands::{
@@ -9,9 +11,10 @@ use commands::{
     config::{config, edit_config, get_config_value},
     hook::hook,
     list::list,
-    list::{SortByOption, hosts, list_all, list_unmanaged, names, owners},
+    list::{hosts, list_all, list_unmanaged, names, owners, SortByOption},
     remove::remove,
 };
+use repo::config::get_config;
 
 /// Manage source code repositories
 #[derive(Parser)]
@@ -19,6 +22,11 @@ use commands::{
 struct Cli {
     #[command(subcommand)]
     command: Option<Command>,
+
+    #[arg(global = true)]
+    #[arg(long)]
+    #[arg(value_name = "FILE")]
+    config_file: Option<PathBuf>,
 }
 
 #[derive(Subcommand)]
@@ -265,14 +273,23 @@ enum Command {
 }
 
 fn main() {
-    let result = match &Cli::parse().command {
+    let cli = Cli::parse();
+
+    let result = match &cli.command {
         Some(Command::Add {
             repos,
             host,
             owner,
             me,
             force,
-        }) => add(repos, host.as_ref(), owner.as_ref(), *me, *force),
+        }) => add(
+            cli.config_file.as_ref(),
+            repos,
+            host.as_ref(),
+            owner.as_ref(),
+            *me,
+            *force,
+        ),
 
         Some(Command::Browse) => {
             println!("Implement me!");
@@ -291,14 +308,15 @@ fn main() {
             Ok(())
         }
 
-        Some(Command::Config { command }) => {
-            command
-                .as_ref()
-                .map_or_else(config, |command| match command {
-                    ConfigSubcommand::Edit => edit_config(),
-                    ConfigSubcommand::Get { key } => get_config_value(key),
-                })
-        }
+        Some(Command::Config { command }) => command.as_ref().map_or_else(
+            || config(cli.config_file.as_ref()),
+            |command| match command {
+                ConfigSubcommand::Edit => edit_config(),
+                ConfigSubcommand::Get { key } => {
+                    get_config_value(cli.config_file.as_ref(), key)
+                }
+            },
+        ),
 
         Some(Command::Hook) => {
             hook();
@@ -318,6 +336,7 @@ fn main() {
             sort_by,
         }) => match command {
             None => list(
+                cli.config_file.as_ref(),
                 host.as_ref(),
                 owner.as_ref(),
                 name.as_ref(),
@@ -350,6 +369,7 @@ fn main() {
                     all_sort_by.clone().map_or(sort_by, |_| all_sort_by);
 
                 list_all(
+                    cli.config_file.as_ref(),
                     *hidden,
                     host.as_ref(),
                     owner.as_ref(),
@@ -362,13 +382,18 @@ fn main() {
                 )
             }
 
-            Some(ListSubcommand::Hosts { all, hidden }) => {
-                hosts(*all, *hidden)
-            }
+            Some(ListSubcommand::Hosts { all, hidden }) => hosts(
+                get_config(cli.config_file.as_ref()).ok().as_ref(),
+                *all,
+                *hidden,
+            ),
 
-            Some(ListSubcommand::Names { all, hidden }) => {
-                names(*all, *hidden, *me)
-            }
+            Some(ListSubcommand::Names { all, hidden }) => names(
+                get_config(cli.config_file.as_ref()).ok().as_ref(),
+                *all,
+                *hidden,
+                *me,
+            ),
 
             Some(ListSubcommand::Unmanaged {
                 hidden,
@@ -388,10 +413,12 @@ fn main() {
                 let no_owner = *all_no_owner || *no_owner;
                 let owner = all_owner.clone().map_or(owner, |_| all_owner);
                 let path = *all_path || *path;
+
                 let sort_by =
                     all_sort_by.clone().map_or(sort_by, |_| all_sort_by);
 
                 list_unmanaged(
+                    cli.config_file.as_ref(),
                     *hidden,
                     host.as_ref(),
                     owner.as_ref(),
@@ -404,9 +431,11 @@ fn main() {
                 )
             }
 
-            Some(ListSubcommand::Owners { all, hidden }) => {
-                owners(*all, *hidden)
-            }
+            Some(ListSubcommand::Owners { all, hidden }) => owners(
+                get_config(cli.config_file.as_ref()).ok().as_ref(),
+                *all,
+                *hidden,
+            ),
         },
 
         Some(Command::New { path: _ }) => {
@@ -421,7 +450,14 @@ fn main() {
             owner,
             me,
             force,
-        }) => remove(repos, host.as_ref(), owner.as_ref(), *me, *force),
+        }) => remove(
+            cli.config_file.as_ref(),
+            repos,
+            host.as_ref(),
+            owner.as_ref(),
+            *me,
+            *force,
+        ),
 
         Some(Command::Sync { repos: _ }) => {
             eprintln!("Implement sync!");

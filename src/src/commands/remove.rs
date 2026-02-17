@@ -1,11 +1,11 @@
-use std::process::Command;
+use std::{path::PathBuf, process::Command};
 
 use anyhow::Result;
 use colored::Colorize;
 use inquire::{Confirm, MultiSelect};
 use repo::config::{get_config, get_root_directory};
 
-use crate::repo::parse_repos_with_error_log;
+use crate::repository::parse_repos_with_error_log;
 
 pub fn remove_repo(managed_path: &str) -> Result<()> {
     Command::new("rm")
@@ -16,16 +16,17 @@ pub fn remove_repo(managed_path: &str) -> Result<()> {
 }
 
 pub fn remove(
+    config_file: Option<&PathBuf>,
     repos: &[String],
     host: Option<&String>,
     owner: Option<&String>,
     me: bool,
     force: bool,
 ) -> Result<()> {
-    let config = get_config()?;
+    let config = get_config(config_file)?;
     let owner = if me { config.owner.as_ref() } else { owner };
     let repos = parse_repos_with_error_log(&config, repos, host, owner, true)?;
-    let root_directory = &get_root_directory()?;
+    let root_directory = &get_root_directory(Some(&config))?;
 
     if repos.is_empty() {
         return Ok(());

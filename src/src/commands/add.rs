@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use anyhow::Result;
@@ -7,7 +7,7 @@ use repo::repo::Repo;
 use repo::{config::get_root_directory, list::get_managed_repo_paths};
 
 use crate::commands::remove::remove_repo;
-use crate::repo::parse_repos_with_error_log;
+use crate::repository::parse_repos_with_error_log;
 
 fn filter_unique_repos(repos: &[Repo]) -> Vec<Repo> {
     let mut repos_to_add: Vec<Repo> = repos
@@ -39,17 +39,20 @@ fn filter_unique_repos(repos: &[Repo]) -> Vec<Repo> {
 }
 
 pub fn add(
+    config_file: Option<&PathBuf>,
     repos: &[String],
     host: Option<&String>,
     owner: Option<&String>,
     me: bool,
     force: bool,
 ) -> Result<()> {
-    let config = get_config()?;
+    let config = get_config(config_file)?;
     let owner = if me { config.owner.as_ref() } else { owner };
+
     let repos =
         parse_repos_with_error_log(&config, repos, host, owner, false)?;
-    let root_directory = get_root_directory()?;
+
+    let root_directory = get_root_directory(Some(&config))?;
     let repo_paths = get_managed_repo_paths(&root_directory);
 
     for repo in filter_unique_repos(&repos) {
