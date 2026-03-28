@@ -11,7 +11,7 @@ use commands::{
     config::{config, edit_config, get_config_value},
     hook::hook,
     list::list,
-    list::{hosts, list_all, list_unmanaged, names, owners, SortByOption},
+    list::{SortByOption, hosts, list_all, list_unmanaged, names, owners},
     remove::remove,
 };
 use repo::config::get_config;

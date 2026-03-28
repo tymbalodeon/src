@@ -4,7 +4,7 @@ use std::{env, path::PathBuf};
 use anyhow::Result;
 use repo::config::{get_config, get_config_path};
 
-use crate::log::{log, LogLevel};
+use crate::log::{LogLevel, log};
 
 pub fn config(config_file: Option<&PathBuf>) -> Result<()> {
     print!("{}", toml::to_string(&get_config(config_file)?)?);

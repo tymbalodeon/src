@@ -20,7 +20,7 @@ pub struct Repo {
     pub local_source_path: Option<PathBuf>,
 
     #[derivative(PartialEq = "ignore")]
-    url: String,
+    pub url: String,
 }
 
 fn parse_url(
@@ -109,11 +109,6 @@ impl Repo {
             url: url.to_string(),
         }
     }
-
-    #[must_use]
-    pub fn url(self) -> String {
-        format!("git@{}", self.url)
-    }
 }
 
 impl fmt::Display for Repo {
@@ -153,9 +148,9 @@ pub fn parse_repos(
                             if let Some(owner_filter) = owner_filter
                                 && owner.to_lowercase()
                                     != owner_filter.to_lowercase()
-                                {
-                                    return Err(SrcRepoError::Config);
-                                }
+                            {
+                                return Err(SrcRepoError::Config);
+                            }
                         }
 
                         None => {
@@ -181,9 +176,9 @@ pub fn parse_repos(
                             if let Some(host_filter) = host_filter
                                 && host.to_lowercase()
                                     != host_filter.to_lowercase()
-                                {
-                                    return Err(SrcRepoError::Config);
-                                }
+                            {
+                                return Err(SrcRepoError::Config);
+                            }
                         }
 
                         None => {

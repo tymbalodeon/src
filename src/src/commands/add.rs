@@ -58,8 +58,8 @@ pub fn add(
     for repo in filter_unique_repos(&repos) {
         let managed_path = repo.managed_path_name(&root_directory);
 
-        if let Some(ref local_source_path) = repo.local_source_path {
-            if force || !repo_paths.contains(&managed_path) {
+        if force || !repo_paths.contains(&managed_path) {
+            if let Some(ref local_source_path) = repo.local_source_path {
                 println!(
                     "Moving {} to {managed_path}",
                     local_source_path.to_string_lossy()
@@ -74,15 +74,15 @@ pub fn add(
                         ),
                     ])
                     .status()?;
-            }
-        } else if force || !repo_paths.contains(&managed_path) {
-            if force && Path::new(&managed_path).exists() {
-                remove_repo(&managed_path)?;
-            }
+            } else {
+                if force && Path::new(&managed_path).exists() {
+                    remove_repo(&managed_path)?;
+                }
 
-            Command::new("git")
-                .args(vec!["clone", &repo.url(), &managed_path])
-                .status()?;
+                Command::new("git")
+                    .args(vec!["clone", &repo.url, &managed_path])
+                    .status()?;
+            }
         }
     }
 

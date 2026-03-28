@@ -2,10 +2,10 @@ use std::{collections::HashSet, path::PathBuf};
 
 use anyhow::Result;
 use repo::{
-    config::{get_config, get_root_directory, get_username, Config},
+    config::{Config, get_config, get_root_directory, get_username},
     list::{
-        get_repos, list_all_repos, list_managed_repos, list_unmanaged_repos,
-        sort_case_insensitive, SortBy,
+        SortBy, get_repos, list_all_repos, list_managed_repos,
+        list_unmanaged_repos, sort_case_insensitive,
     },
 };
 

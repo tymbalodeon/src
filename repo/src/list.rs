@@ -5,7 +5,7 @@ use std::process::Command;
 use dirs::home_dir;
 use walkdir::{DirEntry, WalkDir};
 
-use crate::config::{get_root_directory, Config};
+use crate::config::{Config, get_root_directory};
 use crate::error::SrcRepoError;
 use crate::repo::Repo;
 
