@@ -1063,7 +1063,7 @@
             target = {
               target,
               features,
-            }: ((target."unix" or false) && (!("macos" == target."os" or null)));
+            }: ((target."unix" or false) && ("macos" != target."os" or null));
           }
           {
             name = "openssl-sys";
@@ -1072,7 +1072,7 @@
             target = {
               target,
               features,
-            }: ((target."unix" or false) && (!("macos" == target."os" or null)));
+            }: ((target."unix" or false) && ("macos" != target."os" or null));
           }
           {
             name = "url";
@@ -3907,7 +3907,7 @@
       version,
       sha256,
     }: let
-      dl = registries.${url}.dl;
+      inherit (registries.${url}) dl;
       tmpl = [
         "{crate}"
         "{version}"
@@ -4238,7 +4238,7 @@
           #    # ...
           # }
           crateRenames = let
-            grouped = lib.groupBy (dependency: dependency.name) dependenciesWithRenames;
+            grouped = builtins.groupBy (dependency: dependency.name) dependenciesWithRenames;
             versionAndRename = dep: let
               package = crateConfigs."${dep.packageId}";
             in {

@@ -1,0 +1,9 @@
+imports:
+- environments
+inputs:
+  environments:
+    flake: false
+    url: github:tymbalodeon/environments/trunk?dir=src
+  project:
+    flake: false
+    url: path:.
