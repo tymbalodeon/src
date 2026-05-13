@@ -1,6 +1,1 @@
-#!/usr/bin/env nu
-
-# Run the tests
-def --wrapped main [...args: string] {
-  cargo test ...$args
-}
+/nix/store/5j29ndfavbcixrriya2l7aqgg2miylay-environments-rust-scripts-test.nu

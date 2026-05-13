@@ -1,5 +1,1 @@
-#!/usr/bin/env nu
-
-def main [] {
-  cargo tree --depth 1
-}
+/nix/store/acvixwzzpwwz2fzwi9907gff9zkfqg0l-environments-rust-scripts-deps.nu

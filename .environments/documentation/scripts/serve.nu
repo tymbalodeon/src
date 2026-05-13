@@ -1,9 +1,1 @@
-#!/usr/bin/env nu
-
-use open-documentation.nu
-
-# Serve documentation files and recompile on changes
-def main [] {
-  open-documentation
-  mdbook serve documentation
-}
+/nix/store/wsqll9kzd5082hm0xlg23bzvh9j9641m-environments-documentation-scripts-serve.nu

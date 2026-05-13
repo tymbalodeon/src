@@ -1,5 +1,1 @@
-#!/usr/bin/env nu
-
-def main [] {
-  cargo clean
-}
+/nix/store/vsb6ygi8x43p1dn1nxwh0dg1l14ww7pa-environments-rust-scripts-clean.nu

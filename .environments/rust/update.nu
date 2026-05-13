@@ -1,0 +1,1 @@
+/nix/store/97lylbjsiz72b5w1qjan2whcpd1diqxk-environments-rust-update.nu

@@ -1,5 +1,1 @@
-#!/usr/bin/env nu
-
-def --wrapped main [...args: string] {
-  cargo add ...$args
-}
+/nix/store/vnh8sq49aas59zapfliwn1k2d4d6lk6l-environments-rust-scripts-add.nu

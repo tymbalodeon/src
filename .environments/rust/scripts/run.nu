@@ -1,6 +1,1 @@
-#!/usr/bin/env nu
-
-# Run the application, with any provided <args>.
-def --wrapped main [...args: string] {
-  cargo run -- ...$args
-}
+/nix/store/9sj092h9cx9pi983wmv8gfsr11g5bi2b-environments-rust-scripts-run.nu

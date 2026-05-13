@@ -24,8 +24,7 @@ fn filter_unique_repos(repos: &[Repo]) -> Vec<Repo> {
     let remote_repos: Vec<Repo> = repos
         .iter()
         .filter_map(|repo| {
-            if repo.local_source_path.is_none() && !repos_to_add.contains(repo)
-            {
+            if repo.local_source_path.is_none() && !repos_to_add.contains(repo) {
                 Some(repo.clone())
             } else {
                 None
@@ -49,8 +48,7 @@ pub fn add(
     let config = get_config(config_file)?;
     let owner = if me { config.owner.as_ref() } else { owner };
 
-    let repos =
-        parse_repos_with_error_log(&config, repos, host, owner, false)?;
+    let repos = parse_repos_with_error_log(&config, repos, host, owner, false)?;
 
     let root_directory = get_root_directory(Some(&config))?;
     let repo_paths = get_managed_repo_paths(&root_directory);
@@ -68,10 +66,7 @@ pub fn add(
                 Command::new("mv")
                     .args(vec![
                         &local_source_path.to_string_lossy().to_string(),
-                        &format!(
-                            "{root_directory}/{}/{}",
-                            repo.host, repo.owner
-                        ),
+                        &format!("{root_directory}/{}/{}", repo.host, repo.owner),
                     ])
                     .status()?;
             } else {

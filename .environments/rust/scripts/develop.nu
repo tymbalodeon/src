@@ -1,5 +1,1 @@
-#!/usr/bin/env nu
-
-def main [] {
-  zellij --layout $"($env.ENVIRONMENTS)/rust/layout.kdl"
-}
+/nix/store/5m9lssrihz55gkbnmrybzs8ydpzrd9ym-environments-rust-scripts-develop.nu

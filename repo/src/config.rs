@@ -37,8 +37,7 @@ impl Default for Config {
     fn default() -> Self {
         let mut username = get_git_config_user("github");
 
-        username =
-            username.map_or_else(|| get_git_config_user("gitlab"), Some);
+        username = username.map_or_else(|| get_git_config_user("gitlab"), Some);
 
         Self {
             root_directory: home_dir().map(|home_dir| home_dir.join("src")),
@@ -64,9 +63,7 @@ pub fn get_config_path() -> Result<String, SrcRepoError> {
 ///
 /// Will return `SrcRepoError` if it fails to merge configuration from the file
 /// and the environment
-pub fn get_config(
-    config_file: Option<&PathBuf>,
-) -> Result<Config, SrcRepoError> {
+pub fn get_config(config_file: Option<&PathBuf>) -> Result<Config, SrcRepoError> {
     let config = Figment::from(Serialized::defaults(Config::default()));
 
     let config = if let Some(config_file) = config_file {
@@ -84,19 +81,14 @@ pub fn get_config(
 }
 
 fn select_config(config: Option<&Config>) -> Option<Config> {
-    config.map_or_else(
-        || get_config(None).ok(),
-        |config| Some(config.to_owned()),
-    )
+    config.map_or_else(|| get_config(None).ok(), |config| Some(config.to_owned()))
 }
 
 /// # Errors
 ///
 /// Will return `SrcRepoError` if it fails to merge configuration from the file
 /// and the environment
-pub fn get_root_directory(
-    config: Option<&Config>,
-) -> Result<String, SrcRepoError> {
+pub fn get_root_directory(config: Option<&Config>) -> Result<String, SrcRepoError> {
     Ok(select_config(config)
         .ok_or(SrcRepoError::Config)?
         .root_directory

@@ -1,5 +1,1 @@
-#!/usr/bin/env nu
-
-def main [] {
-  cargo install --path .
-}
+/nix/store/16x84r29dinjbcjvjsrgqlq5cnd9qmwf-environments-rust-scripts-install.nu

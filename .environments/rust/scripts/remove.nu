@@ -1,9 +1,1 @@
-#!/usr/bin/env nu
-
-def main [
-  ...dependencies: string # Dependencies to remove
-] {
-  for dependency in $dependencies {
-      cargo remove $dependency
-  }
-}
+/nix/store/gispjf80y2aknhz7prk5jqrk8vakp4fk-environments-rust-scripts-remove.nu

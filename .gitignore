@@ -2,21 +2,39 @@
 *.iml
 *.log
 *~
-# Devenv
 .devenv*
-# direnv
 .direnv
 .env
 .envrc
 .helix/config.toml
 .idea
-# pre-commit
 .pre-commit-config.yaml
 /result*
+Devenv
+cachix tmp file
+devenv.local.*
 devenv.local.nix
+direnv
 documentation/book
+pre-commit
 result
-# cachix tmp file
 store-path-pre-build
 target
 template/flake.lock
+
+# default
+.devenv*
+devenv.local.*
+.direnv
+.env
+.envrc
+.helix/config.toml
+
+# documentation
+documentation/book
+
+# nix
+result
+
+# rust
+target

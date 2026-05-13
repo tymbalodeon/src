@@ -312,9 +312,7 @@ fn main() {
             || config(cli.config_file.as_ref()),
             |command| match command {
                 ConfigSubcommand::Edit => edit_config(),
-                ConfigSubcommand::Get { key } => {
-                    get_config_value(cli.config_file.as_ref(), key)
-                }
+                ConfigSubcommand::Get { key } => get_config_value(cli.config_file.as_ref(), key),
             },
         ),
 
@@ -365,8 +363,7 @@ fn main() {
                 let no_owner = *all_no_owner || *no_owner;
                 let owner = all_owner.clone().map_or(owner, |_| all_owner);
                 let path = *all_path || *path;
-                let sort_by =
-                    all_sort_by.clone().map_or(sort_by, |_| all_sort_by);
+                let sort_by = all_sort_by.clone().map_or(sort_by, |_| all_sort_by);
 
                 list_all(
                     cli.config_file.as_ref(),
@@ -414,8 +411,7 @@ fn main() {
                 let owner = all_owner.clone().map_or(owner, |_| all_owner);
                 let path = *all_path || *path;
 
-                let sort_by =
-                    all_sort_by.clone().map_or(sort_by, |_| all_sort_by);
+                let sort_by = all_sort_by.clone().map_or(sort_by, |_| all_sort_by);
 
                 list_unmanaged(
                     cli.config_file.as_ref(),

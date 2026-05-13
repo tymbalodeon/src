@@ -19,17 +19,16 @@ pub fn get_managed_repo_paths(root_directory: &str) -> Vec<String> {
                     return None;
                 }
 
-                path.path().strip_prefix(root_directory).map_or(
-                    None,
-                    |dir_entry| {
+                path.path()
+                    .strip_prefix(root_directory)
+                    .map_or(None, |dir_entry| {
                         Some(
                             PathBuf::from(root_directory)
                                 .join(dir_entry)
                                 .to_string_lossy()
                                 .to_string(),
                         )
-                    },
-                )
+                    })
             })
         })
         .collect()
@@ -38,11 +37,7 @@ pub fn get_managed_repo_paths(root_directory: &str) -> Vec<String> {
 /// # Errors
 ///
 /// Will return `SrcRepoError` if it fails to parse a repo in `root_directory`
-pub fn get_repos(
-    root_directory: &str,
-    all: bool,
-    hidden: bool,
-) -> Result<Vec<Repo>, SrcRepoError> {
+pub fn get_repos(root_directory: &str, all: bool, hidden: bool) -> Result<Vec<Repo>, SrcRepoError> {
     let paths = if all {
         get_repo_paths(None, hidden)?
     } else {
@@ -69,9 +64,7 @@ fn is_git_repo(path: &DirEntry) -> bool {
 /// # Errors
 ///
 /// Will return `SrcRepoError` if it git is not installed
-pub fn filter_git_repos(
-    paths: Vec<DirEntry>,
-) -> Result<Vec<DirEntry>, SrcRepoError> {
+pub fn filter_git_repos(paths: Vec<DirEntry>) -> Result<Vec<DirEntry>, SrcRepoError> {
     Ok(paths
         .into_iter()
         .filter_map(|dir_entry| {
@@ -173,11 +166,7 @@ fn list_repos(
         .filter_map(|repo| {
             if path {
                 repo.local_source_path.as_ref().map_or_else(
-                    || {
-                        Some(repo.managed_path_name(
-                            &get_root_directory(Some(config)).ok()?,
-                        ))
-                    },
+                    || Some(repo.managed_path_name(&get_root_directory(Some(config)).ok()?)),
                     |path| Some(path.to_string_lossy().to_string()),
                 )
             } else {
@@ -232,9 +221,8 @@ pub fn list_managed_repos(
 }
 
 fn is_managed_path(path: &DirEntry, root_directory: Option<&str>) -> bool {
-    root_directory.is_some_and(|root_directory| {
-        path.depth() == 4 && path.path().starts_with(root_directory)
-    })
+    root_directory
+        .is_some_and(|root_directory| path.depth() == 4 && path.path().starts_with(root_directory))
 }
 
 fn convert_to_string(path: &DirEntry) -> String {

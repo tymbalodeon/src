@@ -20,10 +20,7 @@ pub fn edit_config() -> Result<()> {
     Ok(())
 }
 
-pub fn get_config_value(
-    config_file: Option<&PathBuf>,
-    key: &str,
-) -> Result<()> {
+pub fn get_config_value(config_file: Option<&PathBuf>, key: &str) -> Result<()> {
     let config = get_config(config_file)?;
 
     let value = match key {

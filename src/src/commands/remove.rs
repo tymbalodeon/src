@@ -47,10 +47,7 @@ pub fn remove(
         if let Ok(selected_repos) = selected_repos {
             repos
                 .into_iter()
-                .filter(|repo| {
-                    selected_repos
-                        .contains(&repo.managed_path_name(root_directory))
-                })
+                .filter(|repo| selected_repos.contains(&repo.managed_path_name(root_directory)))
                 .collect()
         } else {
             // TODO: exit with error?

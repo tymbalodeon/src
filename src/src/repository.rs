@@ -48,8 +48,7 @@ pub fn parse_repos_with_error_log(
     // TODO: allow repos to be null and select all matching a host and/or owner
 
     let hosts = get_values(config, must_exist, host.cloned(), get_host_names)?;
-    let owners =
-        get_values(config, must_exist, owner.cloned(), get_owner_names)?;
+    let owners = get_values(config, must_exist, owner.cloned(), get_owner_names)?;
     let default_host = config.host.as_deref();
     let default_owner = config.owner.as_deref();
 
@@ -80,16 +79,13 @@ pub fn parse_repos_with_error_log(
         .filter_map(|repo| match repo {
             Ok(repo) => {
                 if must_exist {
-                    get_root_directory(Some(config)).map_or(
-                        None,
-                        |root_directory| {
-                            if repo.managed_path(&root_directory).exists() {
-                                Some(repo)
-                            } else {
-                                None
-                            }
-                        },
-                    )
+                    get_root_directory(Some(config)).map_or(None, |root_directory| {
+                        if repo.managed_path(&root_directory).exists() {
+                            Some(repo)
+                        } else {
+                            None
+                        }
+                    })
                 } else {
                     Some(repo)
                 }

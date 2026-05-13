@@ -4,16 +4,12 @@ use anyhow::Result;
 use repo::{
     config::{Config, get_config, get_root_directory, get_username},
     list::{
-        SortBy, get_repos, list_all_repos, list_managed_repos,
-        list_unmanaged_repos, sort_case_insensitive,
+        SortBy, get_repos, list_all_repos, list_managed_repos, list_unmanaged_repos,
+        sort_case_insensitive,
     },
 };
 
-pub fn get_host_names(
-    config: Option<&Config>,
-    all: bool,
-    hidden: bool,
-) -> Result<Vec<String>> {
+pub fn get_host_names(config: Option<&Config>, all: bool, hidden: bool) -> Result<Vec<String>> {
     Ok(get_repos(&get_root_directory(config)?, all, hidden)?
         .into_iter()
         .map(|repo| repo.host)
@@ -32,11 +28,7 @@ pub fn hosts(config: Option<&Config>, all: bool, hidden: bool) -> Result<()> {
     Ok(())
 }
 
-pub fn get_owner_names(
-    config: Option<&Config>,
-    all: bool,
-    hidden: bool,
-) -> Result<Vec<String>> {
+pub fn get_owner_names(config: Option<&Config>, all: bool, hidden: bool) -> Result<Vec<String>> {
     Ok(get_repos(&get_root_directory(config)?, all, hidden)?
         .into_iter()
         .map(|repo| repo.owner)
@@ -55,29 +47,23 @@ pub fn owners(config: Option<&Config>, all: bool, hidden: bool) -> Result<()> {
     Ok(())
 }
 
-pub fn names(
-    config: Option<&Config>,
-    all: bool,
-    hidden: bool,
-    me: bool,
-) -> Result<()> {
-    let mut names: Vec<String> =
-        get_repos(&get_root_directory(config)?, all, hidden)?
-            .into_iter()
-            .filter_map(|repo| {
-                if me {
-                    if repo.owner == get_username(config).ok()? {
-                        Some(repo.name)
-                    } else {
-                        None
-                    }
-                } else {
+pub fn names(config: Option<&Config>, all: bool, hidden: bool, me: bool) -> Result<()> {
+    let mut names: Vec<String> = get_repos(&get_root_directory(config)?, all, hidden)?
+        .into_iter()
+        .filter_map(|repo| {
+            if me {
+                if repo.owner == get_username(config).ok()? {
                     Some(repo.name)
+                } else {
+                    None
                 }
-            })
-            .collect::<HashSet<_>>()
-            .into_iter()
-            .collect();
+            } else {
+                Some(repo.name)
+            }
+        })
+        .collect::<HashSet<_>>()
+        .into_iter()
+        .collect();
 
     names.sort_by(|a, b| sort_case_insensitive(a, b));
 

@@ -1,6 +1,1 @@
-#!/usr/bin/env nu
-
-# Open the documentation page
-export def main [] {
-  job spawn { start http://localhost:3000/ }
-}
+/nix/store/h42svcpfw5n5l1znvff03227a4p0ghb0-environments-documentation-scripts-open-documentation.nu

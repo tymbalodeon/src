@@ -1,0 +1,1 @@
+/nix/store/m7m4ki7qn9hx72f3b6qxdsfhmkicmgqm-environments-rust-test.nu

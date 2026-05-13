@@ -1,11 +1,1 @@
-#!/usr/bin/env nu
-
-def main [
-  --release # Build in release mode, with optimizations
-] {
-  if $release {
-    cargo build --release
-  } else {
-    cargo build
-  }
-}
+/nix/store/vpx6g4cq4f8jmhw09r0f12qwdi4i2c88-environments-rust-scripts-build.nu

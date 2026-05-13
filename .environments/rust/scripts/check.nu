@@ -1,5 +1,1 @@
-#!/usr/bin/env nu
-
-def main [] {
-  cargo check --color always
-}
+/nix/store/q9hazygm564dkc8d14jwnq537r53arda-environments-rust-scripts-check.nu

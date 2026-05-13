@@ -1,0 +1,1 @@
+/nix/store/x38zakanawzg98wrl6agm8zina4bj3n8-environments-rust-format.nu

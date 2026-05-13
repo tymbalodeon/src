@@ -69,6 +69,15 @@ alias todos := todo
 @theme *args:
     .environments/default/scripts/theme.nu {{ args }}
 
+mod documentation ".environments/documentation/Justfile"
+mod rust ".environments/rust/Justfile"
+mod git ".environments/git/Justfile"
+mod just ".environments/just/Justfile"
+mod markdown ".environments/markdown/Justfile"
+mod nix ".environments/nix/Justfile"
+mod yaml ".environments/yaml/Justfile"
+mod src ".environments/src/Justfile"
+
 [private]
 @doc *args:
     just documentation {{ args }}
@@ -89,26 +98,16 @@ alias todos := todo
 @yml *args:
     just yaml {{ args }}
 
-mod documentation ".environments/documentation/Justfile"
-mod git ".environments/git/Justfile"
-mod just ".environments/just/Justfile"
-mod markdown ".environments/markdown/Justfile"
-mod nix ".environments/nix/Justfile"
-mod rust ".environments/rust/Justfile"
-mod src ".environments/src/Justfile"
-mod yaml ".environments/yaml/Justfile"
-
+alias open-documentation := documentation::open-documentation
+alias serve := documentation::serve
+alias leaks := git::leaks
+alias shell := nix::shell
 alias add := rust::add
 alias build := rust::build
 alias deps := rust::deps
 alias install := rust::install
-alias leaks := git::leaks
-alias open := documentation::open
-alias package := src::package
 alias remove := rust::remove
 alias run := rust::run
-alias serve := documentation::serve
-alias sh := nix::shell
-alias shell := nix::shell
 alias test := rust::test
 alias update := rust::update
+alias package := src::package

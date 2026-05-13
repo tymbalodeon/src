@@ -1,12 +1,1 @@
-#!/usr/bin/env nu
-
-# Update rust dependencies
-def main [
-  --breaking # Update to latest SemVer-breaking version
-] {
-  if $breaking {
-    cargo update --breaking -Z unstable-options
-  } else {
-    cargo update
-  }
-}
+/nix/store/nhra5lw0d0s0b0fm6j8vc7953qwngraq-environments-rust-scripts-update.nu

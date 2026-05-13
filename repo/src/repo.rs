@@ -23,10 +23,7 @@ pub struct Repo {
     pub url: String,
 }
 
-fn parse_url(
-    url: &str,
-    local_source_path: Option<&PathBuf>,
-) -> Result<Repo, SrcRepoError> {
+fn parse_url(url: &str, local_source_path: Option<&PathBuf>) -> Result<Repo, SrcRepoError> {
     let git_url = GitUrl::parse(url)?;
     let repo_provider = git_url.provider_info::<GenericProvider>()?;
 
@@ -146,8 +143,7 @@ pub fn parse_repos(
                     match owner {
                         Some(owner) => {
                             if let Some(owner_filter) = owner_filter
-                                && owner.to_lowercase()
-                                    != owner_filter.to_lowercase()
+                                && owner.to_lowercase() != owner_filter.to_lowercase()
                             {
                                 return Err(SrcRepoError::Config);
                             }
@@ -174,8 +170,7 @@ pub fn parse_repos(
                     match host {
                         Some(host) => {
                             if let Some(host_filter) = host_filter
-                                && host.to_lowercase()
-                                    != host_filter.to_lowercase()
+                                && host.to_lowercase() != host_filter.to_lowercase()
                             {
                                 return Err(SrcRepoError::Config);
                             }

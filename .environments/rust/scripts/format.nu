@@ -1,6 +1,1 @@
-#!/usr/bin/env nu
-
-def main [] {
-  # TODO: handle dx (see languages.toml), possibly as a feature
-  cargo fmt
-}
+/nix/store/791vmiz0cz8nacfn1wvghw3rfk2f3rkw-environments-rust-scripts-format.nu
