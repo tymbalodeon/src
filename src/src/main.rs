@@ -7,6 +7,7 @@ use std::path::PathBuf;
 use clap::{Parser, Subcommand};
 use commands::{
     add::add,
+    browse::browse,
     cd::cd,
     config::{config, edit_config, get_config_value},
     hook::hook,
@@ -291,11 +292,7 @@ fn main() {
             *force,
         ),
 
-        Some(Command::Browse) => {
-            println!("Implement me!");
-
-            Ok(())
-        }
+        Some(Command::Browse) => browse(),
 
         Some(Command::Cd {
             repo: _,

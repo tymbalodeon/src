@@ -40,6 +40,7 @@ fn parse_url(url: &str, local_source_path: Option<&PathBuf>) -> Result<Repo, Src
         url,
     })
 }
+
 impl Repo {
     #[must_use]
     pub fn display(&self, no_host: bool, no_owner: bool) -> String {
