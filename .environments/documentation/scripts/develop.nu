@@ -1,1 +1,1 @@
-/nix/store/yn9xlxs97np1nhgc76v4iya0zvh7f858-environments-documentation-scripts-develop.nu
+/nix/store/4lj082282qs7m37wz7fpqykm0nni09kc-environments-documentation-scripts-develop.nu
