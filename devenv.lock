@@ -3,11 +3,11 @@
     "devenv": {
       "locked": {
         "dir": "src/modules",
-        "lastModified": 1778893748,
-        "narHash": "sha256-VqVecb+w+gCD/hNAUI+3xcJEI4aHThCoq8jr0yBKODU=",
+        "lastModified": 1779032662,
+        "narHash": "sha256-+qN6YTSArEThWA8XGCyIz0qZz1GTNRLRUcHxPjf1eZk=",
         "owner": "cachix",
         "repo": "devenv",
-        "rev": "768261db727bdd30d6a70af0dc9938a79830e515",
+        "rev": "58b04522edfe56e4b37a4d4600104db6429f4667",
         "type": "github"
       },
       "original": {
@@ -21,11 +21,11 @@
       "flake": false,
       "locked": {
         "dir": "src",
-        "lastModified": 1779032588,
-        "narHash": "sha256-1ErkMzddUJSEhW7GsPus9l5CnhB+elHYGLSqok+9mDY=",
+        "lastModified": 1779040350,
+        "narHash": "sha256-DPfOc6SSdR6TEgJqDnVhRe9g5MwCI/efJHLqAP6rzo4=",
         "owner": "tymbalodeon",
         "repo": "environments",
-        "rev": "44fc017b349cb064b0bacdd7418235eb03570335",
+        "rev": "a0e3785b72ba06ddf6ce0a4d7dd62102b40df57f",
         "type": "github"
       },
       "original": {
@@ -89,7 +89,28 @@
         "devenv": "devenv",
         "environments": "environments",
         "nixpkgs": "nixpkgs",
-        "project": "project"
+        "project": "project",
+        "rust-overlay": "rust-overlay"
+      }
+    },
+    "rust-overlay": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1778987862,
+        "narHash": "sha256-V3qGt9P1eJP/r/1ONablphfGiH0RP4agQhrRANpDYx8=",
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "rev": "6f44d8874ac29806c8d5cae42bf8e19ebb5ce0d3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "oxalica",
+        "repo": "rust-overlay",
+        "type": "github"
       }
     }
   },
