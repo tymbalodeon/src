@@ -1,1 +1,1 @@
-/nix/store/bda9vxfc9bph2c3lnq9ylsn5ki7mb0x0-environments-rust-check.nu
+/nix/store/0zsrl19547l2nki9rcrnranlmgbhp60f-environments-rust-check.nu

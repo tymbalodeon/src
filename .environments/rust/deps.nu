@@ -1,1 +1,1 @@
-/nix/store/9jsjjk8wvlfrdwxjr6qlyb2fl9skc8j2-environments-rust-deps.nu
+/nix/store/21yp3hkhm5bny910bpk6ksqc927vrjlj-environments-rust-deps.nu

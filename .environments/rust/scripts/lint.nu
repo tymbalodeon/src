@@ -1,1 +1,1 @@
-/nix/store/ydcsv7sgny4pi4g95cipwgmz085jm4m7-environments-rust-scripts-lint.nu
+/nix/store/4lj4qr6yh9k1p6zjqrjm07mxnrn9wmzw-environments-rust-scripts-lint.nu

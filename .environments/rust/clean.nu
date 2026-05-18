@@ -1,1 +1,1 @@
-/nix/store/ar5hlm4zfgwgp7s4sgs6jf2si9cyd47b-environments-rust-clean.nu
+/nix/store/y9whvywcasygfjcazk2arya72c67pd9p-environments-rust-clean.nu

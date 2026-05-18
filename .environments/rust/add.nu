@@ -1,1 +1,1 @@
-/nix/store/2s087z98dc2dhn4cxqn78316j3ysz6gw-environments-rust-add.nu
+/nix/store/k78jp6fvlqkslddvlapaij3wabl2ddi4-environments-rust-add.nu
