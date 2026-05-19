@@ -20,6 +20,9 @@ pub enum SrcRepoError {
     #[error("failed to determine home directory")]
     HomeDir,
 
+    #[error("failed to construct git url regex")]
+    Regex,
+
     #[error("invalid characters in repo path")]
     RepoPath,
 }

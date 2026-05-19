@@ -28,7 +28,7 @@ fn parse_url(url: &str, local_source_path: Option<&PathBuf>) -> Result<Repo, Src
 
     let git_url_regex =
         Regex::new(r"((git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)?(/)?")
-            .unwrap();
+            .map_err(|_| SrcRepoError::Regex)?;
 
     let url = if git_url_regex.is_match(url) {
         Some(url.to_string())
