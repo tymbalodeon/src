@@ -79,7 +79,7 @@ pub fn add(
                         repo.https_url()
                     }
                 } else {
-                    repo.url
+                    repo.https_url()
                 };
 
                 Command::new("git")
