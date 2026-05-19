@@ -108,10 +108,12 @@ impl Repo {
         }
     }
 
+    #[must_use]
     pub fn https_url(&self) -> String {
         format!("https://{}/{}/{}.git", self.host, self.owner, self.name)
     }
 
+    #[must_use]
     pub fn ssh_url(&self) -> String {
         format!("git@{}:{}/{}.git", self.host, self.owner, self.name)
     }
