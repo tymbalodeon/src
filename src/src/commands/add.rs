@@ -73,7 +73,9 @@ pub fn add(
                     remove_repo(&managed_path)?;
                 }
 
-                let url = if let Some(owner) = config.owner.as_ref() {
+                let url = if let Some(url) = repo.url.as_ref() {
+                    url.clone()
+                } else if let Some(owner) = config.owner.as_ref() {
                     if owner == &repo.owner {
                         repo.ssh_url()
                     } else {

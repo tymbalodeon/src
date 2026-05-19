@@ -5,6 +5,7 @@ use std::path::{Path, PathBuf};
 use derivative::Derivative;
 use git_url_parse::{GitUrl, types::provider::GenericProvider};
 use git2::Repository;
+use regex::Regex;
 use shellexpand::tilde;
 
 use crate::error::SrcRepoError;
@@ -12,25 +13,28 @@ use crate::error::SrcRepoError;
 #[derive(Clone, Debug, Derivative)]
 #[derivative(Eq, PartialEq, Hash)]
 pub struct Repo {
+    pub url: Option<String>,
     pub host: String,
     pub owner: String,
     pub name: String,
 
     #[derivative(PartialEq = "ignore")]
     pub local_source_path: Option<PathBuf>,
-
-    #[derivative(PartialEq = "ignore")]
-    pub url: String,
 }
 
 fn parse_url(url: &str, local_source_path: Option<&PathBuf>) -> Result<Repo, SrcRepoError> {
     let git_url = GitUrl::parse(url)?;
     let repo_provider = git_url.provider_info::<GenericProvider>()?;
 
-    let url = local_source_path.as_ref().map_or_else(
-        || Ok::<String, SrcRepoError>(url.to_owned()),
-        |path| Ok(path.to_str().ok_or(SrcRepoError::GitUrl)?.to_string()),
-    )?;
+    let git_url_regex =
+        Regex::new(r"((git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)?(/)?")
+            .unwrap();
+
+    let url = if git_url_regex.is_match(url) {
+        Some(url.to_string())
+    } else {
+        None
+    };
 
     Ok(Repo {
         host: git_url.host().ok_or(SrcRepoError::GitUrl)?.to_string(),
@@ -104,7 +108,7 @@ impl Repo {
             name: name.to_string(),
             owner: owner.to_string(),
             local_source_path,
-            url: url.to_string(),
+            url: Some(url.to_string()),
         }
     }
 
@@ -259,7 +263,7 @@ mod tests {
         assert_eq!(repo.host, HOST);
         assert_eq!(repo.name, NAME);
         assert_eq!(repo.owner, OWNER);
-        assert_eq!(repo.url, url);
+        assert_eq!(repo.url, Some(url.to_string()));
     }
 
     #[test]
