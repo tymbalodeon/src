@@ -47,9 +47,7 @@ pub fn add(
 ) -> Result<()> {
     let config = get_config(config_file)?;
     let owner = if me { config.owner.as_ref() } else { owner };
-
     let repos = parse_repos_with_error_log(&config, repos, host, owner, false)?;
-
     let root_directory = get_root_directory(Some(&config))?;
     let repo_paths = get_managed_repo_paths(&root_directory);
 
@@ -74,8 +72,18 @@ pub fn add(
                     remove_repo(&managed_path)?;
                 }
 
+                let url = if let Some(owner) = config.owner.as_ref() {
+                    if owner == &repo.owner {
+                        repo.ssh_url()
+                    } else {
+                        repo.https_url()
+                    }
+                } else {
+                    repo.url
+                };
+
                 Command::new("git")
-                    .args(vec!["clone", &repo.url, &managed_path])
+                    .args(vec!["clone", &url, &managed_path])
                     .status()?;
             }
         }
@@ -86,9 +94,8 @@ pub fn add(
 
 #[cfg(test)]
 mod tests {
-    use std::path::PathBuf;
-
     use super::*;
+    use std::path::PathBuf;
 
     #[test]
     fn it_prefers_local_paths_to_remote_urls() {

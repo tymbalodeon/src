@@ -107,6 +107,14 @@ impl Repo {
             url: url.to_string(),
         }
     }
+
+    pub fn https_url(&self) -> String {
+        format!("https://{}/{}/{}.git", self.host, self.owner, self.name)
+    }
+
+    pub fn ssh_url(&self) -> String {
+        format!("git@{}:{}/{}.git", self.host, self.owner, self.name)
+    }
 }
 
 impl fmt::Display for Repo {
@@ -230,8 +238,20 @@ mod tests {
     use super::*;
 
     const HOST: &str = "github.com";
+    const HTTPS: &str = "https://github.com/tymbalodeon/src.git";
     const NAME: &str = "src";
     const OWNER: &str = "tymbalodeon";
+    const SSH: &str = "git@github.com:tymbalodeon/src.git";
+
+    #[test]
+    fn it_converts_to_https() {
+        assert_eq!(parse_url(SSH, None).unwrap().https_url(), HTTPS);
+    }
+
+    #[test]
+    fn it_converts_to_ssh() {
+        assert_eq!(parse_url(HTTPS, None).unwrap().ssh_url(), SSH);
+    }
 
     fn validate_repo(repo: &Repo, url: &str) {
         assert_eq!(repo.host, HOST);
@@ -242,17 +262,11 @@ mod tests {
 
     #[test]
     fn it_parses_https_url() {
-        let url = "https://github.com/tymbalodeon/src.git";
-        let repo = parse_url(url, None);
-
-        validate_repo(&repo.unwrap(), url);
+        validate_repo(&parse_url(HTTPS, None).unwrap(), HTTPS);
     }
 
     #[test]
     fn it_parses_ssh_url() {
-        let url = "git@github.com:tymbalodeon/src.git";
-        let repo = parse_url(url, None);
-
-        validate_repo(&repo.unwrap(), url);
+        validate_repo(&parse_url(SSH, None).unwrap(), SSH);
     }
 }
