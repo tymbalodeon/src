@@ -1,3 +1,4 @@
+use std::fs::remove_dir;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -82,9 +83,22 @@ pub fn add(
                     repo.https_url()
                 };
 
-                Command::new("git")
+                let status = Command::new("git")
                     .args(vec!["clone", &url, &managed_path])
                     .status()?;
+
+                if !status.success() {
+                    let managed_path = repo.managed_path(&root_directory);
+                    let mut parent = managed_path.parent();
+
+                    while let Some(directory) = parent {
+                        if directory.to_string_lossy() == root_directory {
+                            break;
+                        }
+                        remove_dir(directory)?;
+                        parent = directory.parent();
+                    }
+                }
             }
         }
     }
