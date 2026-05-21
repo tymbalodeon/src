@@ -25,6 +25,7 @@ fn get_values(
     if must_exist {
         match value {
             Some(host) => values.push(Some(host)),
+
             None => values.extend(
                 getter(Some(config), false, false)?
                     .iter()
