@@ -1,6 +1,7 @@
 use std::fmt;
 use std::fmt::Write;
 use std::path::{Path, PathBuf};
+use std::string::ToString;
 
 use derivative::Derivative;
 use git_url_parse::{GitUrl, types::provider::GenericProvider};
@@ -71,9 +72,8 @@ impl Repo {
             |path| {
                 Ok(Repository::open(path)?
                     .find_remote("origin")?
-                    .url()
-                    .ok_or(SrcRepoError::GitUrl)?
-                    .to_owned())
+                    .url()?
+                    .to_string())
             },
         )?;
 

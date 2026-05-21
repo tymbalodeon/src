@@ -46,10 +46,7 @@ pub fn get_repos(root_directory: &str, all: bool, hidden: bool) -> Result<Vec<Re
 
     Ok(paths
         .iter()
-        .filter_map(|repo| match Repo::from(repo) {
-            Ok(repo) => Some(repo),
-            Err(_) => None,
-        })
+        .filter_map(|repo| Repo::from(repo).ok())
         .collect())
 }
 
