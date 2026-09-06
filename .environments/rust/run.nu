@@ -1,1 +1,0 @@
-/nix/store/6gal51n9qpmxyysh175w8yark1rn3nf3-environments-rust-run.nu

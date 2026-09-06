@@ -1,8 +1,1 @@
-#!/usr/bin/env nu
-
-# View README file
-def main [] {
-  if ("README.md" | path exists) {
-    glow README.md
-  }
-}
+/nix/store/a0629lla6g4bqlpasd5kyradx7a2z8df-environments-default-scripts-readme.nu

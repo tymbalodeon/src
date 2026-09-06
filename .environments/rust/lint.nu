@@ -1,1 +1,0 @@
-/nix/store/7l416wzknkgyvvkdb4h1lxkg4qldax87-environments-rust-lint.nu

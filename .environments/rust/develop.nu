@@ -1,1 +1,0 @@
-/nix/store/llh38asa8safgygiwh328pl6a10gr71n-environments-rust-develop.nu

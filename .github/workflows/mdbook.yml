@@ -1,4 +1,4 @@
 jobs:
   build:
     env:
-      MDBOOK_VERSION: 0.5.2
+      MDBOOK_VERSION: 0.5.4

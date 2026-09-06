@@ -3,11 +3,11 @@
     "devenv": {
       "locked": {
         "dir": "src/modules",
-        "lastModified": 1779032662,
-        "narHash": "sha256-+qN6YTSArEThWA8XGCyIz0qZz1GTNRLRUcHxPjf1eZk=",
+        "lastModified": 1788707710,
+        "narHash": "sha256-+ZyV4DJ5ljfp3ouZ1m3mAVWawzXLsn3i5YPvg34aURs=",
         "owner": "cachix",
         "repo": "devenv",
-        "rev": "58b04522edfe56e4b37a4d4600104db6429f4667",
+        "rev": "34eb5ddc0db51fbf6f3a8df5fc42b0e91a5be8f8",
         "type": "github"
       },
       "original": {
@@ -21,19 +21,18 @@
       "flake": false,
       "locked": {
         "dir": "src",
-        "lastModified": 1779067324,
-        "narHash": "sha256-LRihdnoBBW4370L7+3SBHZw5SIouugjfQYpuSRD0fK4=",
-        "owner": "tymbalodeon",
-        "repo": "environments",
-        "rev": "002013d6d291130c30abc22a696ff506da67ffb4",
-        "type": "github"
+        "lastModified": 1788718081,
+        "narHash": "sha256-xii7W51fBi3QdAoGjwuMMy7y6uxKfpnkd2A2ccg1kIo=",
+        "ref": "refs/heads/trunk",
+        "rev": "69d0cd2be289e15119c3551d075733a8a58d30b3",
+        "revCount": 1744,
+        "type": "git",
+        "url": "ssh://git@codeberg.org/tymbalodeon/environments.git"
       },
       "original": {
         "dir": "src",
-        "owner": "tymbalodeon",
-        "ref": "trunk",
-        "repo": "environments",
-        "type": "github"
+        "type": "git",
+        "url": "ssh://git@codeberg.org/tymbalodeon/environments.git"
       }
     },
     "nixpkgs": {
@@ -41,11 +40,11 @@
         "nixpkgs-src": "nixpkgs-src"
       },
       "locked": {
-        "lastModified": 1778507786,
-        "narHash": "sha256-HzSQCKMsMr8r55LwM1JuzIOB+8bzk0FEv6sItKvsfoY=",
+        "lastModified": 1787753358,
+        "narHash": "sha256-Tl77VbWyAKrOfRNQhL6JbQtb/MLzbYa/1RG1gWWfICk=",
         "owner": "cachix",
         "repo": "devenv-nixpkgs",
-        "rev": "8f24a228a782e24576b155d1e39f0d914b380691",
+        "rev": "256551e45f6303e142ab4a98be1bf243feb77dc0",
         "type": "github"
       },
       "original": {
@@ -58,11 +57,11 @@
     "nixpkgs-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1778274207,
-        "narHash": "sha256-I4puXmX1iovcCHZlRmztO3vW0mAbbRvq4F8wgIMQ1MM=",
+        "lastModified": 1787394516,
+        "narHash": "sha256-pRGOQSClnXNI2iLUG6DYpsGvYcuw0drOutVZFTJNw90=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "b3da656039dc7a6240f27b2ef8cc6a3ef3bccae7",
+        "rev": "c8f90650c15282fa8656a041bfbbd2403997a9a7",
         "type": "github"
       },
       "original": {
@@ -100,11 +99,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1779074409,
-        "narHash": "sha256-6aXy8Ga41iLVM8ibddFU1O5+wYWcBGNEfZzZuL91eIc=",
+        "lastModified": 1788678114,
+        "narHash": "sha256-pcqbpV4ZI79al6KAlr+WJjaEo/PYfgctRlG43D5BSJM=",
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "2a77b5b1dc952f214e8102acdef1622b68515560",
+        "rev": "4748ec2f5ed4a881474ed4c98aa71a5308cdac8d",
         "type": "github"
       },
       "original": {

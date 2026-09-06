@@ -1,7 +1,1 @@
-export def main [] {
-  nix flake metadata --json err> /dev/null
-  | from json
-  | get locks.nodes.root.inputs
-  | columns
-  | to text --no-newline
-}
+/nix/store/30dcybcw09yjbg4f1xl8c8k2lz7dcb29-environments-default-scripts-environment-inputs.nu

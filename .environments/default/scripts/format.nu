@@ -1,10 +1,1 @@
-#!/usr/bin/env nu
-
-use check.nu run-check
-
-# Format files
-def main [
-  ...paths: string # Files or directories to format
-] {
-  run-check format $paths
-}
+/nix/store/2lhbivvvyl5vdl9qhf3j51ifxja2anhf-environments-default-scripts-format.nu

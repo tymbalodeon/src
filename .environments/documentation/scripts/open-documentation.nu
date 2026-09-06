@@ -1,1 +1,1 @@
-/nix/store/h42svcpfw5n5l1znvff03227a4p0ghb0-environments-documentation-scripts-open-documentation.nu
+/nix/store/xni6g43xnjw8xczndg5bzaqbdkjmfk5b-environments-documentation-scripts-open-documentation.nu

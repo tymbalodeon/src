@@ -1,1 +1,0 @@
-/nix/store/5w26mq8xcf5jjm8p9f9r17bjnrj9nnc0-environments-rust-remove.nu

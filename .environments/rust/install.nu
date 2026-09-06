@@ -1,1 +1,0 @@
-/nix/store/3j5cxwixphagfsa91aw9254x9fgrk1i7-environments-rust-install.nu

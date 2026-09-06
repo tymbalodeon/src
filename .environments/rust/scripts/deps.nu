@@ -1,1 +1,1 @@
-/nix/store/zbqjvvi3mcr3aj0yvfjmj61pv2qrqbbh-environments-rust-scripts-deps.nu
+/nix/store/qb92crr80ply4d4k0ly57i9721v7ckpa-environments-rust-scripts-deps.nu

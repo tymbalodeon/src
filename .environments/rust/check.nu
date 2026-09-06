@@ -1,1 +1,0 @@
-/nix/store/0zsrl19547l2nki9rcrnranlmgbhp60f-environments-rust-check.nu

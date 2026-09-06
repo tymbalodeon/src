@@ -1,1 +1,1 @@
-/nix/store/warjwdsxm15qhhplalpanwqflf3nj6rw-environments-rust-scripts-install.nu
+/nix/store/fn8gbyk0ab5dlax8ffrn520q86pdii3a-environments-rust-scripts-install.nu

@@ -1,1 +1,0 @@
-/nix/store/2m164cllf2s6xyv9apml7987ch3mzxhz-environments-rust-build.nu

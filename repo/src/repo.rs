@@ -3,10 +3,10 @@ use std::fmt::Write;
 use std::path::{Path, PathBuf};
 
 use derivative::Derivative;
-use git_url_parse::{GitUrl, types::provider::GenericProvider};
 use git2::Repository;
 use regex::Regex;
 use shellexpand::tilde;
+use url::Url;
 
 use crate::error::SrcRepoError;
 
@@ -23,8 +23,7 @@ pub struct Repo {
 }
 
 fn parse_url(url: &str, local_source_path: Option<&PathBuf>) -> Result<Repo, SrcRepoError> {
-    let git_url = GitUrl::parse(url)?;
-    let repo_provider = git_url.provider_info::<GenericProvider>()?;
+    let git_url = Url::parse(url)?;
 
     let git_url_regex =
         Regex::new(r"((git|ssh|http(s)?)|(git@[\w\.]+))(:(//)?)([\w\.@\:/\-~]+)(\.git)?(/)?")
@@ -36,10 +35,15 @@ fn parse_url(url: &str, local_source_path: Option<&PathBuf>) -> Result<Repo, Src
         None
     };
 
+    let segments: Vec<&str> = git_url
+        .path_segments()
+        .ok_or(SrcRepoError::GitUrl)?
+        .collect();
+
     Ok(Repo {
-        host: git_url.host().ok_or(SrcRepoError::GitUrl)?.to_string(),
-        owner: repo_provider.owner().clone(),
-        name: repo_provider.repo().clone(),
+        host: git_url.host_str().ok_or(SrcRepoError::GitUrl)?.to_string(),
+        owner: segments[0].to_string(),
+        name: segments[1].to_string(),
         local_source_path: local_source_path.cloned(),
         url,
     })
@@ -71,8 +75,7 @@ impl Repo {
             |path| {
                 Ok(Repository::open(path)?
                     .find_remote("origin")?
-                    .url()
-                    .ok_or(SrcRepoError::GitUrl)?
+                    .url()?
                     .to_owned())
             },
         )?;

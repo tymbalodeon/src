@@ -1,1 +1,1 @@
-/nix/store/kf0581plb6gca4dk12315616sj138svs-environments-documentation-scripts-help.nu
+/nix/store/y7y9bcwah2sc4skxr693mwvjsvzghc99-environments-documentation-scripts-help.nu

@@ -15,7 +15,7 @@ pub enum SrcRepoError {
     GitUrl,
 
     #[error("failed to parse git url")]
-    GitUrlParseError(#[from] git_url_parse::GitUrlParseError),
+    GitUrlParseError(#[from] url::ParseError),
 
     #[error("failed to determine home directory")]
     HomeDir,

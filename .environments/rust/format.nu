@@ -1,1 +1,0 @@
-/nix/store/mmlzxnrr4ivbpmmjaf8mq5wdfdmsldyd-environments-rust-format.nu
