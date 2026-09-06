@@ -9,6 +9,7 @@ use repo::{
     },
 };
 
+// TODO: pass in `get_repos` to avoid duplication?
 pub fn get_host_names(config: Option<&Config>, all: bool, hidden: bool) -> Result<Vec<String>> {
     Ok(get_repos(&get_root_directory(config)?, all, hidden)?
         .into_iter()

@@ -44,7 +44,10 @@ pub fn get_repos(root_directory: &str, all: bool, hidden: bool) -> Result<Vec<Re
         get_managed_repo_paths(root_directory)
     };
 
-    paths.iter().map(|repo| Repo::from(repo)).collect()
+    Ok(paths
+        .iter()
+        .filter_map(|repo| Repo::from(repo).ok())
+        .collect())
 }
 
 fn is_git_repo(path: &DirEntry) -> bool {

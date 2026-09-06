@@ -1,6 +1,7 @@
 use std::fmt;
 use std::fmt::Write;
 use std::path::{Path, PathBuf};
+use std::string::ToString;
 
 use derivative::Derivative;
 use git2::Repository;
@@ -76,7 +77,7 @@ impl Repo {
                 Ok(Repository::open(path)?
                     .find_remote("origin")?
                     .url()?
-                    .to_owned())
+                    .to_string())
             },
         )?;
 
