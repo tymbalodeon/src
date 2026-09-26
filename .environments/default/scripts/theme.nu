@@ -1,1 +1,1 @@
-/nix/store/wxfa0q763b3hjfi7z951bk3h9l4p1988-environments-default-scripts-theme.nu
+/nix/store/b9mlxr6r44myycc7alcmdnj7bf1df2gn-environments-default-scripts-theme.nu

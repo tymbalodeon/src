@@ -1,1 +1,1 @@
-/nix/store/8zyx1c2ha6j0w66kpd3nc95fjhrn0nym-environments-rust-scripts-remove.nu
+/nix/store/h12jldb8z9vj26sxa1xsmj1vqbwwar2k-environments-rust-scripts-remove.nu

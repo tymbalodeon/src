@@ -1,1 +1,1 @@
-/nix/store/kkwb4rkjp602d43hnqfbgnv3llbp52a0-environments-documentation-scripts-serve.nu
+/nix/store/2nm6ljx6glzra49qn26vf4l5w3sxy6zg-environments-documentation-scripts-serve.nu

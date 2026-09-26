@@ -1,1 +1,1 @@
-/nix/store/4n7915f3qfc22l5l7z90xi2blzn1svc4-environments-default-scripts-history.nu
+/nix/store/11l457b2xybswkbd2i7966fpvlm7liiz-environments-default-scripts-history.nu

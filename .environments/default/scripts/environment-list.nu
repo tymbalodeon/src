@@ -1,1 +1,1 @@
-/nix/store/dafskvgl6hbaj9ld8gi4rffkr33ccckd-environments-default-scripts-environment-list.nu
+/nix/store/92ms2aflbpglb2ni7ilj1mgwwpdim1sz-environments-default-scripts-environment-list.nu

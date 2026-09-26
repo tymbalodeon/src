@@ -1,1 +1,1 @@
-/nix/store/pvpbw1jqjkv2jkxibkdxmc7yilhv4kds-environments-rust-scripts-build.nu
+/nix/store/hyaxkjydhx4mmrs271l6p5fl1clvzdns-environments-rust-scripts-build.nu

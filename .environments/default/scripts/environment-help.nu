@@ -1,1 +1,1 @@
-/nix/store/vbpk6ia2wkpan21bz94ccj9kh5yc40hj-environments-default-scripts-environment-help.nu
+/nix/store/kjr3ac069q5wh17wj11f2wh20wwr5336-environments-default-scripts-environment-help.nu

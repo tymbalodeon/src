@@ -1,1 +1,1 @@
-/nix/store/a9mfbbsc242qhyq0yx10d5lz6bva3m3b-environments-rust-scripts-update.nu
+/nix/store/6lw2jx9202naci12x3cs5bx0ypbci87a-environments-rust-scripts-update.nu

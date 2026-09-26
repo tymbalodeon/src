@@ -1,1 +1,1 @@
-/nix/store/n9c9l3jb5xra1w5px85lvpgj4nhzbwx3-environments-rust-scripts-develop.nu
+/nix/store/g60rvficvgbhy17ix7zg5ii8j3xzwsp7-environments-rust-scripts-develop.nu
